@@ -1,0 +1,32 @@
+---
+layout: ""
+page_title: "TransparentEdge Terraform Provider"
+description: |-
+    The TransparentEdge provider to interact directly with the autoprovisioning
+    capabilities of the CDN via API.
+---
+
+# TransparentEdge Provider
+
+## Example usage
+
+{{tffile "examples/provider/provider.tf"}}
+
+It's recommended to use environment variables as follows:  
+
+```shell
+export TCDN_COMPANY_ID=0
+export TCDN_CLIENT_ID="xxx"
+export TCDN_CLIENT_SECRET="xxx"
+```
+
+To get all the required variables login into [our dashboard](https://dashboard.transparentcdn.com/), their avaible in your profile at "Account Options" -> "Manage Keys".  
+
+Optional environment variables:  
+
+```shell
+export TCDN_HOST_URL="https://api.transparentcdn.com"
+export TCDN_VERIFY_SSL=true
+```
+
+{{ .SchemaMarkdown | trimspace }}
