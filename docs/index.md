@@ -8,7 +8,7 @@ description: |-
 
 # TransparentEdge Terraform Provider
 
-A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).
+A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).  
 This provider is intended to be used by the CDN users with the role "Company Admin", although some services do not require this role.
 
 ## Example usage
@@ -53,7 +53,8 @@ Make sure that you're using the correct Company ID if you own multiple companies
 Optional environment variables:  
 
 ```shell
-export TCDN_HOST_URL="https://api.transparentcdn.com"
+# Not required, default values are:
+export TCDN_API_URL="https://api.transparentcdn.com"
 export TCDN_VERIFY_SSL=true
 ```
 
@@ -62,8 +63,8 @@ export TCDN_VERIFY_SSL=true
 
 ### Optional
 
-- `api_url` (String) URL of Transparent Edge API. default: 'https://api.transparentcdn.com'. May also be provided via TCDN_API_URL environment variable.
-- `client_id` (String, Sensitive) Client ID (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_ID environment variable.
-- `client_secret` (String, Sensitive) Client Secret (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_SECRET environment variable.
-- `company_id` (Number) Company ID number (for ex: 300). May also be provided via TCDN_COMPANY_ID environment variable.
-- `verify_ssl` (Boolean) Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.
+- `api_url` (String) URL of Transparent Edge API. default: `https://api.transparentcdn.com`. May also be provided via `TCDN_API_URL` environment variable.
+- `client_id` (String, Sensitive) Client ID (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_ID` environment variable.
+- `client_secret` (String, Sensitive) Client Secret (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_SECRET` environment variable.
+- `company_id` (Number) Company ID number (for ex: `300`). May also be provided via `TCDN_COMPANY_ID` environment variable.
+- `verify_ssl` (Boolean) Ignore SSL certificate for `api_url`. May also be provided via `TCDN_VERIFY_SSL` environment variable.
