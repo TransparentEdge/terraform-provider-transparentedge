@@ -10,8 +10,16 @@ import (
 )
 
 // Provider documentation generation.
+//go:generate terraform fmt -recursive ./examples/
 //go:generate go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name transparentedge --rendered-provider-name TransparentEdge
+
+var (
+	// variables are set by goreleaser
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 
 func main() {
 	var debug bool
@@ -24,7 +32,7 @@ func main() {
 		Debug:   debug,
 	}
 
-	err := providerserver.Serve(context.Background(), transparentedge.New, opts)
+	err := providerserver.Serve(context.Background(), transparentedge.New(version, commit, date), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())
