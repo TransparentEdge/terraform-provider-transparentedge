@@ -6,7 +6,10 @@ description: |-
     capabilities of the CDN via API.
 ---
 
-# TransparentEdge Provider
+# TransparentEdge Terraform Provider
+
+A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).
+This provider is intended to be used by the CDN users with the role "Company Admin", although some services do not require this role.
 
 ## Example usage
 
@@ -22,7 +25,7 @@ terraform {
 provider "transparentedge" {}
 ```
 
-It's recommended to use environment variables as follows:  
+It's recommended to use environment variables:  
 
 ```shell
 export TCDN_COMPANY_ID=0
@@ -30,7 +33,10 @@ export TCDN_CLIENT_ID="xxx"
 export TCDN_CLIENT_SECRET="xxx"
 ```
 
-To get all the required variables login into [our dashboard](https://dashboard.transparentcdn.com/), their avaible in your profile at "Account Options" -> "Manage Keys".  
+You can find all the required variables in our [our dashboard](https://dashboard.transparentcdn.com/).
+Login, go to your profile -> "Account options" -> "Manage keys".
+
+Make sure that you're using the correct Company ID if you own multiple companies.  
 
 Optional environment variables:  
 
