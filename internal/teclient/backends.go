@@ -7,8 +7,9 @@ import (
 	"strings"
 )
 
-func (c *Client) GetBackend(backendID int) (*BackendAPIModel, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/backends/%d/", c.HostURL, c.CompanyId, backendID), nil)
+func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*BackendAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
 	req.Header.Set("User-Agent", USERAGENT)
 	if err != nil {
 		return nil, err
@@ -30,8 +31,9 @@ func (c *Client) GetBackend(backendID int) (*BackendAPIModel, error) {
 	return &backend, nil
 }
 
-func (c *Client) GetBackends() ([]BackendAPIModel, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/backends/", c.HostURL, c.CompanyId), nil)
+func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +54,9 @@ func (c *Client) GetBackends() ([]BackendAPIModel, error) {
 	return backends, nil
 }
 
-func (c *Client) CreateBackend(backend NewBackendAPIModel) (*BackendAPIModel, error) {
-	req, err := c.preparePostRequest(backend, fmt.Sprintf("%s/v1/autoprovisioning/%d/backends/", c.HostURL, c.CompanyId))
+func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := c.preparePostRequest(backend, fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +77,9 @@ func (c *Client) CreateBackend(backend NewBackendAPIModel) (*BackendAPIModel, er
 	return &newBackend, nil
 }
 
-func (c *Client) UpdateBackend(backend BackendAPIModel) (*BackendAPIModel, error) {
-	req, err := c.preparePutRequest(backend, fmt.Sprintf("%s/v1/autoprovisioning/%d/backends/%d/", c.HostURL, c.CompanyId, backend.ID))
+func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := c.preparePutRequest(backend, fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backend.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +100,9 @@ func (c *Client) UpdateBackend(backend BackendAPIModel) (*BackendAPIModel, error
 	return &newBackend, nil
 }
 
-func (c *Client) DeleteBackend(backendID int) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/autoprovisioning/%d/backends/%d/", c.HostURL, c.CompanyId, backendID), nil)
+func (c *Client) DeleteBackend(backendID int, environment APIEnvironment) error {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
 	req.Header.Set("User-Agent", USERAGENT)
 	if err != nil {
 		return err
