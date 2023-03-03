@@ -15,7 +15,3 @@ provider "transparentedge" {
   verify_ssl    = true                             # this is the default value
   api_url       = "https://api.transparentcdn.com" # this is the default value
 }
-
-
-data "transparentedge_sites" "all" {
-}
