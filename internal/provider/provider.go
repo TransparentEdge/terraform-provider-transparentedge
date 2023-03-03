@@ -44,26 +44,31 @@ func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaReq
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_url": schema.StringAttribute{
-				Optional:    true,
-				Description: "URL of Transparent Edge API. default: 'https://api.transparentcdn.com'. May also be provided via TCDN_API_URL environment variable.",
+				Optional:            true,
+				Description:         "URL of Transparent Edge API. default: 'https://api.transparentcdn.com'. May also be provided via TCDN_API_URL environment variable.",
+				MarkdownDescription: "URL of Transparent Edge API. default: `https://api.transparentcdn.com`. May also be provided via `TCDN_API_URL` environment variable.",
 			},
 			"company_id": schema.Int64Attribute{
-				Optional:    true,
-				Description: "Company ID number (for ex: 300). May also be provided via TCDN_COMPANY_ID environment variable.",
+				Optional:            true,
+				Description:         "Company ID number (for ex: 300). May also be provided via TCDN_COMPANY_ID environment variable.",
+				MarkdownDescription: "Company ID number (for ex: `300`). May also be provided via `TCDN_COMPANY_ID` environment variable.",
 			},
 			"client_id": schema.StringAttribute{
-				Optional:    true,
-				Sensitive:   true,
-				Description: "Client ID (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_ID environment variable.",
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "Client ID (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_ID environment variable.",
+				MarkdownDescription: "Client ID (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_ID` environment variable.",
 			},
 			"client_secret": schema.StringAttribute{
-				Optional:    true,
-				Sensitive:   true,
-				Description: "Client Secret (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_SECRET environment variable.",
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "Client Secret (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_SECRET environment variable.",
+				MarkdownDescription: "Client Secret (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_SECRET` environment variable.",
 			},
 			"verify_ssl": schema.BoolAttribute{
-				Optional:    true,
-				Description: "Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.",
+				Optional:            true,
+				Description:         "Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.",
+				MarkdownDescription: "Ignore SSL certificate for `api_url`. May also be provided via `TCDN_VERIFY_SSL` environment variable.",
 			},
 		},
 	}

@@ -8,7 +8,7 @@ description: |-
 
 # TransparentEdge Terraform Provider
 
-A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).
+A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).  
 This provider is intended to be used by the CDN users with the role "Company Admin", although some services do not require this role.
 
 ## Example usage
@@ -31,7 +31,8 @@ Make sure that you're using the correct Company ID if you own multiple companies
 Optional environment variables:  
 
 ```shell
-export TCDN_HOST_URL="https://api.transparentcdn.com"
+# Not required, default values are:
+export TCDN_API_URL="https://api.transparentcdn.com"
 export TCDN_VERIFY_SSL=true
 ```
 
