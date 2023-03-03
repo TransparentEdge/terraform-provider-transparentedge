@@ -205,6 +205,7 @@ func (p *transparentedgeProvider) DataSources(_ context.Context) []func() dataso
 		autoprovisioning.NewBackendsDataSource,
 		autoprovisioning.NewVclconfDataSource,
 		staging.NewStagingBackendsDataSource,
+		staging.NewStagingVclconfDataSource,
 	}
 }
 
@@ -215,5 +216,6 @@ func (p *transparentedgeProvider) Resources(_ context.Context) []func() resource
 		autoprovisioning.NewBackendResource,
 		autoprovisioning.NewVclconfResource,
 		staging.NewStagingBackendResource,
+		staging.NewStagingVclconfResource,
 	}
 }
