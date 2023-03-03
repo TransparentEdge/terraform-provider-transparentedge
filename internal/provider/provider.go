@@ -211,5 +211,6 @@ func (p *transparentedgeProvider) Resources(_ context.Context) []func() resource
 	return []func() resource.Resource{
 		autoprovisioning.NewSiteResource,
 		autoprovisioning.NewBackendResource,
+		autoprovisioning.NewVclconfResource,
 	}
 }

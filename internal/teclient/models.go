@@ -47,7 +47,7 @@ type NewBackendAPIModel struct {
 }
 
 type VCLConfCreator struct {
-	ID        int `json:"id"`
+	ID        int    `json:"id"`
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -55,7 +55,7 @@ type VCLConfCreator struct {
 }
 
 type VCLConfAPIModel struct {
-	ID             int         `json:"id"`
+	ID             int            `json:"id"`
 	Company        int            `json:"company"`
 	VCLCode        string         `json:"config_body"`
 	UploadDate     string         `json:"upload_dt"`
@@ -64,4 +64,8 @@ type VCLConfAPIModel struct {
 	Active         bool           `json:"active"`
 	Deployed       bool           `json:"deployed"`
 	CreatorUser    VCLConfCreator `json:"creator_user"`
+}
+
+type NewVCLConfAPIModel struct {
+	VCLCode string `json:"config_body"`
 }
