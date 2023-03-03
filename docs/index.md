@@ -17,12 +17,24 @@ This provider is intended to be used by the CDN users with the role "Company Adm
 terraform {
   required_providers {
     transparentedge = {
-      version = ">= 0.1.0"
+      version = ">= 0.2.0"
     }
   }
 }
 
-provider "transparentedge" {}
+provider "transparentedge" {
+  # Provider configuration overrides environment variables
+  # it's recommended to use environment variables for company_id, client_id and client_secret
+  company_id    = 300
+  client_id     = "XXX"
+  client_secret = "XXX"
+  verify_ssl    = true                             # this is the default value
+  api_url       = "https://api.transparentcdn.com" # this is the default value
+}
+
+
+data "transparentedge_sites" "all" {
+}
 ```
 
 It's recommended to use environment variables:  
@@ -50,8 +62,8 @@ export TCDN_VERIFY_SSL=true
 
 ### Optional
 
+- `api_url` (String) URL of Transparent Edge API. default: 'https://api.transparentcdn.com'. May also be provided via TCDN_API_URL environment variable.
 - `client_id` (String, Sensitive) Client ID (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_ID environment variable.
 - `client_secret` (String, Sensitive) Client Secret (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_SECRET environment variable.
 - `company_id` (Number) Company ID number (for ex: 300). May also be provided via TCDN_COMPANY_ID environment variable.
-- `host_url` (String) URL of Transparent Edge API. default: 'https://api.transparentcdn.com'. May also be provided via TCDN_HOST_URL environment variable.
-- `verify_ssl` (Boolean) Ignore SSL certificate for 'host_url'. May also be provided via TCDN_VERIFY_SSL environment variable.
+- `verify_ssl` (Boolean) Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.

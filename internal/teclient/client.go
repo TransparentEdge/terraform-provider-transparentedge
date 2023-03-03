@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-const USERAGENT string = "TransparentEdge CDN TF provider client/0.1"
+const (
+	defaultUserAgent      string        = "TransparentEdge CDN TF provider client/0.1"
+	defaultAPIHTTPTimeout time.Duration = 50 * time.Second
+)
 
 type TokenStruct struct {
 	Token     string `json:"access_token"`
@@ -38,7 +41,7 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 	}
 
 	c := Client{
-		HTTPClient: &http.Client{Timeout: 50 * time.Second, Transport: tr},
+		HTTPClient: &http.Client{Timeout: defaultAPIHTTPTimeout, Transport: tr},
 
 		HostURL:      *host,
 		CompanyId:    *companyid,
@@ -62,9 +65,12 @@ func (c *Client) GetToken() error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", USERAGENT)
+	req.Header.Set("User-Agent", defaultUserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
+	if resp.StatusCode == 401 {
+		return fmt.Errorf("%d - Could not create API client, please ensure credentials are correct.", resp.StatusCode)
+	}
 	if err != nil {
 		return err
 	}
@@ -87,7 +93,7 @@ func (c *Client) GetToken() error {
 
 func (c *Client) doRequest(req *http.Request) ([]byte, int, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token.Token))
-	req.Header.Set("User-Agent", USERAGENT)
+	req.Header.Set("User-Agent", defaultUserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
