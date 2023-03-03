@@ -1,4 +1,4 @@
-package autoprovisioning
+package staging
 
 import (
 	"context"
@@ -20,23 +20,23 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &backendResource{}
-	_ resource.ResourceWithConfigure   = &backendResource{}
-	_ resource.ResourceWithImportState = &backendResource{}
+	_ resource.Resource                = &stagingbackendResource{}
+	_ resource.ResourceWithConfigure   = &stagingbackendResource{}
+	_ resource.ResourceWithImportState = &stagingbackendResource{}
 )
 
 // helper function to simplify the provider implementation.
-func NewBackendResource() resource.Resource {
-	return &backendResource{}
+func NewStagingBackendResource() resource.Resource {
+	return &stagingbackendResource{}
 }
 
 // resource implementation.
-type backendResource struct {
+type stagingbackendResource struct {
 	client *teclient.Client
 }
 
 // maps schema data.
-type backendResourceModel struct {
+type stagingbackendResourceModel struct {
 	ID           types.Int64  `tfsdk:"id"`
 	Company      types.Int64  `tfsdk:"company"`
 	Name         types.String `tfsdk:"name"`
@@ -49,12 +49,12 @@ type backendResourceModel struct {
 }
 
 // Metadata returns the resource type name.
-func (r *backendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_backend"
+func (r *stagingbackendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_stagingbackend"
 }
 
 // Schema defines the schema for the resource.
-func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *stagingbackendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -62,14 +62,14 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "ID of the backend",
+				Description: "ID of the staging backend",
 			},
 			"company": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "Company ID that owns this backend",
+				Description: "Company ID that owns this staging backend",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -78,7 +78,7 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						stringvalidator.RegexMatches(regexp.MustCompile("[^0-9][a-z0-9]+"), "The name must contain only lower case letters and numbers (cannot start with a number)"),
 					),
 				},
-				Description: "Name of the backend",
+				Description: "Name of the staging backend",
 			},
 			"origin": schema.StringAttribute{
 				Required:    true,
@@ -115,17 +115,17 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 }
 
 // Create
-func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *stagingbackendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan backendResourceModel
+	var plan stagingbackendResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, "Creating backend: "+plan.Name.ValueString())
-	newBackend := teclient.NewBackendAPIModel{
+	tflog.Info(ctx, "Creating stagingbackend: "+plan.Name.ValueString())
+	newStagingBackend := teclient.NewBackendAPIModel{
 		Name:         plan.Name.ValueString(),
 		Origin:       plan.Origin.ValueString(),
 		Ssl:          plan.Ssl.ValueBool(),
@@ -134,40 +134,40 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
 	}
-	backendState, errCreate := r.client.CreateBackend(newBackend, teclient.ProdEnv)
+	stagingbackendState, errCreate := r.client.CreateBackend(newStagingBackend, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
-			"Error creating backend",
-			fmt.Sprintf("Could not create the backend '%s': %s", plan.Name.ValueString(), errCreate),
+			"Error creating staging backend",
+			fmt.Sprintf("Could not create the staging backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
 		return
 	}
 
 	// Set state to fully populated data
-	plan.ID = types.Int64Value(int64(backendState.ID))
-	plan.Company = types.Int64Value(int64(backendState.Company))
-	plan.Name = types.StringValue(backendState.Name)
-	plan.Origin = types.StringValue(backendState.Origin)
-	plan.Ssl = types.BoolValue(backendState.Ssl)
-	plan.Port = types.Int64Value(int64(backendState.Port))
-	plan.HCHost = types.StringValue(backendState.HCHost)
-	plan.HCPath = types.StringValue(backendState.HCPath)
-	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
+	plan.ID = types.Int64Value(int64(stagingbackendState.ID))
+	plan.Company = types.Int64Value(int64(stagingbackendState.Company))
+	plan.Name = types.StringValue(stagingbackendState.Name)
+	plan.Origin = types.StringValue(stagingbackendState.Origin)
+	plan.Ssl = types.BoolValue(stagingbackendState.Ssl)
+	plan.Port = types.Int64Value(int64(stagingbackendState.Port))
+	plan.HCHost = types.StringValue(stagingbackendState.HCHost)
+	plan.HCPath = types.StringValue(stagingbackendState.HCPath)
+	plan.HCStatusCode = types.Int64Value(int64(stagingbackendState.HCStatusCode))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan backendResourceModel
+func (r *stagingbackendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan stagingbackendResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, "Updating backend: "+plan.Name.ValueString())
-	newBackend := teclient.BackendAPIModel{
+	tflog.Info(ctx, "Updating stagingbackend: "+plan.Name.ValueString())
+	newStagingBackend := teclient.BackendAPIModel{
 		ID:           int(plan.ID.ValueInt64()),
 		Company:      int(plan.Company.ValueInt64()),
 		Name:         plan.Name.ValueString(),
@@ -178,33 +178,33 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
 	}
-	backendState, errCreate := r.client.UpdateBackend(newBackend, teclient.ProdEnv)
+	stagingbackendState, errCreate := r.client.UpdateBackend(newStagingBackend, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
-			"Error updating backend",
-			fmt.Sprintf("Could not update the backend '%s': %s", plan.Name.ValueString(), errCreate),
+			"Error updating staging backend",
+			fmt.Sprintf("Could not update the staging backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
 		return
 	}
 
 	// Set state to fully populated data
-	plan.ID = types.Int64Value(int64(backendState.ID))
-	plan.Company = types.Int64Value(int64(backendState.Company))
-	plan.Name = types.StringValue(backendState.Name)
-	plan.Origin = types.StringValue(backendState.Origin)
-	plan.Ssl = types.BoolValue(backendState.Ssl)
-	plan.Port = types.Int64Value(int64(backendState.Port))
-	plan.HCHost = types.StringValue(backendState.HCHost)
-	plan.HCPath = types.StringValue(backendState.HCPath)
-	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
+	plan.ID = types.Int64Value(int64(stagingbackendState.ID))
+	plan.Company = types.Int64Value(int64(stagingbackendState.Company))
+	plan.Name = types.StringValue(stagingbackendState.Name)
+	plan.Origin = types.StringValue(stagingbackendState.Origin)
+	plan.Ssl = types.BoolValue(stagingbackendState.Ssl)
+	plan.Port = types.Int64Value(int64(stagingbackendState.Port))
+	plan.HCHost = types.StringValue(stagingbackendState.HCHost)
+	plan.HCPath = types.StringValue(stagingbackendState.HCPath)
+	plan.HCStatusCode = types.Int64Value(int64(stagingbackendState.HCStatusCode))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Read resource information
-func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *stagingbackendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state backendResourceModel
+	var state stagingbackendResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -213,35 +213,35 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		if backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err == nil {
-			state.ID = types.Int64Value(int64(backend.ID))
-			state.Company = types.Int64Value(int64(backend.Company))
-			state.Name = types.StringValue(backend.Name)
-			state.Origin = types.StringValue(backend.Origin)
-			state.Ssl = types.BoolValue(backend.Ssl)
-			state.Port = types.Int64Value(int64(backend.Port))
-			state.HCHost = types.StringValue(backend.HCHost)
-			state.HCPath = types.StringValue(backend.HCPath)
-			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
+		if stagingbackend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.StagingEnv); err == nil {
+			state.ID = types.Int64Value(int64(stagingbackend.ID))
+			state.Company = types.Int64Value(int64(stagingbackend.Company))
+			state.Name = types.StringValue(stagingbackend.Name)
+			state.Origin = types.StringValue(stagingbackend.Origin)
+			state.Ssl = types.BoolValue(stagingbackend.Ssl)
+			state.Port = types.Int64Value(int64(stagingbackend.Port))
+			state.HCHost = types.StringValue(stagingbackend.HCHost)
+			state.HCPath = types.StringValue(stagingbackend.HCPath)
+			state.HCStatusCode = types.Int64Value(int64(stagingbackend.HCStatusCode))
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 			return
 		}
 	}
 
 	// Try to find by Name
-	backends, err := r.client.GetBackends(teclient.ProdEnv)
+	stagingbackends, err := r.client.GetBackends(teclient.StagingEnv)
 	if err == nil {
-		for _, backend := range backends {
-			if backend.Name == state.Name.ValueString() {
-				state.ID = types.Int64Value(int64(backend.ID))
-				state.Company = types.Int64Value(int64(backend.Company))
-				state.Name = types.StringValue(backend.Name)
-				state.Origin = types.StringValue(backend.Origin)
-				state.Ssl = types.BoolValue(backend.Ssl)
-				state.Port = types.Int64Value(int64(backend.Port))
-				state.HCHost = types.StringValue(backend.HCHost)
-				state.HCPath = types.StringValue(backend.HCPath)
-				state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
+		for _, stagingbackend := range stagingbackends {
+			if stagingbackend.Name == state.Name.ValueString() {
+				state.ID = types.Int64Value(int64(stagingbackend.ID))
+				state.Company = types.Int64Value(int64(stagingbackend.Company))
+				state.Name = types.StringValue(stagingbackend.Name)
+				state.Origin = types.StringValue(stagingbackend.Origin)
+				state.Ssl = types.BoolValue(stagingbackend.Ssl)
+				state.Port = types.Int64Value(int64(stagingbackend.Port))
+				state.HCHost = types.StringValue(stagingbackend.HCHost)
+				state.HCPath = types.StringValue(stagingbackend.HCPath)
+				state.HCStatusCode = types.Int64Value(int64(stagingbackend.HCStatusCode))
 				resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 				return
 			}
@@ -249,12 +249,12 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Not found
-	resp.Diagnostics.AddError("Backend not found", "Backend '"+state.Name.ValueString()+"' doesn't exist in API")
+	resp.Diagnostics.AddError("StagingBackend not found", "Staging Backend '"+state.Name.ValueString()+"' doesn't exist in API")
 }
 
 // Delete
-func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state backendResourceModel
+func (r *stagingbackendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state stagingbackendResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -262,18 +262,18 @@ func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	// 204 on successful delete
-	tflog.Info(ctx, "Deleting backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
-	if err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err != nil {
+	tflog.Info(ctx, "Deleting stagingbackend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
+	if err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.StagingEnv); err != nil {
 		resp.Diagnostics.AddError(
-			"Error deleting a backend",
-			"Could not delete the backend: "+state.Name.ValueString()+"\n"+err.Error(),
+			"Error deleting a stagingbackend",
+			"Could not delete the stagingbackend: "+state.Name.ValueString()+"\n"+err.Error(),
 		)
 		return
 	}
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *backendResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *stagingbackendResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -281,6 +281,6 @@ func (r *backendResource) Configure(_ context.Context, req resource.ConfigureReq
 	r.client = req.ProviderData.(*teclient.Client)
 }
 
-func (r *backendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *stagingbackendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

@@ -1,4 +1,4 @@
-package autoprovisioning
+package staging
 
 import (
 	"context"
@@ -12,27 +12,27 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource              = &backendsDataSource{}
-	_ datasource.DataSourceWithConfigure = &backendsDataSource{}
+	_ datasource.DataSource              = &stagingbackendsDataSource{}
+	_ datasource.DataSourceWithConfigure = &stagingbackendsDataSource{}
 )
 
 // Helper function to simplify the provider implementation.
-func NewBackendsDataSource() datasource.DataSource {
-	return &backendsDataSource{}
+func NewStagingBackendsDataSource() datasource.DataSource {
+	return &stagingbackendsDataSource{}
 }
 
 // data source implementation.
-type backendsDataSource struct {
+type stagingbackendsDataSource struct {
 	client *teclient.Client
 }
 
 // maps the data source schema data.
-type backendsDataSourceModel struct {
-	Backends []backendsModel `tfsdk:"backends"`
+type stagingbackendsDataSourceModel struct {
+	StagingBackends []stagingbackendsModel `tfsdk:"stagingbackends"`
 }
 
 // maps schema data.
-type backendsModel struct {
+type stagingbackendsModel struct {
 	ID           types.Int64  `tfsdk:"id"`
 	Company      types.Int64  `tfsdk:"company"`
 	Name         types.String `tfsdk:"name"`
@@ -45,30 +45,30 @@ type backendsModel struct {
 }
 
 // Metadata returns the data source type name.
-func (d *backendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_backends"
+func (d *stagingbackendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_stagingbackends"
 }
 
 // Schema defines the schema for the data source.
-func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *stagingbackendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"backends": schema.ListNestedAttribute{
+			"stagingbackends": schema.ListNestedAttribute{
 				Computed:    true,
-				Description: "List of all backends",
+				Description: "List of all staging backends",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.Int64Attribute{
 							Computed:    true,
-							Description: "ID of the backend",
+							Description: "ID of the staging backend",
 						},
 						"company": schema.Int64Attribute{
 							Computed:    true,
-							Description: "Company ID that owns this backend",
+							Description: "Company ID that owns this staging backend",
 						},
 						"name": schema.StringAttribute{
 							Computed:    true,
-							Description: "Name of the backend",
+							Description: "Name of the staging backend",
 						},
 						"origin": schema.StringAttribute{
 							Computed:    true,
@@ -102,33 +102,33 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state backendsDataSourceModel
+func (d *stagingbackendsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state stagingbackendsDataSourceModel
 
-	backends, err := d.client.GetBackends(teclient.ProdEnv)
+	stagingbackends, err := d.client.GetBackends(teclient.StagingEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Backends info",
+			"Unable to read StagingBackends info",
 			err.Error(),
 		)
 		return
 	}
 
 	// Map response body to model
-	for _, backend := range backends {
-		backendState := backendsModel{
-			ID:           types.Int64Value(int64(backend.ID)),
-			Company:      types.Int64Value(int64(backend.Company)),
-			Name:         types.StringValue(backend.Name),
-			Origin:       types.StringValue(backend.Origin),
-			Ssl:          types.BoolValue(backend.Ssl),
-			Port:         types.Int64Value(int64(backend.Port)),
-			HCHost:       types.StringValue(backend.HCHost),
-			HCPath:       types.StringValue(backend.HCPath),
-			HCStatusCode: types.Int64Value(int64(backend.HCStatusCode)),
+	for _, stagingbackend := range stagingbackends {
+		stagingbackendState := stagingbackendsModel{
+			ID:           types.Int64Value(int64(stagingbackend.ID)),
+			Company:      types.Int64Value(int64(stagingbackend.Company)),
+			Name:         types.StringValue(stagingbackend.Name),
+			Origin:       types.StringValue(stagingbackend.Origin),
+			Ssl:          types.BoolValue(stagingbackend.Ssl),
+			Port:         types.Int64Value(int64(stagingbackend.Port)),
+			HCHost:       types.StringValue(stagingbackend.HCHost),
+			HCPath:       types.StringValue(stagingbackend.HCPath),
+			HCStatusCode: types.Int64Value(int64(stagingbackend.HCStatusCode)),
 		}
 
-		state.Backends = append(state.Backends, backendState)
+		state.StagingBackends = append(state.StagingBackends, stagingbackendState)
 	}
 
 	// Set state
@@ -136,7 +136,7 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *backendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *stagingbackendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
