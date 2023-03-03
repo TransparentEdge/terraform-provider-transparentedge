@@ -1,3 +1,6 @@
+#################
+### EXAMPLE 1 ###
+#################
 # The verbatim VCL code is set here in a heredoc string: https://developer.hashicorp.com/terraform/language/expressions/strings#heredoc-strings
 # if you already have a VCL configuration it's recommended to import it directly from the dashboard.
 variable "code" {
@@ -20,3 +23,41 @@ resource "transparentedge_vclconf" "prod" {
 output "prod_config" {
   value = transparentedge_vclconf.prod
 }
+
+#################
+### EXAMPLE 2 ###
+#################
+# You can also set the heredoc string directly on the resource or reference an external file:
+resource "transparentedge_vclconf" "external_file" {
+  vclcode = file("${path.module}/config.vcl")
+}
+
+#################
+### EXAMPLE 3 ###
+#################
+# If you keep the configuration inside of a tf file you'll be able to reference other variables.
+# This is a good approach since the backends are tied to the configuration
+resource "transparentedge_backend" "myorig" {
+  name   = "origin1"
+  origin = "my-origin.com"
+  port   = 443
+  ssl    = true
+
+  # healthcheck
+  hchost       = "www.my-origin.com"
+  hcpath       = "/favicon.ico"
+  hcstatuscode = 200
+}
+
+resource "transparentedge_vclconf" "backend_dependency" {
+  vclcode = <<EOF
+sub vcl_recv {
+    if (req.http.host == "www.example.com") {
+        set req.backend_hint = cX_${resource.transparentedge_backend.myorig.name}.backend();
+    }
+}
+EOF
+}
+
+# Another option would be to use template files:
+# https://developer.hashicorp.com/terraform/language/functions/templatefile
