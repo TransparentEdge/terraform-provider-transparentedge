@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -203,6 +204,7 @@ func (p *transparentedgeProvider) DataSources(_ context.Context) []func() dataso
 		autoprovisioning.NewSiteVerifyDataSource,
 		autoprovisioning.NewBackendsDataSource,
 		autoprovisioning.NewVclconfDataSource,
+		staging.NewStagingBackendsDataSource,
 	}
 }
 
@@ -212,5 +214,6 @@ func (p *transparentedgeProvider) Resources(_ context.Context) []func() resource
 		autoprovisioning.NewSiteResource,
 		autoprovisioning.NewBackendResource,
 		autoprovisioning.NewVclconfResource,
+		staging.NewStagingBackendResource,
 	}
 }
