@@ -31,10 +31,6 @@ provider "transparentedge" {
   verify_ssl    = true                             # this is the default value
   api_url       = "https://api.transparentcdn.com" # this is the default value
 }
-
-
-data "transparentedge_sites" "all" {
-}
 ```
 
 It's recommended to use environment variables:  
@@ -45,8 +41,7 @@ export TCDN_CLIENT_ID="xxx"
 export TCDN_CLIENT_SECRET="xxx"
 ```
 
-You can find all the required variables in our [our dashboard](https://dashboard.transparentcdn.com/).
-Login, go to your profile -> "Account options" -> "Manage keys".
+You can find all the required variables in our [our dashboard](https://dashboard.transparentcdn.com/) `"Profile" -> "Account options" -> "Manage keys".`  
 
 Make sure that you're using the correct Company ID if you own multiple companies.  
 
