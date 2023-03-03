@@ -128,3 +128,14 @@ func (c *Client) preparePutRequest(jdata interface{}, url string) (*http.Request
 	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }
+
+func (c *Client) GetAPIEnvironmentPath(environment APIEnvironment) string {
+	if environment == ProdEnv {
+		return "autoprovisioning"
+	} else if environment == StagingEnv {
+		return "staging"
+	}
+
+	// requests will fail
+	return "invalid_env"
+}

@@ -121,7 +121,7 @@ func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest
 	newVclconf := teclient.NewVCLConfAPIModel{
 		VCLCode: plan.VCLCode.ValueString(),
 	}
-	vclconfState, errCreate := r.client.CreateVclconf(newVclconf)
+	vclconfState, errCreate := r.client.CreateVclconf(newVclconf, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating vclconf",
@@ -156,7 +156,7 @@ func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	vclconf, err := r.client.GetActiveVCLConf()
+	vclconf, err := r.client.GetActiveVCLConf(teclient.ProdEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read VclConf info",

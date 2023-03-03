@@ -6,8 +6,9 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetVclConfs() ([]VCLConfAPIModel, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/config/", c.HostURL, c.CompanyId), nil)
+func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/config/?offset=%d", c.HostURL, envpath, c.CompanyId, offset), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +29,8 @@ func (c *Client) GetVclConfs() ([]VCLConfAPIModel, error) {
 	return vclconfs, nil
 }
 
-func (c *Client) GetActiveVCLConf() (*VCLConfAPIModel, error) {
-	vclconfs, err := c.GetVclConfs()
+func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel, error) {
+	vclconfs, err := c.GetVclConfs(1, environment)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +48,9 @@ func (c *Client) GetActiveVCLConf() (*VCLConfAPIModel, error) {
 	return &topVclConf, nil
 }
 
-func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel) (*VCLConfAPIModel, error) {
-	req, err := c.preparePostRequest(vclconf, fmt.Sprintf("%s/v1/autoprovisioning/%d/config/", c.HostURL, c.CompanyId))
+func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
+	envpath := c.GetAPIEnvironmentPath(environment)
+	req, err := c.preparePostRequest(vclconf, fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
 	}

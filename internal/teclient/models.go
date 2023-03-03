@@ -1,5 +1,12 @@
 package teclient
 
+type APIEnvironment int
+
+const (
+	ProdEnv    APIEnvironment = 0
+	StagingEnv APIEnvironment = 1
+)
+
 type ErrorAPIMessage struct {
 	Message string `json:"message"`
 }

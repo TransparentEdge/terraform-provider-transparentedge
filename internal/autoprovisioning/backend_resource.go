@@ -134,7 +134,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
 	}
-	backendState, errCreate := r.client.CreateBackend(newBackend)
+	backendState, errCreate := r.client.CreateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating backend",
@@ -178,7 +178,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
 	}
-	backendState, errCreate := r.client.UpdateBackend(newBackend)
+	backendState, errCreate := r.client.UpdateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating backend",
@@ -213,7 +213,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		if backend, err := r.client.GetBackend(int(state.ID.ValueInt64())); err == nil {
+		if backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err == nil {
 			state.ID = types.Int64Value(int64(backend.ID))
 			state.Company = types.Int64Value(int64(backend.Company))
 			state.Name = types.StringValue(backend.Name)
@@ -229,7 +229,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Try to find by Name
-	backends, err := r.client.GetBackends()
+	backends, err := r.client.GetBackends(teclient.ProdEnv)
 	if err == nil {
 		for _, backend := range backends {
 			if backend.Name == state.Name.ValueString() {
@@ -263,7 +263,7 @@ func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
-	if err := r.client.DeleteBackend(int(state.ID.ValueInt64())); err != nil {
+	if err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a backend",
 			"Could not delete the backend: "+state.Name.ValueString()+"\n"+err.Error(),
