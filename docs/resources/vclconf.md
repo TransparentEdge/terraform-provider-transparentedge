@@ -42,7 +42,7 @@ output "prod_config" {
 
 ### Required
 
-- `vclcode` (String) Verbatim of the VCL (Varnish Configuration Language) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied you can known if a configuration has been applied by running 'terraform plan' and checking the productiondate field.
+- `vclcode` (String) Verbatim of the VCL (Varnish Configuration Language) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied. You can know if a configuration is already in production by running 'terraform plan' and checking the 'productiondate' field.
 
 ### Read-Only
 
