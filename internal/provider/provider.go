@@ -204,6 +204,7 @@ func (p *transparentedgeProvider) DataSources(_ context.Context) []func() dataso
 		autoprovisioning.NewSiteVerifyDataSource,
 		autoprovisioning.NewBackendsDataSource,
 		autoprovisioning.NewVclconfDataSource,
+		autoprovisioning.NewCertificatesDataSource,
 		staging.NewStagingBackendsDataSource,
 		staging.NewStagingVclconfDataSource,
 	}
