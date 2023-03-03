@@ -44,7 +44,7 @@ Make sure that you're using the correct Company ID if you own multiple companies
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.18
+- [Go](https://golang.org/doc/install) >= 1.19
 
 ## Building The Provider
 
