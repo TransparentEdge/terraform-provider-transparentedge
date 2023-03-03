@@ -57,7 +57,6 @@ func (r *backendResource) Metadata(_ context.Context, req resource.MetadataReque
 func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"id": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{

@@ -46,3 +46,31 @@ func (c *Client) GetActiveVCLConf() (*VCLConfAPIModel, error) {
 
 	return &topVclConf, nil
 }
+
+func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel) (*VCLConfAPIModel, error) {
+	req, err := c.preparePostRequest(vclconf, fmt.Sprintf("%s/v1/autoprovisioning/%d/config/", c.HostURL, c.CompanyId))
+	if err != nil {
+		return nil, err
+	}
+
+	body, sc, err := c.doRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("%d - %s", sc, err.Error())
+	}
+	if sc == 400 {
+		apiError := ErrorAPIMessage{}
+		if err := json.Unmarshal(body, &apiError); err == nil {
+			return nil, fmt.Errorf("VCL COMPILATION ERROR\n\n%s\n", apiError.Message)
+		}
+	}
+	if !(sc == 200 || sc == 201) {
+		return nil, fmt.Errorf("%d - %s", sc, string(body))
+	}
+
+	newVclConf := VCLConfAPIModel{}
+	if err := json.Unmarshal(body, &newVclConf); err != nil {
+		return nil, err
+	}
+
+	return &newVclConf, nil
+}
