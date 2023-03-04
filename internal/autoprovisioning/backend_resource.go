@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -40,6 +41,7 @@ type backendResourceModel struct {
 	ID           types.Int64  `tfsdk:"id"`
 	Company      types.Int64  `tfsdk:"company"`
 	Name         types.String `tfsdk:"name"`
+	VclName      types.String `tfsdk:"vclname"`
 	Origin       types.String `tfsdk:"origin"`
 	Ssl          types.Bool   `tfsdk:"ssl"`
 	Port         types.Int64  `tfsdk:"port"`
@@ -56,6 +58,9 @@ func (r *backendResource) Metadata(_ context.Context, req resource.MetadataReque
 // Schema defines the schema for the resource.
 func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manages backend configuration",
+		MarkdownDescription: "Manages backend configuration",
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed: true,
@@ -79,6 +84,10 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 					),
 				},
 				Description: "Name of the backend",
+			},
+			"vclname": schema.StringAttribute{
+				Computed:    true,
+				Description: "Unique name that can be referenced in VCL code",
 			},
 			"origin": schema.StringAttribute{
 				Required:    true,
@@ -147,6 +156,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 	plan.ID = types.Int64Value(int64(backendState.ID))
 	plan.Company = types.Int64Value(int64(backendState.Company))
 	plan.Name = types.StringValue(backendState.Name)
+	plan.VclName = types.StringValue("c" + strconv.Itoa(backendState.Company) + "_" + backendState.Name)
 	plan.Origin = types.StringValue(backendState.Origin)
 	plan.Ssl = types.BoolValue(backendState.Ssl)
 	plan.Port = types.Int64Value(int64(backendState.Port))
@@ -191,6 +201,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 	plan.ID = types.Int64Value(int64(backendState.ID))
 	plan.Company = types.Int64Value(int64(backendState.Company))
 	plan.Name = types.StringValue(backendState.Name)
+	plan.VclName = types.StringValue("c" + strconv.Itoa(backendState.Company) + "_" + backendState.Name)
 	plan.Origin = types.StringValue(backendState.Origin)
 	plan.Ssl = types.BoolValue(backendState.Ssl)
 	plan.Port = types.Int64Value(int64(backendState.Port))
@@ -217,6 +228,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.ID = types.Int64Value(int64(backend.ID))
 			state.Company = types.Int64Value(int64(backend.Company))
 			state.Name = types.StringValue(backend.Name)
+			state.VclName = types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name)
 			state.Origin = types.StringValue(backend.Origin)
 			state.Ssl = types.BoolValue(backend.Ssl)
 			state.Port = types.Int64Value(int64(backend.Port))
@@ -236,6 +248,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 				state.ID = types.Int64Value(int64(backend.ID))
 				state.Company = types.Int64Value(int64(backend.Company))
 				state.Name = types.StringValue(backend.Name)
+				state.VclName = types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name)
 				state.Origin = types.StringValue(backend.Origin)
 				state.Ssl = types.BoolValue(backend.Ssl)
 				state.Port = types.Int64Value(int64(backend.Port))

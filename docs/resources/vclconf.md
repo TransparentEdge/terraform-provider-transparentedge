@@ -68,7 +68,7 @@ resource "transparentedge_vclconf" "backend_dependency" {
   vclcode = <<EOF
 sub vcl_recv {
     if (req.http.host == "www.example.com") {
-        set req.backend_hint = cX_${resource.transparentedge_backend.myorig.name}.backend();
+        set req.backend_hint = ${resource.transparentedge_backend.myorig.vclname}.backend();
     }
 }
 EOF

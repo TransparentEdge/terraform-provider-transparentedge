@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
-
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"

@@ -41,5 +41,6 @@ Read-Only:
 - `origin` (String) Origin is the IP or DNS address to the origin backend, for example: 'my-origin.com'
 - `port` (Number) Port where the origin is listening to HTTP requests, for example: 80 or 443
 - `ssl` (Boolean) If the origin should be contacted using TLS encription.
+- `vclname` (String) Unique name that can be referenced in VCL code
 
 
