@@ -3,12 +3,12 @@
 page_title: "transparentedge_backend Resource - transparentedge"
 subcategory: ""
 description: |-
-  
+  Manages backend configuration
 ---
 
 # transparentedge_backend (Resource)
 
-
+Manages backend configuration
 
 ## Example Usage
 
@@ -63,6 +63,7 @@ output "origin2" {
 
 - `company` (Number) Company ID that owns this backend
 - `id` (Number) ID of the backend
+- `vclname` (String) Unique name that can be referenced in VCL code
 
 ## Import
 

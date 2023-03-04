@@ -2,9 +2,9 @@ package autoprovisioning
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -36,6 +36,7 @@ type backendsModel struct {
 	ID           types.Int64  `tfsdk:"id"`
 	Company      types.Int64  `tfsdk:"company"`
 	Name         types.String `tfsdk:"name"`
+	VclName      types.String `tfsdk:"vclname"`
 	Origin       types.String `tfsdk:"origin"`
 	Ssl          types.Bool   `tfsdk:"ssl"`
 	Port         types.Int64  `tfsdk:"port"`
@@ -69,6 +70,10 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						"name": schema.StringAttribute{
 							Computed:    true,
 							Description: "Name of the backend",
+						},
+						"vclname": schema.StringAttribute{
+							Computed:    true,
+							Description: "Unique name that can be referenced in VCL code",
 						},
 						"origin": schema.StringAttribute{
 							Computed:    true,
@@ -120,6 +125,7 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 			ID:           types.Int64Value(int64(backend.ID)),
 			Company:      types.Int64Value(int64(backend.Company)),
 			Name:         types.StringValue(backend.Name),
+			VclName:      types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name),
 			Origin:       types.StringValue(backend.Origin),
 			Ssl:          types.BoolValue(backend.Ssl),
 			Port:         types.Int64Value(int64(backend.Port)),

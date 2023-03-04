@@ -42,6 +42,9 @@ func (p *TransparentEdgeProvider) Metadata(ctx context.Context, _ provider.Metad
 // Schema defines the provider-level schema for configuration data.
 func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "A terraform provider for the CDN of Transparent Edge",
+		MarkdownDescription: "A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/)",
+
 		Attributes: map[string]schema.Attribute{
 			"api_url": schema.StringAttribute{
 				Optional:            true,

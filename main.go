@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/provider"
+	transparentedge "github.com/TransparentEdge/terraform-provider-transparentedge/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
