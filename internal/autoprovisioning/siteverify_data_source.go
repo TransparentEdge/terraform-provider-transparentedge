@@ -25,12 +25,6 @@ type siteVerifyDataSource struct {
 	client *teclient.Client
 }
 
-// siteVerifyModel maps schema data.
-type siteVerifyModel struct {
-	Domain              types.String `tfsdk:"domain"`
-	VerificantionString types.String `tfsdk:"verification_string"`
-}
-
 // Metadata returns the data source type name.
 func (d *siteVerifyDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_siteverify"
@@ -53,7 +47,7 @@ func (d *siteVerifyDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 
 // Read refreshes the Terraform state with the latest data.
 func (d *siteVerifyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data siteVerifyModel
+	var data SiteVerify
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -67,7 +61,7 @@ func (d *siteVerifyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	data = siteVerifyModel{
+	data = SiteVerify{
 		Domain:              types.StringValue(domain),
 		VerificantionString: types.StringValue(verify_string),
 	}

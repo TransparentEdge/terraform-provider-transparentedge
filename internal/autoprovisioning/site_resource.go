@@ -39,14 +39,6 @@ type siteResource struct {
 	client *teclient.Client
 }
 
-// siteModel maps schema data.
-type siteResourceModel struct {
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-	ID       types.Int64    `tfsdk:"id"`
-	Domain   types.String   `tfsdk:"domain"`
-	Active   types.Bool     `tfsdk:"active"`
-}
-
 // Metadata returns the resource type name.
 func (r *siteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_site"
@@ -87,7 +79,7 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 // Create new site
 func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan siteResourceModel
+	var plan Site
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -127,7 +119,7 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 // Read resource information
 func (r *siteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state siteResourceModel
+	var state Site
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -170,7 +162,7 @@ func (r *siteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 // Deletes the site and removes the terraform plan on success
 func (r *siteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state siteResourceModel
+	var state Site
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -202,11 +194,11 @@ func (r *siteResource) ImportState(ctx context.Context, req resource.ImportState
 }
 
 // Helpers
-func (r *siteResource) HelperCreateSite(ctx context.Context, domain string, maxTimeout time.Duration) (*siteResourceModel, error) {
+func (r *siteResource) HelperCreateSite(ctx context.Context, domain string, maxTimeout time.Duration) (*Site, error) {
 	var err error = nil
 	remainingTimeForVerification := maxTimeout.Seconds()
 	siteCreate := teclient.SiteNewAPIModel{Url: domain}
-	siteState := siteResourceModel{}
+	siteState := Site{}
 
 	site := &teclient.SiteAPIModel{}
 	verify_error := false

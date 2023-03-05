@@ -33,16 +33,6 @@ type vclconfResource struct {
 	client *teclient.Client
 }
 
-// maps schema data.
-type vclconfResourceModel struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
-}
-
 // Metadata returns the resource type name.
 func (r *vclconfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_vclconf"
@@ -88,7 +78,7 @@ func (r *vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 // Create
 func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan vclconfResourceModel
+	var plan VCLConf
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -127,7 +117,7 @@ func (r *vclconfResource) Update(ctx context.Context, req resource.UpdateRequest
 // Read resource information
 func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state vclconfResourceModel
+	var state VCLConf
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -158,7 +148,7 @@ func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 // Delete
 func (r *vclconfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state vclconfResourceModel
+	var state VCLConf
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -26,20 +26,6 @@ type sitesDataSource struct {
 	client *teclient.Client
 }
 
-// sitesDataSourceModel maps the data source schema data.
-type sitesDataSourceModel struct {
-	Sites []sitesModel `tfsdk:"sites"`
-}
-
-// sitesModel maps schema data.
-type sitesModel struct {
-	ID      types.Int64  `tfsdk:"id"`
-	Company types.Int64  `tfsdk:"company"`
-	Domain  types.String `tfsdk:"domain"`
-	Active  types.Bool   `tfsdk:"active"`
-	Ssl     types.Bool   `tfsdk:"ssl"`
-}
-
 // Metadata returns the data source type name.
 func (d *sitesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_sites"
@@ -88,7 +74,7 @@ func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 
 // Read refreshes the Terraform state with the latest data.
 func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state sitesDataSourceModel
+	var state Sites
 
 	sites, err := d.client.GetSites()
 	if err != nil {
@@ -101,7 +87,7 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	// Map response body to model
 	for _, site := range sites {
-		siteState := sitesModel{
+		siteState := SiteDataSourceModel{
 			ID:      types.Int64Value(int64(site.ID)),
 			Company: types.Int64Value(int64(site.Company)),
 			Domain:  types.StringValue(site.Url),

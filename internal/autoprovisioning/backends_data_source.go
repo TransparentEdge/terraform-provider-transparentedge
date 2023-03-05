@@ -26,25 +26,6 @@ type backendsDataSource struct {
 	client *teclient.Client
 }
 
-// maps the data source schema data.
-type backendsDataSourceModel struct {
-	Backends []backendsModel `tfsdk:"backends"`
-}
-
-// maps schema data.
-type backendsModel struct {
-	ID           types.Int64  `tfsdk:"id"`
-	Company      types.Int64  `tfsdk:"company"`
-	Name         types.String `tfsdk:"name"`
-	VclName      types.String `tfsdk:"vclname"`
-	Origin       types.String `tfsdk:"origin"`
-	Ssl          types.Bool   `tfsdk:"ssl"`
-	Port         types.Int64  `tfsdk:"port"`
-	HCHost       types.String `tfsdk:"hchost"`
-	HCPath       types.String `tfsdk:"hcpath"`
-	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`
-}
-
 // Metadata returns the data source type name.
 func (d *backendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_backends"
@@ -108,7 +89,7 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 
 // Read refreshes the Terraform state with the latest data.
 func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state backendsDataSourceModel
+	var state Backends
 
 	backends, err := d.client.GetBackends(teclient.ProdEnv)
 	if err != nil {
@@ -121,7 +102,7 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	// Map response body to model
 	for _, backend := range backends {
-		backendState := backendsModel{
+		backendState := Backend{
 			ID:           types.Int64Value(int64(backend.ID)),
 			Company:      types.Int64Value(int64(backend.Company)),
 			Name:         types.StringValue(backend.Name),

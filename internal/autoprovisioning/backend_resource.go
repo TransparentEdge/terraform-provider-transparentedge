@@ -36,20 +36,6 @@ type backendResource struct {
 	client *teclient.Client
 }
 
-// maps schema data.
-type backendResourceModel struct {
-	ID           types.Int64  `tfsdk:"id"`
-	Company      types.Int64  `tfsdk:"company"`
-	Name         types.String `tfsdk:"name"`
-	VclName      types.String `tfsdk:"vclname"`
-	Origin       types.String `tfsdk:"origin"`
-	Ssl          types.Bool   `tfsdk:"ssl"`
-	Port         types.Int64  `tfsdk:"port"`
-	HCHost       types.String `tfsdk:"hchost"`
-	HCPath       types.String `tfsdk:"hcpath"`
-	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`
-}
-
 // Metadata returns the resource type name.
 func (r *backendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_backend"
@@ -126,7 +112,7 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 // Create
 func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan backendResourceModel
+	var plan Backend
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -169,7 +155,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan backendResourceModel
+	var plan Backend
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -215,7 +201,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 // Read resource information
 func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state backendResourceModel
+	var state Backend
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -267,7 +253,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 // Delete
 func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state backendResourceModel
+	var state Backend
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
