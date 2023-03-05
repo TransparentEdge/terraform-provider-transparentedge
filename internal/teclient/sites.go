@@ -38,7 +38,7 @@ func (c *Client) GetSites() ([]SiteAPIModel, error) {
 		return nil, err
 	}
 	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of sites: %s", string(body))
+		return nil, fmt.Errorf("Couldn't retrieve the list of sites: %s", c.parseAPIError(body))
 	}
 
 	sites := []SiteAPIModel{}
@@ -60,7 +60,7 @@ func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
 		return nil, err
 	}
 	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the site with ID %d: %s", siteID, string(body))
+		return nil, fmt.Errorf("Couldn't retrieve the site with ID %d: %s", siteID, c.parseAPIError(body))
 	}
 
 	site := SiteAPIModel{}
@@ -94,16 +94,16 @@ func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 			msg = msg + "\nThe verification string for this site is: " + verify_string + "\n"
 		}
 
-		msg = msg + "\nAPI Response: " + string(body) + "\n\n" +
+		msg = msg + "\nAPI Response: " + c.parseAPIError(body) + "\n\n" +
 			"If you need to get the verification string again, run 'terraform plan' and 'terraform show'" +
 			" with the datasource 'siteverify'.\nIn case of doubts please contact with support."
 
 		return nil, true, fmt.Errorf("Validation error:\n%s", msg)
 	}
 	if sc == 400 {
-		if strings.Contains(string(body), "Site ownership denied") {
+		if strings.Contains(c.parseAPIError(body), "Site ownership denied") {
 			// site belongs to another company
-			return nil, false, fmt.Errorf("Site not owned: %s", string(body))
+			return nil, false, fmt.Errorf("Site not owned: %s", c.parseAPIError(body))
 		}
 		// check if the site already exists
 		if existingSite := c.GetIfExists(body, site.Url); existingSite != nil {
@@ -114,7 +114,7 @@ func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 		return nil, false, fmt.Errorf("%d - %s", sc, err.Error())
 	}
 	if !(sc == 200 || sc == 201) { // 200 = new, 201 = activated again
-		return nil, false, fmt.Errorf("%d - %s", sc, string(body))
+		return nil, false, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newSite := SiteAPIModel{}
@@ -126,15 +126,13 @@ func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 }
 
 func (c *Client) GetIfExists(body []byte, site_domain string) *SiteAPIModel {
-	errorMessage := ErrorAPIMessage{}
-	if err := json.Unmarshal(body, &errorMessage); err == nil {
-		if strings.Contains(errorMessage.Message, "already exists") {
-			// Try to find the site
-			if sites, err := c.GetSites(); err == nil {
-				for _, site := range sites {
-					if site.Url == site_domain {
-						return &site
-					}
+	errorMessage := c.parseAPIError(body)
+	if strings.Contains(errorMessage, "already exists") {
+		// Try to find the site
+		if sites, err := c.GetSites(); err == nil {
+			for _, site := range sites {
+				if site.Url == site_domain {
+					return &site
 				}
 			}
 		}
@@ -153,7 +151,7 @@ func (c *Client) DeleteSite(siteID int) error {
 		return err
 	}
 	if sc != 204 {
-		return fmt.Errorf("%d - API request failed trying to DELETE the site ID %d: %s", sc, siteID, string(body))
+		return fmt.Errorf("%d - API request failed trying to DELETE the site ID %d: %s", sc, siteID, c.parseAPIError(body))
 	}
 
 	return nil

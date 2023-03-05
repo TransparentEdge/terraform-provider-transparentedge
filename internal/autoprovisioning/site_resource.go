@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -66,7 +68,10 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 				MarkdownDescription: "ID of the site",
 			},
 			"domain": schema.StringAttribute{
-				Required:            true,
+				Required: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 				Description:         "Domain in FDQN form, i.e: 'www.example.com'",
 				MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`",
 			},
@@ -117,36 +122,6 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan siteResourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	maxTimeout, err := plan.Timeouts.Create(ctx, defaultCreateTimeout)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error applying timeouts",
-			"Could not apply the timeouts configuration.",
-		)
-		return
-	}
-
-	siteState, errCreate := r.HelperCreateSite(ctx, plan.Domain.ValueString(), maxTimeout)
-	if errCreate != nil {
-		resp.Diagnostics.AddError(
-			"Error updating site",
-			fmt.Sprintf("Could not update the site '%s': %s", plan.Domain.ValueString(), errCreate),
-		)
-		return
-	}
-
-	// Set state to fully populated data
-	plan.ID = siteState.ID
-	plan.Domain = siteState.Domain
-	plan.Active = siteState.Active
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Read resource information
