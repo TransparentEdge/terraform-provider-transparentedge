@@ -10,7 +10,6 @@ import (
 func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.GetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
-	req.Header.Set("User-Agent", defaultUserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +102,6 @@ func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironme
 func (c *Client) DeleteBackend(backendID int, environment APIEnvironment) error {
 	envpath := c.GetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
-	req.Header.Set("User-Agent", defaultUserAgent)
 	if err != nil {
 		return err
 	}

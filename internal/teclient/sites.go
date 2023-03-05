@@ -51,7 +51,6 @@ func (c *Client) GetSites() ([]SiteAPIModel, error) {
 
 func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyId, siteID), nil)
-	req.Header.Set("User-Agent", defaultUserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +144,6 @@ func (c *Client) GetIfExists(body []byte, site_domain string) *SiteAPIModel {
 
 func (c *Client) DeleteSite(siteID int) error {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyId, siteID), nil)
-	req.Header.Set("User-Agent", defaultUserAgent)
 	if err != nil {
 		return err
 	}

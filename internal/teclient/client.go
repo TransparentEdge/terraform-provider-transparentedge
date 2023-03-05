@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	defaultUserAgent      string        = "TransparentEdge CDN TF provider client/0.1"
 	defaultAPIHTTPTimeout time.Duration = 50 * time.Second
 )
 
@@ -30,11 +29,12 @@ type Client struct {
 	ClientId     string
 	ClientSecret string
 	VerifySSL    bool
+	UserAgent    string
 
 	Token TokenStruct
 }
 
-func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl bool) (*Client, error) {
+func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifyssl},
 		Proxy:           http.ProxyFromEnvironment,
@@ -48,6 +48,7 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 		ClientId:     *clientid,
 		ClientSecret: *clientsecret,
 		VerifySSL:    verifyssl,
+		UserAgent:    *useragent,
 	}
 
 	if err := c.GetToken(); err != nil {
@@ -65,7 +66,7 @@ func (c *Client) GetToken() error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", defaultUserAgent)
+	req.Header.Set("User-Agent", c.UserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
 	if resp.StatusCode == 401 {
@@ -93,7 +94,7 @@ func (c *Client) GetToken() error {
 
 func (c *Client) doRequest(req *http.Request) ([]byte, int, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token.Token))
-	req.Header.Set("User-Agent", defaultUserAgent)
+	req.Header.Set("User-Agent", c.UserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
