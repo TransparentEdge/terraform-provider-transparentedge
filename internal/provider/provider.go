@@ -162,7 +162,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	tflog.Debug(ctx, "Creating Transparent Edge API client")
 
 	// Create a new client using the configuration values
-	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, verifyssl)
+	useragent := "terraform-provider-transparentedge/" + p.version
+	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, verifyssl, &useragent)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Transparent Edge API Client",
