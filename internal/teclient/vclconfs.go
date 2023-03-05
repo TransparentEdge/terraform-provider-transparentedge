@@ -50,7 +50,7 @@ func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel,
 
 func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
 	envpath := c.GetAPIEnvironmentPath(environment)
-	req, err := c.preparePostRequest(vclconf, fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyId))
+	req, err := c.prepareJSONRequest(vclconf, "POST", fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
 	}

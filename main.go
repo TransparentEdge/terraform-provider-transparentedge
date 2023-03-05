@@ -11,7 +11,6 @@ import (
 
 // Provider documentation generation.
 //go:generate terraform fmt -recursive ./examples/
-//go:generate go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name transparentedge --rendered-provider-name TransparentEdge
 
 var (

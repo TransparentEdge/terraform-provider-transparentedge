@@ -3,12 +3,12 @@
 page_title: "transparentedge_site Resource - transparentedge"
 subcategory: ""
 description: |-
-  
+  Manages company sites (domains)
 ---
 
 # transparentedge_site (Resource)
 
-
+Manages company sites (domains)
 
 ## Example Usage
 
@@ -72,7 +72,7 @@ resource "transparentedge_site" "www_example3_com" {
 
 ### Required
 
-- `domain` (String) Domain in FDQN form, i.e: 'www.example.com'
+- `domain` (String) Domain in FDQN form, i.e: `www.example.com`
 
 ### Optional
 
@@ -80,7 +80,7 @@ resource "transparentedge_site" "www_example3_com" {
 
 ### Read-Only
 
-- `active` (Boolean) Active status in the CDN
+- `active` (Boolean) Internal value that indicates if the site is active in the CDN
 - `id` (Number) ID of the site
 
 <a id="nestedatt--timeouts"></a>

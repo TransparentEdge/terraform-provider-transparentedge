@@ -9,7 +9,7 @@ import (
 
 func (c *Client) GetSiteVerifyString(site_domain string) string {
 	data := SiteVerifyStringAPIModelRequest{Domain: site_domain}
-	req, err := c.preparePostRequest(data, fmt.Sprintf("%s/v1/companies/%d/siteverification/", c.HostURL, c.CompanyId))
+	req, err := c.prepareJSONRequest(data, "POST", fmt.Sprintf("%s/v1/companies/%d/siteverification/", c.HostURL, c.CompanyId))
 	if err != nil {
 		return ""
 	}
@@ -74,7 +74,7 @@ func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
 
 func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 	// returns model, error, verify_error
-	req, err := c.preparePostRequest(site, fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyId))
+	req, err := c.prepareJSONRequest(site, "POST", fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyId))
 	if err != nil {
 		return nil, false, err
 	}
@@ -104,7 +104,7 @@ func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 	if sc == 400 {
 		if strings.Contains(string(body), "Site ownership denied") {
 			// site belongs to another company
-			return nil, false, fmt.Errorf("Site not onwned: %s", string(body))
+			return nil, false, fmt.Errorf("Site not owned: %s", string(body))
 		}
 		// check if the site already exists
 		if existingSite := c.GetIfExists(body, site.Url); existingSite != nil {

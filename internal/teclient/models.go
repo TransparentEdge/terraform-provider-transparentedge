@@ -15,10 +15,10 @@ type ErrorAPIMessage struct {
 // Sites
 type SiteAPIModel struct {
 	ID      int    `json:"id"`
-	Url     string `json:"url"`
 	Company int    `json:"company"`
-	Ssl     bool   `json:"ssl"`
+	Url     string `json:"url"`
 	Active  bool   `json:"active"`
+	Ssl     bool   `json:"ssl"`
 }
 
 type SiteNewAPIModel struct {

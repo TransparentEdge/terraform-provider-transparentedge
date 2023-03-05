@@ -11,12 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	sdkresource "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+const (
+	defaultCreateTimeout    time.Duration = 5 * time.Minute
+	delayBetweenCreateRetry time.Duration = 30 * time.Second
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -39,8 +40,8 @@ type siteResource struct {
 // siteModel maps schema data.
 type siteResourceModel struct {
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
-	Domain   types.String   `tfsdk:"domain"`
 	ID       types.Int64    `tfsdk:"id"`
+	Domain   types.String   `tfsdk:"domain"`
 	Active   types.Bool     `tfsdk:"active"`
 }
 
@@ -52,27 +53,27 @@ func (r *siteResource) Metadata(_ context.Context, req resource.MetadataRequest,
 // Schema defines the schema for the resource.
 func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manages company sites (domains)",
+		MarkdownDescription: "Manages company sites (domains)",
+
 		Attributes: map[string]schema.Attribute{
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true,
 			}),
 			"id": schema.Int64Attribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
-				Description: "ID of the site",
-			},
-			"active": schema.BoolAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
-				Description: "Active status in the CDN",
+				Computed:            true,
+				Description:         "ID of the site",
+				MarkdownDescription: "ID of the site",
 			},
 			"domain": schema.StringAttribute{
-				Required:    true,
-				Description: "Domain in FDQN form, i.e: 'www.example.com'",
+				Required:            true,
+				Description:         "Domain in FDQN form, i.e: 'www.example.com'",
+				MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`",
+			},
+			"active": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Internal value that indicates if the site is active in the CDN",
+				MarkdownDescription: "Internal value that indicates if the site is active in the CDN",
 			},
 		},
 	}
@@ -88,7 +89,7 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	maxTimeout, err := plan.Timeouts.Create(ctx, 5*time.Minute)
+	maxTimeout, err := plan.Timeouts.Create(ctx, defaultCreateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error applying timeouts",
@@ -96,11 +97,9 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 		)
 		return
 	}
-	ctx, cancel := context.WithTimeout(ctx, maxTimeout)
-	defer cancel()
 
 	tflog.Info(ctx, "Creating site: "+plan.Domain.ValueString())
-	siteState, errCreate := r.HelperCreateSite(plan.Domain.ValueString(), maxTimeout, ctx)
+	siteState, errCreate := r.HelperCreateSite(ctx, plan.Domain.ValueString(), maxTimeout)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating site",
@@ -125,7 +124,7 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	maxTimeout, err := plan.Timeouts.Create(ctx, 5*time.Minute)
+	maxTimeout, err := plan.Timeouts.Create(ctx, defaultCreateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error applying timeouts",
@@ -133,10 +132,8 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		)
 		return
 	}
-	ctx, cancel := context.WithTimeout(ctx, maxTimeout)
-	defer cancel()
 
-	siteState, errCreate := r.HelperCreateSite(plan.Domain.ValueString(), maxTimeout, ctx)
+	siteState, errCreate := r.HelperCreateSite(ctx, plan.Domain.ValueString(), maxTimeout)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating site",
@@ -230,52 +227,41 @@ func (r *siteResource) ImportState(ctx context.Context, req resource.ImportState
 }
 
 // Helpers
-func (r *siteResource) HelperCreateSite(domain string, maxTimeout time.Duration, ctx context.Context) (*siteResourceModel, error) {
-	createState := &sdkresource.StateChangeConf{
-		Pending: []string{
-			"verify_error",
-		},
-		Target: []string{
-			"site_verified",
-		},
-		ContinuousTargetOccurence: 1, // How many times the Target has to be reached to continue
-		Timeout:                   maxTimeout,
-		Delay:                     1 * time.Second,  // Delay before starting
-		MinTimeout:                30 * time.Second, // Delay between retries
-		Refresh: func() (any, string, error) {
-			siteCreate := teclient.SiteNewAPIModel{
-				Url: domain,
-			}
-			newSite, verify_error, err := r.client.CreateSite(siteCreate)
-			if err == nil {
-				siteState := siteResourceModel{
-					Domain: types.StringValue(newSite.Url),
-					ID:     types.Int64Value(int64(newSite.ID)),
-					Active: types.BoolValue(true), // API is not sending back "active" field
-				}
-				return siteState, "site_verified", nil
-			} else if verify_error {
-				// We cannot return the error inmediately or the refresh function will exit
-				// instead, return the error in the interface position and nil on the error
-				return err, "verify_error", nil
-			}
-			return nil, "create_error", fmt.Errorf("Could not create the site: %s; Error: %s", domain, err.Error())
-		},
+func (r *siteResource) HelperCreateSite(ctx context.Context, domain string, maxTimeout time.Duration) (*siteResourceModel, error) {
+	var err error = nil
+	remainingTimeForVerification := maxTimeout.Seconds()
+	siteCreate := teclient.SiteNewAPIModel{Url: domain}
+	siteState := siteResourceModel{}
+
+	site := &teclient.SiteAPIModel{}
+	verify_error := false
+
+	for {
+		site, verify_error, err = r.client.CreateSite(siteCreate)
+		if err == nil {
+			siteState.ID = types.Int64Value(int64(site.ID))
+			siteState.Domain = types.StringValue(site.Url)
+			siteState.Active = types.BoolValue(true)
+			break
+		}
+
+		// break if err != nil and it wasn't a verification error
+		if !verify_error {
+			break
+		}
+
+		// break if we exhausted the remaining time
+		if remainingTimeForVerification <= 0 {
+			break
+		}
+		time.Sleep(delayBetweenCreateRetry)
+		remainingTimeForVerification -= (delayBetweenCreateRetry.Seconds() + 5)
+		tflog.Info(ctx, "Retry site verification for "+domain)
 	}
 
-	siteState, errState := createState.WaitForStateContext(ctx)
-	// Verify error
-	if siteState, ok := siteState.(error); ok {
-		return nil, siteState // here siteState is an error
-	}
-	if errState != nil {
-		return nil, errState
+	if err == nil {
+		return &siteState, nil
 	}
 
-	if siteState, ok := siteState.(siteResourceModel); ok {
-		return &siteState, errState
-	}
-
-	// Cannot assert the response matches the model...
-	return nil, fmt.Errorf("Could not create the site, unknown error.")
+	return nil, err
 }

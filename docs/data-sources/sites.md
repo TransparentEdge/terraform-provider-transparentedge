@@ -32,10 +32,10 @@ output "all_sites" {
 
 Read-Only:
 
-- `active` (Boolean) Active status in the CDN
+- `active` (Boolean) Internal value that indicates if the site is active in the CDN
 - `company` (Number) Company ID that owns this domain
+- `domain` (String) Domain in FDQN form, i.e: `www.example.com`
 - `id` (Number) ID of the site
 - `ssl` (Boolean) If SSL is active (deprecated)
-- `url` (String) Domain in FDQN form, i.e: 'www.example.com'
 
 

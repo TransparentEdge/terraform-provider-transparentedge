@@ -109,25 +109,12 @@ func (c *Client) doRequest(req *http.Request) ([]byte, int, error) {
 	return body, resp.StatusCode, err
 }
 
-func (c *Client) preparePostRequest(jdata interface{}, url string) (*http.Request, error) {
+func (c *Client) prepareJSONRequest(jdata interface{}, method string, url string) (*http.Request, error) {
 	data, err := json.Marshal(jdata)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return req, nil
-}
-
-func (c *Client) preparePutRequest(jdata interface{}, url string) (*http.Request, error) {
-	data, err := json.Marshal(jdata)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(data))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
