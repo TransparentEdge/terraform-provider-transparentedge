@@ -2,6 +2,7 @@ package autoprovisioning
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -33,10 +34,10 @@ type sitesDataSourceModel struct {
 // sitesModel maps schema data.
 type sitesModel struct {
 	ID      types.Int64  `tfsdk:"id"`
-	Url     types.String `tfsdk:"url"`
 	Company types.Int64  `tfsdk:"company"`
-	Ssl     types.Bool   `tfsdk:"ssl"`
+	Domain  types.String `tfsdk:"domain"`
 	Active  types.Bool   `tfsdk:"active"`
+	Ssl     types.Bool   `tfsdk:"ssl"`
 }
 
 // Metadata returns the data source type name.
@@ -54,24 +55,29 @@ func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.Int64Attribute{
-							Computed:    true,
-							Description: "ID of the site",
-						},
-						"url": schema.StringAttribute{
-							Computed:    true,
-							Description: "Domain in FDQN form, i.e: 'www.example.com'",
+							Computed:            true,
+							Description:         "ID of the site",
+							MarkdownDescription: "ID of the site",
 						},
 						"company": schema.Int64Attribute{
-							Computed:    true,
-							Description: "Company ID that owns this domain",
+							Computed:            true,
+							Description:         "Company ID that owns this domain",
+							MarkdownDescription: "Company ID that owns this domain",
 						},
-						"ssl": schema.BoolAttribute{
-							Computed:    true,
-							Description: "If SSL is active (deprecated)",
+						"domain": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Domain in FDQN form, i.e: 'www.example.com'",
+							MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`",
 						},
 						"active": schema.BoolAttribute{
-							Computed:    true,
-							Description: "Active status in the CDN",
+							Computed:            true,
+							Description:         "Internal value that indicates if the site is active in the CDN",
+							MarkdownDescription: "Internal value that indicates if the site is active in the CDN",
+						},
+						"ssl": schema.BoolAttribute{
+							Computed:            true,
+							Description:         "If SSL is active (deprecated)",
+							MarkdownDescription: "If SSL is active (deprecated)",
 						},
 					},
 				},
@@ -87,8 +93,8 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	sites, err := d.client.GetSites()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Transparent Edge Sites",
-			err.Error(),
+			"Error reading sites",
+			fmt.Sprintf("Unexpected error trying to read sites state.\n"+err.Error()),
 		)
 		return
 	}
@@ -97,8 +103,8 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	for _, site := range sites {
 		siteState := sitesModel{
 			ID:      types.Int64Value(int64(site.ID)),
-			Url:     types.StringValue(site.Url),
 			Company: types.Int64Value(int64(site.Company)),
+			Domain:  types.StringValue(site.Url),
 			Ssl:     types.BoolValue(site.Ssl),
 			Active:  types.BoolValue(site.Active),
 		}

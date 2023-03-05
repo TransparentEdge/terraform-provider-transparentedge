@@ -56,7 +56,7 @@ func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, err
 
 func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.GetAPIEnvironmentPath(environment)
-	req, err := c.preparePostRequest(backend, fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))
+	req, err := c.prepareJSONRequest(backend, "POST", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnviro
 
 func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.GetAPIEnvironmentPath(environment)
-	req, err := c.preparePutRequest(backend, fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backend.ID))
+	req, err := c.prepareJSONRequest(backend, "PUT", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backend.ID))
 	if err != nil {
 		return nil, err
 	}
