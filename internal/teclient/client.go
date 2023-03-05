@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -123,7 +124,7 @@ func (c *Client) prepareJSONRequest(jdata interface{}, method string, url string
 	return req, nil
 }
 
-func (c *Client) GetAPIEnvironmentPath(environment APIEnvironment) string {
+func (c *Client) getAPIEnvironmentPath(environment APIEnvironment) string {
 	if environment == ProdEnv {
 		return "autoprovisioning"
 	} else if environment == StagingEnv {
@@ -132,4 +133,23 @@ func (c *Client) GetAPIEnvironmentPath(environment APIEnvironment) string {
 
 	// requests will fail
 	return "invalid_env"
+}
+
+func (c *Client) parseAPIError(body []byte) string {
+	apiError := APIMessage{}
+	apiDetail := APIDetail{}
+
+	decoder := json.NewDecoder(strings.NewReader(string(body)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&apiError); err == nil {
+		return apiError.Message
+	}
+
+	decoder = json.NewDecoder(strings.NewReader(string(body)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&apiDetail); err == nil {
+		return apiDetail.Detail
+	}
+
+	return string(body)
 }

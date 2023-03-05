@@ -17,7 +17,7 @@ func (c *Client) GetCertificates() ([]SSLCertificate, error) {
 		return nil, err
 	}
 	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of certificates: %s", string(body))
+		return nil, fmt.Errorf("Couldn't retrieve the list of certificates: %s", c.parseAPIError(body))
 	}
 
 	certs := []SSLCertificate{}

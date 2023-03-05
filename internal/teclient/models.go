@@ -8,8 +8,12 @@ const (
 	StagingEnv APIEnvironment = 1
 )
 
-type ErrorAPIMessage struct {
+type APIMessage struct {
 	Message string `json:"message"`
+}
+
+type APIDetail struct {
+	Detail string `json:"detail"`
 }
 
 // Sites

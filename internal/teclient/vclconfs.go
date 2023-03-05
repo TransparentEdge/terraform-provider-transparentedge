@@ -7,7 +7,7 @@ import (
 )
 
 func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfAPIModel, error) {
-	envpath := c.GetAPIEnvironmentPath(environment)
+	envpath := c.getAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/config/?offset=%d", c.HostURL, envpath, c.CompanyId, offset), nil)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfA
 		return nil, err
 	}
 	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of configurations: %s", string(body))
+		return nil, fmt.Errorf("Couldn't retrieve the list of configurations: %s", c.parseAPIError(body))
 	}
 
 	vclconfs := []VCLConfAPIModel{}
@@ -49,7 +49,7 @@ func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel,
 }
 
 func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
-	envpath := c.GetAPIEnvironmentPath(environment)
+	envpath := c.getAPIEnvironmentPath(environment)
 	req, err := c.prepareJSONRequest(vclconf, "POST", fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
@@ -60,13 +60,13 @@ func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnviro
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
 	if sc == 400 {
-		apiError := ErrorAPIMessage{}
+		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf("VCL COMPILATION ERROR\n\n%s\n", apiError.Message)
+			return nil, fmt.Errorf("VCL COMPILATION ERROR\n\n%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
-		return nil, fmt.Errorf("%d - %s", sc, string(body))
+		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newVclConf := VCLConfAPIModel{}
