@@ -11,22 +11,22 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource              = &stagingvclconfDataSource{}
-	_ datasource.DataSourceWithConfigure = &stagingvclconfDataSource{}
+	_ datasource.DataSource              = &stagingVclConfDataSource{}
+	_ datasource.DataSourceWithConfigure = &stagingVclConfDataSource{}
 )
 
 // Helper function to simplify the provider implementation.
 func NewStagingVclconfDataSource() datasource.DataSource {
-	return &stagingvclconfDataSource{}
+	return &stagingVclConfDataSource{}
 }
 
 // data source implementation.
-type stagingvclconfDataSource struct {
+type stagingVclConfDataSource struct {
 	client *teclient.Client
 }
 
 // maps the data source schema data.
-type stagingvclconfDataSourceModel struct {
+type stagingVclConfDataSourceModel struct {
 	ID             types.Int64  `tfsdk:"id"`
 	Company        types.Int64  `tfsdk:"company"`
 	VCLCode        types.String `tfsdk:"vclcode"`
@@ -36,12 +36,12 @@ type stagingvclconfDataSourceModel struct {
 }
 
 // Metadata returns the data source type name.
-func (d *stagingvclconfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_stagingvclconf"
+func (d *stagingVclConfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_staging_vclconf"
 }
 
 // Schema defines the schema for the data source.
-func (d *stagingvclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *stagingVclConfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -73,10 +73,10 @@ func (d *stagingvclconfDataSource) Schema(_ context.Context, _ datasource.Schema
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *stagingvclconfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state stagingvclconfDataSourceModel
+func (d *stagingVclConfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state stagingVclConfDataSourceModel
 
-	stagingvclconf, err := d.client.GetActiveVCLConf(teclient.StagingEnv)
+	stagingVclConf, err := d.client.GetActiveVCLConf(teclient.StagingEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Staging VclConf info",
@@ -86,18 +86,18 @@ func (d *stagingvclconfDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	// Set state
-	state.ID = types.Int64Value(int64(stagingvclconf.ID))
-	state.Company = types.Int64Value(int64(stagingvclconf.ID))
-	state.VCLCode = types.StringValue(stagingvclconf.VCLCode)
-	state.UploadDate = types.StringValue(stagingvclconf.UploadDate)
-	state.ProductionDate = types.StringValue(stagingvclconf.ProductionDate)
-	state.User = types.StringValue(stagingvclconf.CreatorUser.FirstName + " " + stagingvclconf.CreatorUser.LastName + " <" + stagingvclconf.CreatorUser.Email + ">")
+	state.ID = types.Int64Value(int64(stagingVclConf.ID))
+	state.Company = types.Int64Value(int64(stagingVclConf.ID))
+	state.VCLCode = types.StringValue(stagingVclConf.VCLCode)
+	state.UploadDate = types.StringValue(stagingVclConf.UploadDate)
+	state.ProductionDate = types.StringValue(stagingVclConf.ProductionDate)
+	state.User = types.StringValue(stagingVclConf.CreatorUser.FirstName + " " + stagingVclConf.CreatorUser.LastName + " <" + stagingVclConf.CreatorUser.Email + ">")
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *stagingvclconfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *stagingVclConfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}

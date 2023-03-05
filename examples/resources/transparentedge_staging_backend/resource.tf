@@ -1,4 +1,4 @@
-resource "transparentedge_stagingbackend" "stagorigin1" {
+resource "transparentedge_staging_backend" "stagorigin1" {
   name   = "stagorigin1"
   origin = "my-origin.com"
   port   = 443
@@ -10,7 +10,7 @@ resource "transparentedge_stagingbackend" "stagorigin1" {
   hcstatuscode = 200
 }
 
-resource "transparentedge_stagingbackend" "stagorigin2" {
+resource "transparentedge_staging_backend" "stagorigin2" {
   name   = "stagorigin2"
   origin = "my-origin2.com"
   port   = 80
@@ -23,9 +23,9 @@ resource "transparentedge_stagingbackend" "stagorigin2" {
 }
 
 output "origin1" {
-  value = transparentedge_stagingbackend.stagorigin1
+  value = transparentedge_staging_backend.stagorigin1
 }
 
 output "origin2" {
-  value = transparentedge_stagingbackend.stagorigin2
+  value = transparentedge_staging_backend.stagorigin2
 }
