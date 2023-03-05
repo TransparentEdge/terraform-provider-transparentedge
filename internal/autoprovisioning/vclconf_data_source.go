@@ -25,16 +25,6 @@ type vclconfDataSource struct {
 	client *teclient.Client
 }
 
-// maps the data source schema data.
-type vclconfDataSourceModel struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
-}
-
 // Metadata returns the data source type name.
 func (d *vclconfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_vclconf"
@@ -74,7 +64,7 @@ func (d *vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 
 // Read refreshes the Terraform state with the latest data.
 func (d *vclconfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state vclconfDataSourceModel
+	var state VCLConf
 
 	vclconf, err := d.client.GetActiveVCLConf(teclient.ProdEnv)
 	if err != nil {

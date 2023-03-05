@@ -27,20 +27,7 @@ type stagingBackendsDataSource struct {
 
 // maps the data source schema data.
 type stagingBackendsDataSourceModel struct {
-	StagingBackends []stagingBackendsModel `tfsdk:"staging_backends"`
-}
-
-// maps schema data.
-type stagingBackendsModel struct {
-	ID           types.Int64  `tfsdk:"id"`
-	Company      types.Int64  `tfsdk:"company"`
-	Name         types.String `tfsdk:"name"`
-	Origin       types.String `tfsdk:"origin"`
-	Ssl          types.Bool   `tfsdk:"ssl"`
-	Port         types.Int64  `tfsdk:"port"`
-	HCHost       types.String `tfsdk:"hchost"`
-	HCPath       types.String `tfsdk:"hcpath"`
-	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`
+	StagingBackends []StagingBackend `tfsdk:"staging_backends"`
 }
 
 // Metadata returns the data source type name.
@@ -115,7 +102,7 @@ func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.Rea
 
 	// Map response body to model
 	for _, stagingBackend := range stagingBackends {
-		stagingBackendState := stagingBackendsModel{
+		stagingBackendState := StagingBackend{
 			ID:           types.Int64Value(int64(stagingBackend.ID)),
 			Company:      types.Int64Value(int64(stagingBackend.Company)),
 			Name:         types.StringValue(stagingBackend.Name),

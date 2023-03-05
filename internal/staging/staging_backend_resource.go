@@ -35,19 +35,6 @@ type stagingBackendResource struct {
 	client *teclient.Client
 }
 
-// maps schema data.
-type stagingBackendResourceModel struct {
-	ID           types.Int64  `tfsdk:"id"`
-	Company      types.Int64  `tfsdk:"company"`
-	Name         types.String `tfsdk:"name"`
-	Origin       types.String `tfsdk:"origin"`
-	Ssl          types.Bool   `tfsdk:"ssl"`
-	Port         types.Int64  `tfsdk:"port"`
-	HCHost       types.String `tfsdk:"hchost"`
-	HCPath       types.String `tfsdk:"hcpath"`
-	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`
-}
-
 // Metadata returns the resource type name.
 func (r *stagingBackendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_backend"
@@ -117,7 +104,7 @@ func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 // Create
 func (r *stagingBackendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan stagingBackendResourceModel
+	var plan StagingBackend
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -159,7 +146,7 @@ func (r *stagingBackendResource) Create(ctx context.Context, req resource.Create
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *stagingBackendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan stagingBackendResourceModel
+	var plan StagingBackend
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -204,7 +191,7 @@ func (r *stagingBackendResource) Update(ctx context.Context, req resource.Update
 // Read resource information
 func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state stagingBackendResourceModel
+	var state StagingBackend
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -254,7 +241,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 
 // Delete
 func (r *stagingBackendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state stagingBackendResourceModel
+	var state StagingBackend
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

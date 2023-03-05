@@ -33,16 +33,6 @@ type stagingVclConfResource struct {
 	client *teclient.Client
 }
 
-// maps schema data.
-type stagingVclConfResourceModel struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
-}
-
 // Metadata returns the resource type name.
 func (r *stagingVclConfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_vclconf"
@@ -88,7 +78,7 @@ func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRe
 // Create
 func (r *stagingVclConfResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan stagingVclConfResourceModel
+	var plan StagingVCLConf
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -127,7 +117,7 @@ func (r *stagingVclConfResource) Update(ctx context.Context, req resource.Update
 // Read resource information
 func (r *stagingVclConfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state stagingVclConfResourceModel
+	var state StagingVCLConf
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -158,7 +148,7 @@ func (r *stagingVclConfResource) Read(ctx context.Context, req resource.ReadRequ
 
 // Delete
 func (r *stagingVclConfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state stagingVclConfResourceModel
+	var state StagingVCLConf
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

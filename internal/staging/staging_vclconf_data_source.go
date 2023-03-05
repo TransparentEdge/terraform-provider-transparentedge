@@ -25,16 +25,6 @@ type stagingVclConfDataSource struct {
 	client *teclient.Client
 }
 
-// maps the data source schema data.
-type stagingVclConfDataSourceModel struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
-}
-
 // Metadata returns the data source type name.
 func (d *stagingVclConfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_vclconf"
@@ -74,7 +64,7 @@ func (d *stagingVclConfDataSource) Schema(_ context.Context, _ datasource.Schema
 
 // Read refreshes the Terraform state with the latest data.
 func (d *stagingVclConfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state stagingVclConfDataSourceModel
+	var state StagingVCLConf
 
 	stagingVclConf, err := d.client.GetActiveVCLConf(teclient.StagingEnv)
 	if err != nil {
