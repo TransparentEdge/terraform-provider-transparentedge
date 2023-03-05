@@ -17,24 +17,24 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &stagingvclconfResource{}
-	_ resource.ResourceWithConfigure   = &stagingvclconfResource{}
-	_ resource.ResourceWithImportState = &stagingvclconfResource{}
-	_ resource.ResourceWithModifyPlan  = &stagingvclconfResource{}
+	_ resource.Resource                = &stagingVclConfResource{}
+	_ resource.ResourceWithConfigure   = &stagingVclConfResource{}
+	_ resource.ResourceWithImportState = &stagingVclConfResource{}
+	_ resource.ResourceWithModifyPlan  = &stagingVclConfResource{}
 )
 
 // helper function to simplify the provider implementation.
 func NewStagingVclconfResource() resource.Resource {
-	return &stagingvclconfResource{}
+	return &stagingVclConfResource{}
 }
 
 // resource implementation.
-type stagingvclconfResource struct {
+type stagingVclConfResource struct {
 	client *teclient.Client
 }
 
 // maps schema data.
-type stagingvclconfResourceModel struct {
+type stagingVclConfResourceModel struct {
 	ID             types.Int64  `tfsdk:"id"`
 	Company        types.Int64  `tfsdk:"company"`
 	VCLCode        types.String `tfsdk:"vclcode"`
@@ -44,21 +44,21 @@ type stagingvclconfResourceModel struct {
 }
 
 // Metadata returns the resource type name.
-func (r *stagingvclconfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_stagingvclconf"
+func (r *stagingVclConfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_staging_vclconf"
 }
 
 // Schema defines the schema for the resource.
-func (r *stagingvclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:    true,
-				Description: "ID of the staging vclconf",
+				Description: "ID of the Staging VCL Config",
 			},
 			"company": schema.Int64Attribute{
 				Computed:    true,
-				Description: "Company ID that owns this staging vclconf",
+				Description: "Company ID that owns this Staging VCL Config",
 			},
 			"vclcode": schema.StringAttribute{
 				Required: true,
@@ -86,9 +86,9 @@ func (r *stagingvclconfResource) Schema(ctx context.Context, _ resource.SchemaRe
 }
 
 // Create
-func (r *stagingvclconfResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *stagingVclConfResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan stagingvclconfResourceModel
+	var plan stagingVclConfResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -99,42 +99,42 @@ func (r *stagingvclconfResource) Create(ctx context.Context, req resource.Create
 	newStagingVclconf := teclient.NewVCLConfAPIModel{
 		VCLCode: plan.VCLCode.ValueString(),
 	}
-	stagingvclconfState, errCreate := r.client.CreateVclconf(newStagingVclconf, teclient.StagingEnv)
+	stagingVclConfState, errCreate := r.client.CreateVclconf(newStagingVclconf, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
-			"Error creating staging vclconf",
-			fmt.Sprintf("Could not create the staging vclconf: %s", errCreate),
+			"Error creating Staging VCL Configuration",
+			fmt.Sprintf("Could not create the Staging VCL Configuration: %s", errCreate),
 		)
 		return
 	}
 
 	// Set state to fully populated data
-	plan.ID = types.Int64Value(int64(stagingvclconfState.ID))
-	plan.Company = types.Int64Value(int64(stagingvclconfState.Company))
+	plan.ID = types.Int64Value(int64(stagingVclConfState.ID))
+	plan.Company = types.Int64Value(int64(stagingVclConfState.Company))
 	// do not update the VCL Config since our API does some string modifications
-	//plan.VCLCode = types.StringValue(stagingvclconfState.VCLCode)
-	plan.UploadDate = types.StringValue(stagingvclconfState.UploadDate)
-	plan.ProductionDate = types.StringValue(stagingvclconfState.ProductionDate)
-	plan.User = types.StringValue(stagingvclconfState.CreatorUser.FirstName + " " + stagingvclconfState.CreatorUser.LastName + " <" + stagingvclconfState.CreatorUser.Email + ">")
+	//plan.VCLCode = types.StringValue(stagingVclConfState.VCLCode)
+	plan.UploadDate = types.StringValue(stagingVclConfState.UploadDate)
+	plan.ProductionDate = types.StringValue(stagingVclConfState.ProductionDate)
+	plan.User = types.StringValue(stagingVclConfState.CreatorUser.FirstName + " " + stagingVclConfState.CreatorUser.LastName + " <" + stagingVclConfState.CreatorUser.Email + ">")
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *stagingvclconfResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *stagingVclConfResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 }
 
 // Read resource information
-func (r *stagingvclconfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *stagingVclConfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state stagingvclconfResourceModel
+	var state stagingVclConfResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	stagingvclconf, err := r.client.GetActiveVCLConf(teclient.StagingEnv)
+	stagingVclConf, err := r.client.GetActiveVCLConf(teclient.StagingEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Staging VclConf info",
@@ -144,21 +144,21 @@ func (r *stagingvclconfResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Set state
-	state.ID = types.Int64Value(int64(stagingvclconf.ID))
-	state.Company = types.Int64Value(int64(stagingvclconf.Company))
-	if helpers.SanitizeStringForDiff(stagingvclconf.VCLCode) != helpers.SanitizeStringForDiff(state.VCLCode.ValueString()) {
-		state.VCLCode = types.StringValue(stagingvclconf.VCLCode)
+	state.ID = types.Int64Value(int64(stagingVclConf.ID))
+	state.Company = types.Int64Value(int64(stagingVclConf.Company))
+	if helpers.SanitizeStringForDiff(stagingVclConf.VCLCode) != helpers.SanitizeStringForDiff(state.VCLCode.ValueString()) {
+		state.VCLCode = types.StringValue(stagingVclConf.VCLCode)
 	}
-	state.UploadDate = types.StringValue(stagingvclconf.UploadDate)
-	state.ProductionDate = types.StringValue(stagingvclconf.ProductionDate)
-	state.User = types.StringValue(stagingvclconf.CreatorUser.FirstName + " " + stagingvclconf.CreatorUser.LastName + " <" + stagingvclconf.CreatorUser.Email + ">")
+	state.UploadDate = types.StringValue(stagingVclConf.UploadDate)
+	state.ProductionDate = types.StringValue(stagingVclConf.ProductionDate)
+	state.User = types.StringValue(stagingVclConf.CreatorUser.FirstName + " " + stagingVclConf.CreatorUser.LastName + " <" + stagingVclConf.CreatorUser.Email + ">")
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Delete
-func (r *stagingvclconfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state stagingvclconfResourceModel
+func (r *stagingVclConfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state stagingVclConfResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -166,7 +166,7 @@ func (r *stagingvclconfResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func (r *stagingvclconfResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (r *stagingVclConfResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	// If the entire plan is null, the resource is planned for destruction.
 	if req.Plan.Raw.IsNull() {
 		resp.Diagnostics.AddWarning(
@@ -178,7 +178,7 @@ func (r *stagingvclconfResource) ModifyPlan(ctx context.Context, req resource.Mo
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *stagingvclconfResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *stagingVclConfResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -186,7 +186,7 @@ func (r *stagingvclconfResource) Configure(_ context.Context, req resource.Confi
 	r.client = req.ProviderData.(*teclient.Client)
 }
 
-func (r *stagingvclconfResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *stagingVclConfResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// path.Root here is ignored
 	// VCL Configs can be imported without issues, but they won't match perfectly
 	// the configuration because of newlines and spaces
