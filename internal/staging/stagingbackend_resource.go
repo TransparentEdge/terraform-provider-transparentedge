@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -58,17 +56,11 @@ func (r *stagingbackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
+				Computed:    true,
 				Description: "ID of the staging backend",
 			},
 			"company": schema.Int64Attribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
+				Computed:    true,
 				Description: "Company ID that owns this staging backend",
 			},
 			"name": schema.StringAttribute{
@@ -106,7 +98,7 @@ func (r *stagingbackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 			"hcstatuscode": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
-					int64validator.Between(200, 499),
+					int64validator.Between(200, 599),
 				},
 				Description: "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
 			},
