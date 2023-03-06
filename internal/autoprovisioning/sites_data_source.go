@@ -34,6 +34,8 @@ func (d *sitesDataSource) Metadata(_ context.Context, req datasource.MetadataReq
 // Schema defines the schema for the data source.
 func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Sites listing",
+		MarkdownDescription: "Sites listing",
 		Attributes: map[string]schema.Attribute{
 			"sites": schema.ListNestedAttribute{
 				Computed:    true,
@@ -63,7 +65,7 @@ func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						"ssl": schema.BoolAttribute{
 							Computed:            true,
 							Description:         "If SSL is active (deprecated)",
-							MarkdownDescription: "If SSL is active (deprecated)",
+							MarkdownDescription: "If SSL is active (**deprecated**)",
 						},
 					},
 				},

@@ -33,13 +33,18 @@ func (d *siteVerifyDataSource) Metadata(_ context.Context, req datasource.Metada
 // Schema defines the schema for the data source.
 func (d *siteVerifyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Shows the verification string of sites",
+		MarkdownDescription: "Shows the verification string of sites",
 		Attributes: map[string]schema.Attribute{
 			"domain": schema.StringAttribute{
-				Required: true,
+				Required:            true,
+				Description:         "Domain to verify",
+				MarkdownDescription: "Domain to verify",
 			},
 			"verification_string": schema.StringAttribute{
-				Computed: true,
-				Optional: false,
+				Computed:            true,
+				Description:         "String to be used in the DNS verification method (_tcdn_challenge.{domain} TXT {string}) or in the HTTP verification method (http://{domain}/tcdn.txt)",
+				MarkdownDescription: "String to be used in the DNS verification method: `_tcdn_challenge.{domain} TXT {string}` or in the HTTP verification method `http://{domain}/tcdn.txt`",
 			},
 		},
 	}

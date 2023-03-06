@@ -33,30 +33,39 @@ func (d *stagingVclConfDataSource) Metadata(_ context.Context, req datasource.Me
 // Schema defines the schema for the data source.
 func (d *stagingVclConfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Staging VCL Configuration listing",
+		MarkdownDescription: "Staging VCL Configuration listing",
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Computed:    true,
-				Description: "ID of the Staging VCL Config",
+				Computed:            true,
+				Description:         "ID of the Staging VCL Config",
+				MarkdownDescription: "ID of the Staging VCL Config",
 			},
 			"company": schema.Int64Attribute{
-				Computed:    true,
-				Description: "Company ID that owns this Staging VCL config",
+				Computed:            true,
+				Description:         "Company ID that owns this Staging VCL config",
+				MarkdownDescription: "Company ID that owns this Staging VCL config",
 			},
 			"vclcode": schema.StringAttribute{
-				Computed:    true,
-				Description: "Verbatim of the VCL code",
+				Computed:            true,
+				Description:         "Verbatim of the VCL code",
+				MarkdownDescription: "Verbatim of the VCL code",
 			},
 			"uploaddate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was uploaded",
+				Computed:            true,
+				Description:         "Date when the configuration was uploaded",
+				MarkdownDescription: "Date when the configuration was uploaded",
 			},
 			"productiondate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was fully applied in the CDN",
+				Computed:            true,
+				Description:         "Date when the configuration was fully applied in the CDN",
+				MarkdownDescription: "Date when the configuration was fully applied in the CDN",
 			},
 			"user": schema.StringAttribute{
-				Computed:    true,
-				Description: "User that created the configuration",
+				Computed:            true,
+				Description:         "User that created the configuration",
+				MarkdownDescription: "User that created the configuration",
 			},
 		},
 	}

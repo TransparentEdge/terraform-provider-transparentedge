@@ -76,38 +76,44 @@ func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 			},
 			"vclname": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Final unique name of the backend to be referencen in VCL Code: 'c{company_id}_{name}'",
-				MarkdownDescription: "Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`",
+				Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'",
+				MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`",
 			},
 			"origin": schema.StringAttribute{
-				Required:    true,
-				Description: "Origin is the IP or DNS address to the origin backend, for example: 'my-origin.com'",
+				Required:            true,
+				Description:         "Origin is the IP or DNS address to the origin backend, for example: 'my-origin.com'",
+				MarkdownDescription: "Origin is the IP or DNS address to the origin backend, for example: `my-origin.com`",
 			},
 			"ssl": schema.BoolAttribute{
-				Required:    true,
-				Description: "If the origin should be contacted using TLS encription.",
+				Required:            true,
+				Description:         "Use TLS encription when contacting with the origin backend",
+				MarkdownDescription: "Use TLS encription when contacting with the origin backend",
 			},
 			"port": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
 					int64validator.Between(80, 65535),
 				},
-				Description: "Port where the origin is listening to HTTP requests, for example: 80 or 443",
+				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443",
+				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`",
 			},
 			"hchost": schema.StringAttribute{
-				Required:    true,
-				Description: "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
+				Required:            true,
+				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
+				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`",
 			},
 			"hcpath": schema.StringAttribute{
-				Required:    true,
-				Description: "Path that the healthcheck probe will used, for example: /favicon.ico",
+				Required:            true,
+				Description:         "Path that the healthcheck probe will use, for example: /favicon.ico",
+				MarkdownDescription: "Path that the healthcheck probe will use, for example: `/favicon.ico`",
 			},
 			"hcstatuscode": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
 					int64validator.Between(200, 599),
 				},
-				Description: "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
+				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
+				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`",
 			},
 		},
 	}

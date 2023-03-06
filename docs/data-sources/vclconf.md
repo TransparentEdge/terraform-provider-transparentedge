@@ -3,12 +3,12 @@
 page_title: "transparentedge_vclconf Data Source - transparentedge"
 subcategory: ""
 description: |-
-  
+  VCL Configuration listing
 ---
 
 # transparentedge_vclconf (Data Source)
 
-
+VCL Configuration listing
 
 ## Example Usage
 

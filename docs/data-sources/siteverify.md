@@ -3,12 +3,12 @@
 page_title: "transparentedge_siteverify Data Source - transparentedge"
 subcategory: ""
 description: |-
-  
+  Shows the verification string of sites
 ---
 
 # transparentedge_siteverify (Data Source)
 
-
+Shows the verification string of sites
 
 
 
@@ -17,10 +17,10 @@ description: |-
 
 ### Required
 
-- `domain` (String)
+- `domain` (String) Domain to verify
 
 ### Read-Only
 
-- `verification_string` (String)
+- `verification_string` (String) String to be used in the DNS verification method: `_tcdn_challenge.{domain} TXT {string}` or in the HTTP verification method `http://{domain}/tcdn.txt`
 
 

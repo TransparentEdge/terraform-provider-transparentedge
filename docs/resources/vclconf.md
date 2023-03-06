@@ -83,12 +83,12 @@ EOF
 
 ### Required
 
-- `vclcode` (String) Verbatim of the VCL (Varnish Configuration Language) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied. You can know if a configuration is already in production by running 'terraform plan' and checking the 'productiondate' field.
+- `vclcode` (String) Verbatim of the VCL (_Varnish Configuration Language_) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully replicated in all the CDN edge nodes. You can check if a configuration is already in production by running `terraform plan` and checking the `productiondate` field.
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this vclconf
-- `id` (Number) ID of the vclconf
+- `company` (Number) Company ID that owns this VCL config
+- `id` (Number) ID of the VCL Config
 - `productiondate` (String) Date when the configuration was fully applied in the CDN
 - `uploaddate` (String) Date when the configuration was uploaded
 - `user` (String) User that created the configuration

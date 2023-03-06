@@ -3,12 +3,12 @@
 page_title: "transparentedge_backends Data Source - transparentedge"
 subcategory: ""
 description: |-
-  
+  Backend listing
 ---
 
 # transparentedge_backends (Data Source)
 
-
+Backend listing
 
 ## Example Usage
 
@@ -33,14 +33,14 @@ output "all_backends" {
 Read-Only:
 
 - `company` (Number) Company ID that owns this backend
-- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com
-- `hcpath` (String) Path that the healthcheck probe will used, for example: /favicon.ico
-- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: 200
+- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`
+- `hcpath` (String) Path that the healthcheck probe will use, for example: `/favicon.ico`
+- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`
 - `id` (Number) ID of the backend
 - `name` (String) Name of the backend
-- `origin` (String) Origin is the IP or DNS address to the origin backend, for example: 'my-origin.com'
-- `port` (Number) Port where the origin is listening to HTTP requests, for example: 80 or 443
-- `ssl` (Boolean) If the origin should be contacted using TLS encription.
-- `vclname` (String) Unique name that can be referenced in VCL code
+- `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`
+- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
+- `ssl` (Boolean) Use TLS encription when contacting with the origin backend
+- `vclname` (String) Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`
 
 

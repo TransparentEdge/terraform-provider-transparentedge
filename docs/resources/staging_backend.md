@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_backend Resource - transparentedge"
 subcategory: ""
 description: |-
-  
+  Manages staging backend configuration
 ---
 
 # transparentedge_staging_backend (Resource)
 
-
+Manages staging backend configuration
 
 ## Example Usage
 
@@ -63,6 +63,7 @@ output "origin2" {
 
 - `company` (Number) Company ID that owns this staging backend
 - `id` (Number) ID of the staging backend
+- `vclname` (String) Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`
 
 ## Import
 

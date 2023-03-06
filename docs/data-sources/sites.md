@@ -3,12 +3,12 @@
 page_title: "transparentedge_sites Data Source - transparentedge"
 subcategory: ""
 description: |-
-  
+  Sites listing
 ---
 
 # transparentedge_sites (Data Source)
 
-
+Sites listing
 
 ## Example Usage
 
@@ -36,6 +36,6 @@ Read-Only:
 - `company` (Number) Company ID that owns this domain
 - `domain` (String) Domain in FDQN form, i.e: `www.example.com`
 - `id` (Number) ID of the site
-- `ssl` (Boolean) If SSL is active (deprecated)
+- `ssl` (Boolean) If SSL is active (**deprecated**)
 
 

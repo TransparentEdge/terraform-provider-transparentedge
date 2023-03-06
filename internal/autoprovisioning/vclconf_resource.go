@@ -41,14 +41,19 @@ func (r *vclconfResource) Metadata(_ context.Context, req resource.MetadataReque
 // Schema defines the schema for the resource.
 func (r *vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manages VCL Configuration",
+		MarkdownDescription: "Manages VCL Configuration",
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Computed:    true,
-				Description: "ID of the vclconf",
+				Computed:            true,
+				Description:         "ID of the VCL Config",
+				MarkdownDescription: "ID of the VCL Config",
 			},
 			"company": schema.Int64Attribute{
-				Computed:    true,
-				Description: "Company ID that owns this vclconf",
+				Computed:            true,
+				Description:         "Company ID that owns this VCL config",
+				MarkdownDescription: "Company ID that owns this VCL config",
 			},
 			"vclcode": schema.StringAttribute{
 				Required: true,
@@ -58,18 +63,24 @@ func (r *vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				Description: "Verbatim of the VCL (Varnish Configuration Language) code configuration to apply." +
 					" After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied." +
 					" You can know if a configuration is already in production by running 'terraform plan' and checking the 'productiondate' field.",
+				MarkdownDescription: "Verbatim of the VCL (_Varnish Configuration Language_) code configuration to apply." +
+					" After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully replicated in all the CDN edge nodes." +
+					" You can check if a configuration is already in production by running `terraform plan` and checking the `productiondate` field.",
 			},
 			"uploaddate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was uploaded",
+				Computed:            true,
+				Description:         "Date when the configuration was uploaded",
+				MarkdownDescription: "Date when the configuration was uploaded",
 			},
 			"productiondate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was fully applied in the CDN",
+				Computed:            true,
+				Description:         "Date when the configuration was fully applied in the CDN",
+				MarkdownDescription: "Date when the configuration was fully applied in the CDN",
 			},
 			"user": schema.StringAttribute{
-				Computed:    true,
-				Description: "User that created the configuration",
+				Computed:            true,
+				Description:         "User that created the configuration",
+				MarkdownDescription: "User that created the configuration",
 			},
 		},
 	}

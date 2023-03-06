@@ -2,6 +2,7 @@ package staging
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -38,6 +39,9 @@ func (d *stagingBackendsDataSource) Metadata(_ context.Context, req datasource.M
 // Schema defines the schema for the data source.
 func (d *stagingBackendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Staging backend listing",
+		MarkdownDescription: "Staging backend listing",
+
 		Attributes: map[string]schema.Attribute{
 			"staging_backends": schema.ListNestedAttribute{
 				Computed:    true,
@@ -45,40 +49,53 @@ func (d *stagingBackendsDataSource) Schema(_ context.Context, _ datasource.Schem
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.Int64Attribute{
-							Computed:    true,
-							Description: "ID of the staging backend",
+							Computed:            true,
+							Description:         "ID of the staging backend",
+							MarkdownDescription: "ID of the staging backend",
 						},
 						"company": schema.Int64Attribute{
-							Computed:    true,
-							Description: "Company ID that owns this staging backend",
+							Computed:            true,
+							Description:         "Company ID that owns this staging backend",
+							MarkdownDescription: "Company ID that owns this staging backend",
 						},
 						"name": schema.StringAttribute{
-							Computed:    true,
-							Description: "Name of the staging backend",
+							Computed:            true,
+							Description:         "Name of the staging backend",
+							MarkdownDescription: "Name of the staging backend",
+						},
+						"vclname": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'",
+							MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`",
 						},
 						"origin": schema.StringAttribute{
-							Computed:    true,
-							Description: "Origin is the IP or DNS address to the origin backend, for example: 'my-origin.com'",
+							Computed:            true,
+							Description:         "IP or DNS name pointing to the origin backend, for example: 'my-origin.com'",
+							MarkdownDescription: "IP or DNS name pointing to the origin backend, for example: `my-origin.com`",
 						},
 						"ssl": schema.BoolAttribute{
-							Computed:    true,
-							Description: "If the origin should be contacted using TLS encription.",
+							Computed:            true,
+							Description:         "Use TLS encription when contacting with the origin backend",
+							MarkdownDescription: "Use TLS encription when contacting with the origin backend",
 						},
 						"port": schema.Int64Attribute{
-							Computed:    true,
-							Description: "Port where the origin is listening to HTTP requests, for example: 80 or 443",
+							Computed:            true,
+							Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443",
+							MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`",
 						},
 						"hchost": schema.StringAttribute{
 							Computed:    true,
 							Description: "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
 						},
 						"hcpath": schema.StringAttribute{
-							Computed:    true,
-							Description: "Path that the healthcheck probe will used, for example: /favicon.ico",
+							Computed:            true,
+							Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
+							MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`",
 						},
 						"hcstatuscode": schema.Int64Attribute{
-							Computed:    true,
-							Description: "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
+							Computed:            true,
+							Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
+							MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`",
 						},
 					},
 				},
@@ -106,6 +123,7 @@ func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.Rea
 			ID:           types.Int64Value(int64(stagingBackend.ID)),
 			Company:      types.Int64Value(int64(stagingBackend.Company)),
 			Name:         types.StringValue(stagingBackend.Name),
+			VclName:      types.StringValue("c" + strconv.Itoa(stagingBackend.Company) + "_" + stagingBackend.Name),
 			Origin:       types.StringValue(stagingBackend.Origin),
 			Ssl:          types.BoolValue(stagingBackend.Ssl),
 			Port:         types.Int64Value(int64(stagingBackend.Port)),

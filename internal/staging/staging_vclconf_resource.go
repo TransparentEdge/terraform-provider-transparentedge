@@ -41,14 +41,19 @@ func (r *stagingVclConfResource) Metadata(_ context.Context, req resource.Metada
 // Schema defines the schema for the resource.
 func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manages Staging VCL Configuration",
+		MarkdownDescription: "Manages Staging VCL Configuration",
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Computed:    true,
-				Description: "ID of the Staging VCL Config",
+				Computed:            true,
+				Description:         "ID of the Staging VCL Config",
+				MarkdownDescription: "ID of the Staging VCL Config",
 			},
 			"company": schema.Int64Attribute{
-				Computed:    true,
-				Description: "Company ID that owns this Staging VCL Config",
+				Computed:            true,
+				Description:         "Company ID that owns this Staging VCL Config",
+				MarkdownDescription: "Company ID that owns this Staging VCL Config",
 			},
 			"vclcode": schema.StringAttribute{
 				Required: true,
@@ -57,19 +62,25 @@ func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRe
 				},
 				Description: "Verbatim of the VCL (Varnish Configuration Language) code configuration to apply." +
 					" After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied." +
-					" You can know if a configuration is already in staging by running 'terraform plan' and checking the 'productiondate' field.",
+					" You can know if a configuration is already in **staging** by running 'terraform plan' and checking the 'productiondate' field.",
+				MarkdownDescription: "Verbatim of the VCL (_Varnish Configuration Language_) code configuration to apply." +
+					" After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully replicated in all the CDN edge nodes." +
+					" You can check if a configuration is already in **staging** by running `terraform plan` and checking the `productiondate` field.",
 			},
 			"uploaddate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was uploaded",
+				Computed:            true,
+				Description:         "Date when the configuration was uploaded",
+				MarkdownDescription: "Date when the configuration was uploaded",
 			},
 			"productiondate": schema.StringAttribute{
-				Computed:    true,
-				Description: "Date when the configuration was fully applied in the CDN",
+				Computed:            true,
+				Description:         "Date when the configuration was fully applied in the CDN",
+				MarkdownDescription: "Date when the configuration was fully applied in the CDN",
 			},
 			"user": schema.StringAttribute{
-				Computed:    true,
-				Description: "User that created the configuration",
+				Computed:            true,
+				Description:         "User that created the configuration",
+				MarkdownDescription: "User that created the configuration",
 			},
 		},
 	}
