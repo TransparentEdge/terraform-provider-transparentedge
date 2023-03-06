@@ -6,6 +6,7 @@ type StagingBackend struct {
 	ID           types.Int64  `tfsdk:"id"`
 	Company      types.Int64  `tfsdk:"company"`
 	Name         types.String `tfsdk:"name"`
+	VclName      types.String `tfsdk:"vclname"`
 	Origin       types.String `tfsdk:"origin"`
 	Ssl          types.Bool   `tfsdk:"ssl"`
 	Port         types.Int64  `tfsdk:"port"`

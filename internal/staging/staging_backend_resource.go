@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -43,20 +44,25 @@ func (r *stagingBackendResource) Metadata(_ context.Context, req resource.Metada
 // Schema defines the schema for the resource.
 func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manages staging backend configuration",
+		MarkdownDescription: "Manages staging backend configuration",
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Computed:    true,
-				Description: "ID of the staging backend",
+				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description:         "ID of the staging backend",
+				MarkdownDescription: "ID of the staging backend",
 			},
 			"company": schema.Int64Attribute{
-				Computed:    true,
-				Description: "Company ID that owns this staging backend",
+				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description:         "Company ID that owns this staging backend",
+				MarkdownDescription: "Company ID that owns this staging backend",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -65,7 +71,13 @@ func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 						stringvalidator.RegexMatches(regexp.MustCompile("[^0-9][a-z0-9]+"), "The name must contain only lower case letters and numbers (cannot start with a number)"),
 					),
 				},
-				Description: "Name of the staging backend",
+				Description:         "Name of the staging backend",
+				MarkdownDescription: "Name of the staging backend",
+			},
+			"vclname": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Final unique name of the backend to be referencen in VCL Code: 'c{company_id}_{name}'",
+				MarkdownDescription: "Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`",
 			},
 			"origin": schema.StringAttribute{
 				Required:    true,
@@ -134,6 +146,7 @@ func (r *stagingBackendResource) Create(ctx context.Context, req resource.Create
 	plan.ID = types.Int64Value(int64(stagingBackendState.ID))
 	plan.Company = types.Int64Value(int64(stagingBackendState.Company))
 	plan.Name = types.StringValue(stagingBackendState.Name)
+	plan.VclName = types.StringValue("c" + strconv.Itoa(stagingBackendState.Company) + "_" + stagingBackendState.Name)
 	plan.Origin = types.StringValue(stagingBackendState.Origin)
 	plan.Ssl = types.BoolValue(stagingBackendState.Ssl)
 	plan.Port = types.Int64Value(int64(stagingBackendState.Port))
@@ -178,6 +191,7 @@ func (r *stagingBackendResource) Update(ctx context.Context, req resource.Update
 	plan.ID = types.Int64Value(int64(stagingBackendState.ID))
 	plan.Company = types.Int64Value(int64(stagingBackendState.Company))
 	plan.Name = types.StringValue(stagingBackendState.Name)
+	plan.VclName = types.StringValue("c" + strconv.Itoa(stagingBackendState.Company) + "_" + stagingBackendState.Name)
 	plan.Origin = types.StringValue(stagingBackendState.Origin)
 	plan.Ssl = types.BoolValue(stagingBackendState.Ssl)
 	plan.Port = types.Int64Value(int64(stagingBackendState.Port))
@@ -204,6 +218,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 			state.ID = types.Int64Value(int64(stagingBackend.ID))
 			state.Company = types.Int64Value(int64(stagingBackend.Company))
 			state.Name = types.StringValue(stagingBackend.Name)
+			state.VclName = types.StringValue("c" + strconv.Itoa(stagingBackend.Company) + "_" + stagingBackend.Name)
 			state.Origin = types.StringValue(stagingBackend.Origin)
 			state.Ssl = types.BoolValue(stagingBackend.Ssl)
 			state.Port = types.Int64Value(int64(stagingBackend.Port))
@@ -223,6 +238,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 				state.ID = types.Int64Value(int64(stagingBackend.ID))
 				state.Company = types.Int64Value(int64(stagingBackend.Company))
 				state.Name = types.StringValue(stagingBackend.Name)
+				state.VclName = types.StringValue("c" + strconv.Itoa(stagingBackend.Company) + "_" + stagingBackend.Name)
 				state.Origin = types.StringValue(stagingBackend.Origin)
 				state.Ssl = types.BoolValue(stagingBackend.Ssl)
 				state.Port = types.Int64Value(int64(stagingBackend.Port))
