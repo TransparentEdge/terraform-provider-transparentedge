@@ -71,3 +71,12 @@ type Certificate struct {
 	PublicKey     types.String `tfsdk:"publickey"`
 	PrivateKey    types.String `tfsdk:"privatekey"`
 }
+
+type CustomCertificate struct {
+	ID         types.Int64  `tfsdk:"id"`
+	CommonName types.String `tfsdk:"commonname"`
+	Domains    types.String `tfsdk:"domains"`
+	Expiration types.String `tfsdk:"expiration"`
+	PublicKey  types.String `tfsdk:"publickey"`
+	PrivateKey types.String `tfsdk:"privatekey"`
+}
