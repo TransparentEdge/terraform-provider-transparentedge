@@ -63,7 +63,7 @@ output "origin2" {
 
 - `company` (Number) Company ID that owns this backend
 - `id` (Number) ID of the backend
-- `vclname` (String) Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`
+- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
 
 ## Import
 

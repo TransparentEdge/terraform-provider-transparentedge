@@ -41,6 +41,6 @@ Read-Only:
 - `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`
 - `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
 - `ssl` (Boolean) Use TLS encription when contacting with the origin backend
-- `vclname` (String) Final unique name of the backend to be referencen in VCL Code: `c{company_id}_{name}`
+- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
 
 

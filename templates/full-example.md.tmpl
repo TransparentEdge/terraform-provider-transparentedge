@@ -23,8 +23,7 @@ provider "transparentedge" {
 }
 ```
 
-In this example we are provisioning two sites: `www.example1.com` and `www.example.com`.  
-On another file: `sites.tf`:  
+In this example we are provisioning two sites: `www.example1.com` and `www.example2.com`, create the file: `sites.tf`:  
 
 ```terraform
 variable "sites" {
@@ -36,13 +35,13 @@ variable "sites" {
 }
 
 # Verification string is required for new sites that are not already owned
-# please check the documentation or contact with support
+# in case of doubts please check the documentation or contact with support
 data "transparentedge_siteverify" "all" {
   for_each = var.sites
   domain   = each.key
 }
 
-# Show all the verification strings
+# Show the verification strings for each domain
 output "verification_strings" {
   value = data.transparentedge_siteverify.all
 }
@@ -60,10 +59,10 @@ resource "transparentedge_site" "all" {
 }
 ```
 
-For each site we output the verification string, when you add new sites to the CDN a verification process is required.   
-If you don't known the steps please login into our [dashboard](https://dashboard.transparentcdn.com/) and try to add a new site, everything is documented there.  
+For each site we output the verification string. When you add new sites to the CDN a verification process is required to ensure that you own the domain.   
+If you don't know the steps please login into our [dashboard](https://dashboard.transparentcdn.com/) and try to add a new site, everything is documented in the process.  
 
-Then we create three new files a terraform file named `certificates.tf` and two files that contain the public and private key in PEM format: `mysite1.crt` and `mysite1.key`:  
+Then we create three new files: a terraform file named `certificates.tf` and two files that contain the public and private key in `PEM` format: `mysite1.crt` and `mysite1.key`:  
 
 ```terraform
 resource "transparentedge_custom_certificate" "mysite1" {
@@ -72,7 +71,7 @@ resource "transparentedge_custom_certificate" "mysite1" {
 }
 ```
 
-A file named `backends.tf`:  
+Now with the backend definition, we create a file named `backends.tf`:  
 
 ```terraform
 resource "transparentedge_backend" "origin1" {

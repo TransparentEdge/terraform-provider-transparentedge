@@ -3,12 +3,12 @@
 page_title: "transparentedge_vclconf Resource - transparentedge"
 subcategory: ""
 description: |-
-  
+  Manages VCL Configuration
 ---
 
 # transparentedge_vclconf (Resource)
 
-
+Manages VCL Configuration
 
 ## Example Usage
 

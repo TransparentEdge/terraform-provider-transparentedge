@@ -10,7 +10,7 @@ variable "sites" {
 }
 
 # Verification string is required for new sites that are not already owned
-# please check the documentation or contact with support
+# in case of doubts please check the documentation or contact with support
 data "transparentedge_siteverify" "all" {
   for_each = var.sites
   domain   = each.key

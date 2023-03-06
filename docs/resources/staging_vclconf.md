@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_vclconf Resource - transparentedge"
 subcategory: ""
 description: |-
-  
+  Manages Staging VCL Configuration
 ---
 
 # transparentedge_staging_vclconf (Resource)
 
-
+Manages Staging VCL Configuration
 
 ## Example Usage
 
@@ -39,7 +39,7 @@ output "staging_config" {
 
 ### Required
 
-- `vclcode` (String) Verbatim of the VCL (Varnish Configuration Language) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied. You can know if a configuration is already in staging by running 'terraform plan' and checking the 'productiondate' field.
+- `vclcode` (String) Verbatim of the VCL (_Varnish Configuration Language_) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully replicated in all the CDN edge nodes. You can check if a configuration is already in **staging** by running `terraform plan` and checking the `productiondate` field.
 
 ### Read-Only
 

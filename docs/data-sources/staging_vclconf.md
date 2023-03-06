@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_vclconf Data Source - transparentedge"
 subcategory: ""
 description: |-
-  
+  Staging VCL Configuration listing
 ---
 
 # transparentedge_staging_vclconf (Data Source)
 
-
+Staging VCL Configuration listing
 
 ## Example Usage
 
