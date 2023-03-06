@@ -60,6 +60,6 @@ EOF
 Import is supported using the following syntax:
 
 ```shell
-# Import a custom certificate by its ID
+# Import a custom certificate by ID
 terraform import 'transparentedge_custom_certificate.mysite' 321
 ```
