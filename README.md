@@ -87,6 +87,7 @@ To override the provider locally, it's usually enough to create the file `~/.ter
 # ~/.terraformrc
 provider_installation {
   dev_overrides {
+      "TransparentEdge/transparentedge" = "<GOPATH>/bin"
       "registry.terraform.io/hashicorp/transparentedge" = "<GOPATH>/bin"
   }
 
