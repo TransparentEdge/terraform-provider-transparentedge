@@ -13,7 +13,8 @@ First, we create the file `provider.tf`:
 terraform {
   required_providers {
     transparentedge = {
-      version = ">= 0.2.0"
+      source = "TransparentEdge/transparentedge"
+      version = ">=0.2.3"
     }
   }
 }

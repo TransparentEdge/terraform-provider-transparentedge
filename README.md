@@ -15,7 +15,8 @@ This provider is intended to be used by the CDN users with the role "Company Adm
 terraform {
   required_providers {
     transparentedge = {
-      version = ">= 0.2.0"
+      source = "TransparentEdge/transparentedge"
+      version = ">=0.2.3"
     }
   }
 }
