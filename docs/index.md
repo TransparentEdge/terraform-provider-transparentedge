@@ -18,7 +18,7 @@ terraform {
   required_providers {
     transparentedge = {
       source  = "TransparentEdge/transparentedge"
-      version = ">=0.2.3"
+      version = ">=0.2.6"
     }
   }
 }
@@ -31,6 +31,7 @@ provider "transparentedge" {
   client_secret = "XXX"
   verify_ssl    = true                             # this is the default value
   api_url       = "https://api.transparentcdn.com" # this is the default value
+  auth          = true                             # false if you only use data-sources that do not require authentication such as 'transparentedge_ip_ranges'
 }
 ```
 
@@ -60,6 +61,7 @@ export TCDN_VERIFY_SSL=true
 ### Optional
 
 - `api_url` (String) URL of Transparent Edge API. default: `https://api.transparentcdn.com`. May also be provided via `TCDN_API_URL` environment variable.
+- `auth` (Boolean) Set to false if your configuration only consumes data sources that do not require authentication, such as `transparentedge_ip_ranges`.
 - `client_id` (String, Sensitive) Client ID (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_ID` environment variable.
 - `client_secret` (String, Sensitive) Client Secret (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_SECRET` environment variable.
 - `company_id` (Number) Company ID number (for ex: `300`). May also be provided via `TCDN_COMPANY_ID` environment variable.

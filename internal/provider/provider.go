@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/companies"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -73,6 +74,11 @@ func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaReq
 				Description:         "Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.",
 				MarkdownDescription: "Ignore SSL certificate for `api_url`. May also be provided via `TCDN_VERIFY_SSL` environment variable.",
 			},
+			"auth": schema.BoolAttribute{
+				Optional:            true,
+				Description:         "Set to false if your configuration only consumes data sources that do not require authentication, such as `transparentedge_ip_ranges`.",
+				MarkdownDescription: "Set to false if your configuration only consumes data sources that do not require authentication, such as `transparentedge_ip_ranges`.",
+			},
 		},
 	}
 }
@@ -84,6 +90,7 @@ type transparentedgeProviderModel struct {
 	ClientId     types.String `tfsdk:"client_id"`
 	ClientSecret types.String `tfsdk:"client_secret"`
 	VerifySSL    types.Bool   `tfsdk:"verify_ssl"`
+	Auth         types.Bool   `tfsdk:"auth"`
 }
 
 func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -107,6 +114,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	companyid, _ = strconv.Atoi(os.Getenv("TCDN_COMPANY_ID"))
 	verifyssl, _ := strconv.ParseBool(os.Getenv("TCDN_VERIFY_SSL"))
 
+	auth := true
+
 	// Override with terraform configuration values
 	if !config.ApiURL.IsNull() {
 		api_url = config.ApiURL.ValueString()
@@ -123,12 +132,28 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	if !config.VerifySSL.IsNull() {
 		verifyssl = config.VerifySSL.ValueBool()
 	}
+	if !config.Auth.IsNull() {
+		auth = config.Auth.ValueBool()
+	}
 
 	// Values that need conversion (if not set in the configuration)
 
 	// Default values
 	if api_url == "" {
 		api_url = defaultApiUrl
+	}
+
+	if !auth {
+		// Override unset values and let the client setup
+		if companyid < 1 {
+			companyid = 1
+		}
+		if clientid == "" {
+			clientid = "noauth"
+		}
+		if clientsecret == "" {
+			clientsecret = "noauth"
+		}
 	}
 
 	if companyid < 1 {
@@ -163,7 +188,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 
 	// Create a new client using the configuration values
 	useragent := "terraform-provider-transparentedge/" + p.version
-	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, verifyssl, &useragent)
+	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, verifyssl, auth, &useragent)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Transparent Edge API Client",
@@ -192,6 +217,7 @@ func (p *TransparentEdgeProvider) DataSources(_ context.Context) []func() dataso
 		autoprovisioning.NewCertificatesDataSource,
 		staging.NewStagingBackendsDataSource,
 		staging.NewStagingVclconfDataSource,
+		companies.NewIpRangesDataSource,
 	}
 }
 

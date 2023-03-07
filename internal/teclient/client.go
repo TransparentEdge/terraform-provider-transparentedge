@@ -35,7 +35,7 @@ type Client struct {
 	Token TokenStruct
 }
 
-func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl bool, useragent *string) (*Client, error) {
+func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl bool, auth bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifyssl},
 		Proxy:           http.ProxyFromEnvironment,
@@ -52,8 +52,12 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 		UserAgent:    *useragent,
 	}
 
-	if err := c.GetToken(); err != nil {
-		return nil, err
+	if auth {
+		if err := c.GetToken(); err != nil {
+			return nil, err
+		}
+	} else {
+		c.Token.Token = "noauth"
 	}
 
 	return &c, nil
