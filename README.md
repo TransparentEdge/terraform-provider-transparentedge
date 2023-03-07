@@ -3,9 +3,11 @@
 A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).  
 This provider is intended to be used by the CDN users with the role "Company Admin", although some services do not require this role.
 
-## Official documentation
+## Links
 
-- TODO
+- [Overview](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest)  
+- [Official documentation](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest/docs)  
+- [API documentation](https://api.transparentcdn.com/docs/)  
 
 ## Example usage
 
