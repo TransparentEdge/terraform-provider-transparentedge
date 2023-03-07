@@ -36,7 +36,7 @@ type TransparentEdgeProvider struct {
 func (p *TransparentEdgeProvider) Metadata(ctx context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "transparentedge"
 	resp.Version = p.version
-	tflog.Info(ctx, "Version: "+p.version+", Commit: "+p.commit+", Date: "+time.Now().String())
+	tflog.Info(ctx, "Version: "+p.version+", Commit: "+p.commit+", Date: "+time.Now().UTC().String())
 }
 
 // Schema defines the provider-level schema for configuration data.
