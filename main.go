@@ -17,7 +17,6 @@ var (
 	// variables are set by goreleaser
 	version = "dev"
 	commit  = "none"
-	date    = "unknown"
 )
 
 func main() {
@@ -31,7 +30,7 @@ func main() {
 		Debug:   debug,
 	}
 
-	err := providerserver.Serve(context.Background(), transparentedge.New(version, commit, date), opts)
+	err := providerserver.Serve(context.Background(), transparentedge.New(version, commit), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())

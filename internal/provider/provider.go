@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
@@ -29,14 +30,13 @@ var (
 type TransparentEdgeProvider struct {
 	version string
 	commit  string
-	date    string
 }
 
 // Metadata returns the provider type name.
 func (p *TransparentEdgeProvider) Metadata(ctx context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "transparentedge"
 	resp.Version = p.version
-	tflog.Info(ctx, "Version: "+p.version+", Commit: "+p.commit+", Date: "+p.date)
+	tflog.Info(ctx, "Version: "+p.version+", Commit: "+p.commit+", Date: "+time.Now().String())
 }
 
 // Schema defines the provider-level schema for configuration data.
@@ -207,12 +207,11 @@ func (p *TransparentEdgeProvider) Resources(_ context.Context) []func() resource
 	}
 }
 
-func New(version string, commit string, date string) func() provider.Provider {
+func New(version string, commit string) func() provider.Provider {
 	return func() provider.Provider {
 		return &TransparentEdgeProvider{
 			version: version,
 			commit:  commit,
-			date:    date,
 		}
 	}
 }
