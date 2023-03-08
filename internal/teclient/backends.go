@@ -53,6 +53,19 @@ func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, err
 	return backends, nil
 }
 
+func (c *Client) GetBackendByName(name string, environment APIEnvironment) (*BackendAPIModel, error) {
+	backends, err := c.GetBackends(environment)
+	if err != nil {
+		return nil, err
+	}
+	for _, backend := range backends {
+		if backend.Name == name {
+			return &backend, nil
+		}
+	}
+	return nil, fmt.Errorf("A backend named '%s' wasn't found.", name)
+}
+
 func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := c.prepareJSONRequest(backend, "POST", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))

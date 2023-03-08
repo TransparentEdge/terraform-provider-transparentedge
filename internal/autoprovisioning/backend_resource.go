@@ -237,23 +237,21 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Try to find by Name
-	backends, err := r.client.GetBackends(teclient.ProdEnv)
+	backend, err := r.client.GetBackendByName(state.Name.ValueString(), teclient.ProdEnv)
 	if err == nil {
-		for _, backend := range backends {
-			if backend.Name == state.Name.ValueString() {
-				state.ID = types.Int64Value(int64(backend.ID))
-				state.Company = types.Int64Value(int64(backend.Company))
-				state.Name = types.StringValue(backend.Name)
-				state.VclName = types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name)
-				state.Origin = types.StringValue(backend.Origin)
-				state.Ssl = types.BoolValue(backend.Ssl)
-				state.Port = types.Int64Value(int64(backend.Port))
-				state.HCHost = types.StringValue(backend.HCHost)
-				state.HCPath = types.StringValue(backend.HCPath)
-				state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
-				resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-				return
-			}
+		if backend.Name == state.Name.ValueString() {
+			state.ID = types.Int64Value(int64(backend.ID))
+			state.Company = types.Int64Value(int64(backend.Company))
+			state.Name = types.StringValue(backend.Name)
+			state.VclName = types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name)
+			state.Origin = types.StringValue(backend.Origin)
+			state.Ssl = types.BoolValue(backend.Ssl)
+			state.Port = types.Int64Value(int64(backend.Port))
+			state.HCHost = types.StringValue(backend.HCHost)
+			state.HCPath = types.StringValue(backend.HCPath)
+			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
+			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+			return
 		}
 	}
 

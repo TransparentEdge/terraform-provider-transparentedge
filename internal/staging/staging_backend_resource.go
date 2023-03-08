@@ -237,23 +237,21 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Try to find by Name
-	stagingBackends, err := r.client.GetBackends(teclient.StagingEnv)
+	stagingBackend, err := r.client.GetBackendByName(state.Name.ValueString(), teclient.StagingEnv)
 	if err == nil {
-		for _, stagingBackend := range stagingBackends {
-			if stagingBackend.Name == state.Name.ValueString() {
-				state.ID = types.Int64Value(int64(stagingBackend.ID))
-				state.Company = types.Int64Value(int64(stagingBackend.Company))
-				state.Name = types.StringValue(stagingBackend.Name)
-				state.VclName = types.StringValue("c" + strconv.Itoa(stagingBackend.Company) + "_" + stagingBackend.Name)
-				state.Origin = types.StringValue(stagingBackend.Origin)
-				state.Ssl = types.BoolValue(stagingBackend.Ssl)
-				state.Port = types.Int64Value(int64(stagingBackend.Port))
-				state.HCHost = types.StringValue(stagingBackend.HCHost)
-				state.HCPath = types.StringValue(stagingBackend.HCPath)
-				state.HCStatusCode = types.Int64Value(int64(stagingBackend.HCStatusCode))
-				resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-				return
-			}
+		if stagingBackend.Name == state.Name.ValueString() {
+			state.ID = types.Int64Value(int64(stagingBackend.ID))
+			state.Company = types.Int64Value(int64(stagingBackend.Company))
+			state.Name = types.StringValue(stagingBackend.Name)
+			state.VclName = types.StringValue("c" + strconv.Itoa(stagingBackend.Company) + "_" + stagingBackend.Name)
+			state.Origin = types.StringValue(stagingBackend.Origin)
+			state.Ssl = types.BoolValue(stagingBackend.Ssl)
+			state.Port = types.Int64Value(int64(stagingBackend.Port))
+			state.HCHost = types.StringValue(stagingBackend.HCHost)
+			state.HCPath = types.StringValue(stagingBackend.HCPath)
+			state.HCStatusCode = types.Int64Value(int64(stagingBackend.HCStatusCode))
+			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+			return
 		}
 	}
 
