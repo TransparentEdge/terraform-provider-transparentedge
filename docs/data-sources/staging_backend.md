@@ -13,6 +13,16 @@ Read a staging backend
 ## Example Usage
 
 ```terraform
+terraform {
+  required_providers {
+    transparentedge = {
+      source = "TransparentEdge/transparentedge"
+      # Available since version 0.3.0
+      version = ">=0.3.0"
+    }
+  }
+}
+
 data "transparentedge_staging_backend" "mybackend" {
   name = "mybackendname"
 }
