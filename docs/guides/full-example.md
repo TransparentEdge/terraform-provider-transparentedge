@@ -100,5 +100,7 @@ sub vcl_recv {
         set bereq.http.TCDN-Command = "redirect_https, brotli_compress";
     }
 }
+EOF
+}
 ```
 

@@ -25,7 +25,7 @@ sub vcl_recv {
     if (req.http.host == "www.example.com") {
         set req.backend_hint = cX_myorigin.backend();
         set req.http.TCDN-i3-transform = "auto_webp";
-        set bereq.http.TCDN-Command = "redirect_https, brotli_compress";
+        set req.http.TCDN-Command = "redirect_https, brotli_compress";
     }
 }
 EOF
