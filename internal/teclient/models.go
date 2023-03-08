@@ -1,19 +1,41 @@
 package teclient
 
-type APIEnvironment int
+import "net/http"
 
 // Environment
+type APIEnvironment int
+
 const (
 	ProdEnv    APIEnvironment = 0
 	StagingEnv APIEnvironment = 1
 )
 
+// API
 type APIMessage struct {
 	Message string `json:"message"`
 }
 
 type APIDetail struct {
 	Detail string `json:"detail"`
+}
+
+type TokenStruct struct {
+	Token     string `json:"access_token"`
+	ExpiresIn int    `json:"expires_in"`
+	TokenType string `json:"token_type"`
+	Scope     string `json:"scope"`
+}
+
+type Client struct {
+	HTTPClient *http.Client
+	Token      TokenStruct
+
+	HostURL      string
+	CompanyId    int
+	ClientId     string
+	ClientSecret string
+	VerifySSL    bool
+	UserAgent    string
 }
 
 // Sites

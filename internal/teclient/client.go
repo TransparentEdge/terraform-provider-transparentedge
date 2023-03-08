@@ -15,44 +15,27 @@ const (
 	defaultAPIHTTPTimeout time.Duration = 50 * time.Second
 )
 
-type TokenStruct struct {
-	Token     string `json:"access_token"`
-	ExpiresIn int    `json:"expires_in"`
-	TokenType string `json:"token_type"`
-	Scope     string `json:"scope"`
-}
-
-type Client struct {
-	HTTPClient *http.Client
-
-	HostURL      string
-	CompanyId    int
-	ClientId     string
-	ClientSecret string
-	VerifySSL    bool
-	UserAgent    string
-
-	Token TokenStruct
-}
-
-func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl bool, auth bool, useragent *string) (*Client, error) {
+func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl *bool, auth *bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifyssl},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: *verifyssl},
 		Proxy:           http.ProxyFromEnvironment,
 	}
 
+	token := TokenStruct{}
+
 	c := Client{
 		HTTPClient: &http.Client{Timeout: defaultAPIHTTPTimeout, Transport: tr},
+		Token:      token,
 
 		HostURL:      *host,
 		CompanyId:    *companyid,
 		ClientId:     *clientid,
 		ClientSecret: *clientsecret,
-		VerifySSL:    verifyssl,
+		VerifySSL:    *verifyssl,
 		UserAgent:    *useragent,
 	}
 
-	if auth {
+	if *auth {
 		if err := c.GetToken(); err != nil {
 			return nil, err
 		}
@@ -85,13 +68,14 @@ func (c *Client) GetToken() error {
 	if resp.StatusCode != 200 {
 		resp_body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("%d - Couldn't create an API Token: %w", resp.StatusCode, err)
+			return fmt.Errorf("%d - Failure creating API Token: %w", resp.StatusCode, err)
 		}
-		return fmt.Errorf("%d - Couldn't create an API token: %s", resp.StatusCode, string(resp_body))
+		return fmt.Errorf("%d - Unable to create API Token: %s", resp.StatusCode, c.parseAPIError(resp_body))
 	}
 
-	if err_decode := json.NewDecoder(resp.Body).Decode(&c.Token); err_decode != nil || c.Token.Token == "" {
-		return fmt.Errorf("Couldn't process the API response in order to create the token.")
+	err_decode := json.NewDecoder(resp.Body).Decode(&c.Token)
+	if err_decode != nil || c.Token.Token == "" {
+		return fmt.Errorf("Fatal error creating API Token: %s", err_decode.Error())
 	}
 
 	return err
