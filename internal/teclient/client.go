@@ -36,7 +36,7 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 	}
 
 	if *auth {
-		if err := c.GetToken(); err != nil {
+		if err := c.getToken(); err != nil {
 			return nil, err
 		}
 	} else {
@@ -46,7 +46,7 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 	return &c, nil
 }
 
-func (c *Client) GetToken() error {
+func (c *Client) getToken() error {
 	req_body := []byte(fmt.Sprintf("client_id=%s&client_secret=%s&grant_type=client_credentials", c.ClientId, c.ClientSecret))
 
 	req, err := http.NewRequest("POST", c.HostURL+"/v1/oauth2/access_token/", bytes.NewBuffer(req_body))
@@ -112,15 +112,15 @@ func (c *Client) prepareJSONRequest(jdata interface{}, method string, url string
 	return req, nil
 }
 
-func (c *Client) getAPIEnvironmentPath(environment APIEnvironment) string {
+func (c *Client) MustGetAPIEnvironmentPath(environment APIEnvironment) string {
 	if environment == ProdEnv {
 		return "autoprovisioning"
 	} else if environment == StagingEnv {
 		return "staging"
 	}
 
-	// requests will fail
-	return "invalid_env"
+	// Invalid env
+	panic(fmt.Sprintf("Invalid environment: %+v", environment))
 }
 
 func (c *Client) parseAPIError(body []byte) string {

@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*BackendAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*Backend
 }
 
 func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId), nil)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, err
 }
 
 func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := c.prepareJSONRequest(backend, "POST", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnviro
 }
 
 func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := c.prepareJSONRequest(backend, "PUT", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backend.ID))
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironme
 }
 
 func (c *Client) DeleteBackend(backendID int, environment APIEnvironment) error {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
 	if err != nil {
 		return err

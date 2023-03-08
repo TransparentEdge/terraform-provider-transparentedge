@@ -7,7 +7,7 @@ import (
 )
 
 func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/config/?offset=%d", c.HostURL, envpath, c.CompanyId, offset), nil)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel,
 }
 
 func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
-	envpath := c.getAPIEnvironmentPath(environment)
+	envpath := c.MustGetAPIEnvironmentPath(environment)
 	req, err := c.prepareJSONRequest(vclconf, "POST", fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyId))
 	if err != nil {
 		return nil, err
