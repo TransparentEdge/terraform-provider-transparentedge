@@ -97,7 +97,7 @@ sub vcl_recv {
     if (req.http.host ~ "www.example(1|2).com") {
         set req.backend_hint = ${resource.transparentedge_backend.origin1.vclname}.backend();
         set req.http.TCDN-i3-transform = "auto_webp";
-        set bereq.http.TCDN-Command = "redirect_https, brotli_compress";
+        set req.http.TCDN-Command = "redirect_https, brotli_compress";
     }
 }
 EOF
