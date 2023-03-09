@@ -3,11 +3,11 @@ package transparentedge
 import (
 	"context"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/companies"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -110,9 +110,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	clientid := os.Getenv("TCDN_CLIENT_ID")
 	clientsecret := os.Getenv("TCDN_CLIENT_SECRET")
 
-	companyid := 0
-	companyid, _ = strconv.Atoi(os.Getenv("TCDN_COMPANY_ID"))
-	verifyssl, _ := strconv.ParseBool(os.Getenv("TCDN_VERIFY_SSL"))
+	companyid, _ := helpers.GetIntEnv("TCDN_COMPANY_ID", 0)
+	verifyssl, _ := helpers.GetEnvBool("TCDN_VERIFY_SSL", true)
 
 	auth := true
 
