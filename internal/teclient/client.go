@@ -17,7 +17,7 @@ const (
 
 func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl *bool, auth *bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: *verifyssl},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: !*verifyssl},
 		Proxy:           http.ProxyFromEnvironment,
 	}
 
