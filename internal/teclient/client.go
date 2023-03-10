@@ -15,9 +15,9 @@ const (
 	defaultAPIHTTPTimeout time.Duration = 50 * time.Second
 )
 
-func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, verifyssl *bool, auth *bool, useragent *string) (*Client, error) {
+func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, insecure *bool, auth *bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: !*verifyssl},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},
 		Proxy:           http.ProxyFromEnvironment,
 	}
 
@@ -31,7 +31,7 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 		CompanyId:    *companyid,
 		ClientId:     *clientid,
 		ClientSecret: *clientsecret,
-		VerifySSL:    *verifyssl,
+		VerifySSL:    *insecure,
 		UserAgent:    *useragent,
 	}
 

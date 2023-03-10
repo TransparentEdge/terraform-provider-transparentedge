@@ -69,10 +69,10 @@ func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaReq
 				Description:         "Client Secret (dashboard -> profile -> account options -> manage keys). May also be provided via TCDN_CLIENT_SECRET environment variable.",
 				MarkdownDescription: "Client Secret (`dashboard -> profile -> account options -> manage keys`). May also be provided via `TCDN_CLIENT_SECRET` environment variable.",
 			},
-			"verify_ssl": schema.BoolAttribute{
+			"insecure": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "Ignore SSL certificate for 'api_url'. May also be provided via TCDN_VERIFY_SSL environment variable.",
-				MarkdownDescription: "Ignore SSL certificate for `api_url`. May also be provided via `TCDN_VERIFY_SSL` environment variable.",
+				Description:         "Ignore TLS certificate for 'api_url'. May also be provided via TCDN_INSECURE environment variable.",
+				MarkdownDescription: "Ignore TLS certificate for `api_url`. May also be provided via `TCDN_INSECURE` environment variable.",
 			},
 			"auth": schema.BoolAttribute{
 				Optional:            true,
@@ -89,7 +89,7 @@ type transparentedgeProviderModel struct {
 	CompanyId    types.Int64  `tfsdk:"company_id"`
 	ClientId     types.String `tfsdk:"client_id"`
 	ClientSecret types.String `tfsdk:"client_secret"`
-	VerifySSL    types.Bool   `tfsdk:"verify_ssl"`
+	Insecure     types.Bool   `tfsdk:"insecure"`
 	Auth         types.Bool   `tfsdk:"auth"`
 }
 
@@ -111,7 +111,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	clientsecret := os.Getenv("TCDN_CLIENT_SECRET")
 
 	companyid, _ := helpers.GetIntEnv("TCDN_COMPANY_ID", 0)
-	verifyssl, _ := helpers.GetEnvBool("TCDN_VERIFY_SSL", true)
+	insecure, _ := helpers.GetEnvBool("TCDN_INSECURE", false)
 
 	auth := true
 
@@ -128,8 +128,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	if !config.ClientSecret.IsNull() {
 		clientsecret = config.ClientSecret.ValueString()
 	}
-	if !config.VerifySSL.IsNull() {
-		verifyssl = config.VerifySSL.ValueBool()
+	if !config.Insecure.IsNull() {
+		insecure = config.Insecure.ValueBool()
 	}
 	if !config.Auth.IsNull() {
 		auth = config.Auth.ValueBool()
@@ -187,7 +187,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 
 	// Create a new client using the configuration values
 	useragent := "terraform-provider-transparentedge/" + p.version
-	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, &verifyssl, &auth, &useragent)
+	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, &insecure, &auth, &useragent)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Transparent Edge API Client",

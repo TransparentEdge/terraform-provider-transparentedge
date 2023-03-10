@@ -16,7 +16,7 @@ terraform {
   required_providers {
     transparentedge = {
       source = "TransparentEdge/transparentedge"
-      version = ">=0.2.3"
+      version = ">=0.3.3"
     }
   }
 }
@@ -27,7 +27,7 @@ provider "transparentedge" {
   company_id    = 300
   client_id     = "XXX"
   client_secret = "XXX"
-  verify_ssl    = true                             # this is the default value
+  insecure      = false                            # this is the default value
   api_url       = "https://api.transparentcdn.com" # this is the default value
 }
 ```
