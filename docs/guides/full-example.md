@@ -77,12 +77,12 @@ Now with the backend definition, we create a file named `backends.tf`:
 ```terraform
 resource "transparentedge_backend" "origin1" {
   name   = "origin1"
-  origin = "my-origin.com"
+  origin = "origin.example.com"
   port   = 443
   ssl    = true
 
   # healthcheck
-  hchost       = "www.my-origin.com"
+  hchost       = "www.origin.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 200
 }

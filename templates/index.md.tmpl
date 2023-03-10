@@ -15,17 +15,53 @@ This provider is intended to be used by the CDN users with the role "Company Adm
 
 {{tffile "examples/provider/provider.tf"}}
 
-It's recommended to use environment variables:  
+## Configuration and authentication
 
-```shell
-export TCDN_COMPANY_ID=0
-export TCDN_CLIENT_ID="xxx"
-export TCDN_CLIENT_SECRET="xxx"
+Configuration for the provider is applied in the following order:
+
+1. Parameters set directly in the provider configuration (`.tf` file)
+2. Environment variables
+
+### Provider configuration
+
+!> **Warning:** Hard-coded credentials are not recommended in any Terraform
+configuration and risks secret leakage should this file ever be committed to a
+public version control system. It's recommended to use environment variables instead.
+
+Usage:
+
+```terraform
+provider "transparentedge" {
+  # Provider configuration overrides environment variables
+  # it's recommended to use environment variables for company_id, client_id and client_secret
+  company_id    = 300
+  client_id     = "XXX"
+  client_secret = "XXX"
+  insecure      = false                            # this is the default value
+  api_url       = "https://api.transparentcdn.com" # this is the default value
+  auth          = true                             # false if you only use data-sources that do not require authentication such as 'transparentedge_ip_ranges'
+}
 ```
 
-You can find all the required variables in our [dashboard](https://dashboard.transparentcdn.com/): `"Profile" -> "Account options" -> "Manage keys".`  
+### Environment variables
 
-Make sure that you're using the correct Company ID if you own multiple companies.  
+Configuration can be provided using environment variables, this is the recommended approach.  
+
+Example:  
+
+```terraform
+provider "transparentedge" {}
+```
+
+```shell
+$ export TCDN_COMPANY_ID=0
+$ export TCDN_CLIENT_ID="xxx"
+$ export TCDN_CLIENT_SECRET="xxx"
+```
+
+You can find all the required parameters in our [dashboard](https://dashboard.transparentcdn.com/): `"Profile" -> "Account options" -> "Manage keys".`  
+
+Make sure that you're using the correct `Company ID` if you own multiple companies.  
 
 Optional environment variables:  
 
@@ -34,5 +70,16 @@ Optional environment variables:
 export TCDN_API_URL="https://api.transparentcdn.com"
 export TCDN_INSECURE=false
 ```
+
+## Configuration reference
+
+|Setting|Provider|Environment variable|Default value|
+|-------|--------|--------------------|-------------|
+|Company ID|`company_id`|`TCDN_COMPANY_ID`|N/A|
+|Client ID|`client_id`|`TCDN_CLIENT_ID`|N/A|
+|Client Secret|`client_secret`|`TCDN_CLIENT_SECRET`|N/A|
+|API URL|`api_url`|`TCDN_API_URL`|`https://api.transparentcdn.com`|
+|Insecure|`insecure`|`TCDN_INSECURE`|`false`|
+|Auth|`auth`|N/A|`true`|
 
 {{ .SchemaMarkdown | trimspace }}

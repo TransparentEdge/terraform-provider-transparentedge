@@ -54,12 +54,12 @@ resource "transparentedge_vclconf" "external_file" {
 # This is a good approach since the backends are tied to the configuration
 resource "transparentedge_backend" "myorig" {
   name   = "origin1"
-  origin = "my-origin.com"
+  origin = "origin.example.com"
   port   = 443
   ssl    = true
 
   # healthcheck
-  hchost       = "www.my-origin.com"
+  hchost       = "www.origin.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 200
 }
