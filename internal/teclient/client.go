@@ -57,14 +57,14 @@ func (c *Client) getToken() error {
 	req.Header.Set("User-Agent", c.UserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("%d - Could not create API client, please ensure credentials are correct.", resp.StatusCode)
-	}
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == 401 {
+		return fmt.Errorf("%d - Could not create API client, please ensure credentials are correct.", resp.StatusCode)
+	}
 	if resp.StatusCode != 200 {
 		resp_body, err := io.ReadAll(resp.Body)
 		if err != nil {

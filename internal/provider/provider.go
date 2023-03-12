@@ -3,6 +3,7 @@ package transparentedge
 import (
 	"context"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
@@ -174,6 +175,13 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 			path.Root("client_secret"),
 			"Missing Client Secret",
 			"Please provide a valid Client Secret.",
+		)
+	}
+	if !(strings.HasPrefix(api_url, "http://") || strings.HasPrefix(api_url, "https://")) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_url"),
+			"Invalid API URL",
+			"Please provide a valid API URL value, protocol (http or https) is required.",
 		)
 	}
 
