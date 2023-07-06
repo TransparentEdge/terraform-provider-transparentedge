@@ -22,5 +22,3 @@ Shows the verification string of sites
 ### Read-Only
 
 - `verification_string` (String) String to be used in the DNS verification method: `_tcdn_challenge.{domain} TXT {string}` or in the HTTP verification method `http://{domain}/tcdn.txt`
-
-

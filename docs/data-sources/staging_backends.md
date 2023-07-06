@@ -42,5 +42,3 @@ Read-Only:
 - `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
 - `ssl` (Boolean) Use TLS encription when contacting with the origin backend
 - `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
-
-

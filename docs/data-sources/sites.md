@@ -37,5 +37,3 @@ Read-Only:
 - `domain` (String) Domain in FDQN form, i.e: `www.example.com`
 - `id` (Number) ID of the site
 - `ssl` (Boolean) If SSL is active (**deprecated**)
-
-

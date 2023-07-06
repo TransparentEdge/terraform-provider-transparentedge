@@ -55,5 +55,3 @@ resource "aws_security_group" "tcdn" {
 
 - `ipv4_cidr_blocks` (List of String) List of IPv4 CIDR blocks
 - `ipv6_cidr_blocks` (List of String) List of IPv6 CIDR blocks
-
-

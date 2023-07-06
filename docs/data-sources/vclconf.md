@@ -31,5 +31,3 @@ output "active_vcl_config" {
 - `uploaddate` (String) Date when the configuration was uploaded
 - `user` (String) User that created the configuration
 - `vclcode` (String) Verbatim of the VCL code
-
-

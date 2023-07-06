@@ -42,5 +42,3 @@ Read-Only:
 - `privatekey` (String) Private key of the certificate in PEM format, it cannot be password protected
 - `publickey` (String) Public part of the certificate in PEM format, it's recommended to include the full chain
 - `standalone` (Boolean) A standalone certificate will not be merged automatically on the SAN of other existing certificates for the same Company on creation or renewals
-
-
