@@ -1,13 +1,13 @@
 # TransparentEdge Terraform Provider
 
 A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).  
-This provider is intended to be used by the CDN users with the role "Company Admin", although some services do not require this role.
+This provider is intended to be used by the CDN users with the role _Company Admin_, although some services do not require this role.
 
 ## Links
 
-- [Overview](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest)  
-- [Official documentation](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest/docs)  
-- [API documentation](https://api.transparentcdn.com/docs/)  
+- [Overview](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest)
+- [Official documentation](https://registry.terraform.io/providers/TransparentEdge/transparentedge/latest/docs)
+- [API documentation](https://api.transparentcdn.com/docs/)
 
 ## Example usage
 
@@ -32,7 +32,7 @@ provider "transparentedge" {
 }
 ```
 
-It's recommended to use environment variables:  
+It's recommended to use environment variables:
 
 ```shell
 export TCDN_COMPANY_ID=0
@@ -40,9 +40,9 @@ export TCDN_CLIENT_ID="xxx"
 export TCDN_CLIENT_SECRET="xxx"
 ```
 
-You can find all the required variables in our [dashboard](https://dashboard.transparentcdn.com/): `"Profile" -> "Account options" -> "Manage keys".`  
+You can find all the required variables in the [dashboard](https://dashboard.transparentcdn.com/): `"Profile" -> "Account options" -> "Manage keys".`
 
-Make sure that you're using the correct Company ID if you own multiple companies.  
+Make sure that you're using the correct Company ID if you own multiple companies.
 
 ## Requirements
 
@@ -77,7 +77,7 @@ Then commit the changes to `go.mod` and `go.sum`.
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
 
-To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` or `$GOBIN` directory if you have it set.
+To compile the provider, run `go install`. This builds the provider and put the provider binary in the `$GOPATH/bin` or `$GOBIN` directory if you have it set.
 
 To generate or update documentation, run `go generate`.
 
@@ -86,6 +86,7 @@ To override the provider locally, it's usually enough to create the file `~/.ter
 ```
 # ~/.terraformrc
 provider_installation {
+  # Use $GOPATH/bin or $GOBIN
   dev_overrides {
       "TransparentEdge/transparentedge" = "<GOPATH>/bin"
       "registry.terraform.io/hashicorp/transparentedge" = "<GOPATH>/bin"
