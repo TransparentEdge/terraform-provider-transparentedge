@@ -178,6 +178,15 @@ func (r *siteResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		)
 		return
 	}
+
+	// Sites are disabled, not deleted
+	resp.Diagnostics.AddWarning(
+		"Site Resource Destruction Considerations",
+		"This action will disable the site and remove it from the Terraform state, but it does not permanently delete the site.\n"+
+			"Remember, sites can only be re-enabled within the same company.\n"+
+			"If there's a future requirement to reassign this site to a different company, please contact our support team for help.\n"+
+			"If this action aligns with your current intentions, you may disregard this warning.",
+	)
 }
 
 // Configure adds the provider configured client to the resource.

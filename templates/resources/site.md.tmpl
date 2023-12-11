@@ -1,0 +1,31 @@
+---
+layout: ""
+page_title: "transparentedge_site Resource - transparentedge"
+subcategory: ""
+description: |-
+  Manages company sites (domains)
+---
+
+# transparentedge_site (Resource)
+
+Manages company sites (domains)
+
+## Example Usage
+
+{{tffile "examples/resources/transparentedge_site/resource.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+{{codefile "shell" "examples/resources/transparentedge_site/import.sh"}}
+
+## Resource deletion
+
+Running destroy on a site resource will only **disable** the site and remove it from the Terraform state, but it does not permanently delete the site.
+
+- Deleting a site only disables it.
+- Sites can only be re-enabled within the same company.
+- If there's a future requirement to reassign a site to a different company, please contact our support team for help.
