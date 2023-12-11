@@ -52,7 +52,8 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 
 		Attributes: map[string]schema.Attribute{
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
-				Create: true,
+				Create:            true,
+				CreateDescription: "Site validation retries continue until the create timeout period ends.",
 			}),
 			"id": schema.Int64Attribute{
 				Computed:            true,
