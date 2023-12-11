@@ -53,7 +53,7 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 		Attributes: map[string]schema.Attribute{
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create:            true,
-				CreateDescription: "Site validation retries continue until the create timeout period ends.",
+				CreateDescription: "Site validation retries continue until the create timeout period ends. The value of create must consist of numbers and unit suffixes, such as '30s' or '2h45m'. Valid time units are 's' (seconds), 'm' (minutes), 'h' (hours).",
 			}),
 			"id": schema.Int64Attribute{
 				Computed:            true,
@@ -115,6 +115,41 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan Site
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Try to find by ID
+	if !plan.ID.IsNull() {
+		if siteAPI, err := r.client.GetSite(int(plan.ID.ValueInt64())); err == nil {
+			if siteAPI.Active {
+				plan.ID = types.Int64Value(int64(siteAPI.ID))
+				plan.Domain = types.StringValue(siteAPI.Url)
+				plan.Active = types.BoolValue(siteAPI.Active)
+				resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+				return
+			}
+		}
+	}
+
+	// Try to find by Domain
+	sites, err := r.client.GetSites()
+	if err == nil {
+		for _, siteAPI := range sites {
+			if siteAPI.Url == plan.Domain.ValueString() && siteAPI.Active {
+				plan.ID = types.Int64Value(int64(siteAPI.ID))
+				plan.Domain = types.StringValue(siteAPI.Url)
+				plan.Active = types.BoolValue(siteAPI.Active)
+				resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+				return
+			}
+		}
+	}
+
+	// Error retrieving the site, bail out without updating the state
 }
 
 // Read resource information
@@ -200,7 +235,28 @@ func (r *siteResource) Configure(_ context.Context, req resource.ConfigureReques
 }
 
 func (r *siteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Import without a default create timeout
 	resource.ImportStatePassthroughID(ctx, path.Root("domain"), req, resp)
+
+	/*
+		// Import with a default create timeout
+			site := Site{}
+			site.Domain = types.StringValue(req.ID)
+
+			site.Timeouts = timeouts.Value{
+				Object: types.ObjectValueMust(
+					map[string]attr.Type{
+						"create": types.StringType,
+					},
+					map[string]attr.Value{
+						"create": types.StringValue("5m"),
+					},
+				),
+			}
+
+			diags := resp.State.Set(ctx, &site)
+			resp.Diagnostics.Append(diags...)
+	*/
 }
 
 // Helpers
