@@ -128,3 +128,16 @@ type SSLCustomCertificate struct {
 	PublicKey     string `json:"cert"`
 	PrivateKey    string `json:"key"`
 }
+
+// Certificate Requests
+type CRDNSKeys struct {
+	KeyNameID int    `json:"key_name_id"`
+	KeyName   string `json:"key_name"`
+}
+
+type CRDNSProvider struct {
+	ID       int         `json:"id"`
+	HookName string      `json:"hook_name"`
+	Provider string      `json:"provider"`
+	Keys     []CRDNSKeys `json:"keys"`
+}

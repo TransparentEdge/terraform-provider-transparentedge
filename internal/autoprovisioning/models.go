@@ -80,3 +80,19 @@ type CustomCertificate struct {
 	PublicKey  types.String `tfsdk:"publickey"`
 	PrivateKey types.String `tfsdk:"privatekey"`
 }
+
+// Certificate Requests
+type CertReqDNSKeys struct {
+	KeyNameID types.Int64  `tfsdk:"key_name_id"`
+	KeyName   types.String `tfsdk:"key_name"`
+}
+
+type CertReqDNSProvider struct {
+	ID       types.Int64      `tfsdk:"id"`
+	Provider types.String     `tfsdk:"provider"`
+	Keys     []CertReqDNSKeys `tfsdk:"keys"`
+}
+
+type CertReqDNSProviders struct {
+	Providers []CertReqDNSProvider `tfsdk:"providers"`
+}
