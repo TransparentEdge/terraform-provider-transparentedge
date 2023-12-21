@@ -141,3 +141,7 @@ type CRDNSProvider struct {
 	Provider string      `json:"provider"`
 	Keys     []CRDNSKeys `json:"keys"`
 }
+
+type CRDNSCNAMEVerification struct {
+	CNAME string `json:"cname"`
+}

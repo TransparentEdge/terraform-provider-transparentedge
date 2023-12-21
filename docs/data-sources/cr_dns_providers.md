@@ -24,14 +24,12 @@ List of the available Certificate Request DNS Providers.
 
 Read-Only:
 
-- `id` (Number) ID of the provider
-- `keys` (Attributes List) Keys/parameters of the provider (see [below for nested schema](#nestedatt--providers--keys))
+- `parameters` (Attributes List) Keys/parameters of the provider (see [below for nested schema](#nestedatt--providers--parameters))
 - `provider` (String) DNS Provider
 
-<a id="nestedatt--providers--keys"></a>
-### Nested Schema for `providers.keys`
+<a id="nestedatt--providers--parameters"></a>
+### Nested Schema for `providers.parameters`
 
 Read-Only:
 
-- `key_name` (String) Name of the key
-- `key_name_id` (Number) ID of the key
+- `key_name` (String) Name of the key / parameter required by the provider

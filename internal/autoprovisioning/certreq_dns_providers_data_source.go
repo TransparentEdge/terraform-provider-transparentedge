@@ -41,27 +41,17 @@ func (d *crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				Description: "Available DNS providers",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"id": schema.Int64Attribute{
-							Computed:            true,
-							Description:         "ID of the provider",
-							MarkdownDescription: "ID of the provider",
-						},
 						"provider": schema.StringAttribute{
 							Computed:            true,
 							Description:         "DNS Provider",
 							MarkdownDescription: "DNS Provider",
 						},
 
-						"keys": schema.ListNestedAttribute{
+						"parameters": schema.ListNestedAttribute{
 							Computed:    true,
 							Description: "Keys/parameters of the provider",
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
-									"key_name_id": schema.Int64Attribute{
-										Computed:            true,
-										Description:         "ID of the key",
-										MarkdownDescription: "ID of the key",
-									},
 									"key_name": schema.StringAttribute{
 										Computed:            true,
 										Description:         "Name of the key / parameter required by the provider",
@@ -97,13 +87,11 @@ func (d *crDNSProviderDataSource) Read(ctx context.Context, req datasource.ReadR
 		var keys []CertReqDNSKeys
 		for _, key := range prov.Keys {
 			keys = append(keys, CertReqDNSKeys{
-				KeyNameID: types.Int64Value(int64(key.KeyNameID)),
-				KeyName:   types.StringValue(key.KeyName)})
+				KeyName: types.StringValue(key.KeyName)})
 		}
 		state := CertReqDNSProvider{
-			ID:       types.Int64Value(int64(prov.ID)),
-			Provider: types.StringValue(prov.Provider),
-			Keys:     keys,
+			Provider:   types.StringValue(prov.Provider),
+			Parameters: keys,
 		}
 
 		providers.Providers = append(providers.Providers, state)
