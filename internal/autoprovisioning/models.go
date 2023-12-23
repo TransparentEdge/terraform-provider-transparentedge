@@ -82,13 +82,9 @@ type CustomCertificate struct {
 }
 
 // Certificate Requests
-type CertReqDNSKeys struct {
-	KeyName types.String `tfsdk:"key_name"`
-}
-
 type CertReqDNSProvider struct {
-	Provider   types.String     `tfsdk:"provider"`
-	Parameters []CertReqDNSKeys `tfsdk:"parameters"`
+	DNSProvider types.String `tfsdk:"dns_provider"`
+	Parameters  types.List   `tfsdk:"parameters"`
 }
 
 type CertReqDNSProviders struct {
@@ -97,4 +93,21 @@ type CertReqDNSProviders struct {
 
 type CertReqCNAMEVerify struct {
 	CNAME types.String `tfsdk:"cname"`
+}
+
+type CertReqDNSCredential struct {
+	ID          types.Int64  `tfsdk:"id"`
+	Alias       types.String `tfsdk:"alias"`
+	DNSProvider types.String `tfsdk:"dns_provider"`
+	Parameters  types.Map    `tfsdk:"parameters"`
+}
+
+type CertReqDNS struct {
+	ID            types.Int64  `tfsdk:"id"`
+	Domains       types.Set    `tfsdk:"domains"`
+	Credential    types.Int64  `tfsdk:"credential"`
+	CertificateID types.Int64  `tfsdk:"certificate_id"`
+	CreatedAt     types.String `tfsdk:"created_at"`
+	UpdatedAt     types.String `tfsdk:"updated_at"`
+	StatusMessage types.String `tfsdk:"status_message"`
 }

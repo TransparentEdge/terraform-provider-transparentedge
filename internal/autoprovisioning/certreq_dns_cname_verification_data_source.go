@@ -27,7 +27,7 @@ type crDNSCNAMEVerifDataSource struct {
 
 // Metadata returns the data source type name.
 func (d *crDNSCNAMEVerifDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_cr_dns_cname_verification"
+	resp.TypeName = req.ProviderTypeName + "_certreq_dns_cname_verification"
 }
 
 // Schema defines the schema for the data source.

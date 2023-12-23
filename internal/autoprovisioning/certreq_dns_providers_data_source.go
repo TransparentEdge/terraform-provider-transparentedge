@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -15,8 +16,8 @@ var (
 	_ datasource.DataSourceWithConfigure = &crDNSProviderDataSource{}
 )
 
-// NewCRDNSProvidersDataSource is a helper function to simplify the provider implementation.
-func NewCRDNSProvidersDataSource() datasource.DataSource {
+// helper function to simplify the provider implementation.
+func NewCertReqDNSProvidersDataSource() datasource.DataSource {
 	return &crDNSProviderDataSource{}
 }
 
@@ -27,7 +28,7 @@ type crDNSProviderDataSource struct {
 
 // Metadata returns the data source type name.
 func (d *crDNSProviderDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_cr_dns_providers"
+	resp.TypeName = req.ProviderTypeName + "_certreq_dns_providers"
 }
 
 // Schema defines the schema for the data source.
@@ -41,24 +42,17 @@ func (d *crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				Description: "Available DNS providers",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"provider": schema.StringAttribute{
+						"dns_provider": schema.StringAttribute{
 							Computed:            true,
 							Description:         "DNS Provider",
 							MarkdownDescription: "DNS Provider",
 						},
 
-						"parameters": schema.ListNestedAttribute{
-							Computed:    true,
-							Description: "Keys/parameters of the provider",
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"key_name": schema.StringAttribute{
-										Computed:            true,
-										Description:         "Name of the key / parameter required by the provider",
-										MarkdownDescription: "Name of the key / parameter required by the provider",
-									},
-								},
-							},
+						"parameters": schema.ListAttribute{
+							Computed:            true,
+							Description:         "Keys/parameters of the provider",
+							MarkdownDescription: "Keys/parameters of the provider",
+							ElementType:         types.StringType,
 						},
 					},
 				},
@@ -84,14 +78,18 @@ func (d *crDNSProviderDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	// Map response body to model
 	for _, prov := range resp_providers {
-		var keys []CertReqDNSKeys
+		var keys []attr.Value
 		for _, key := range prov.Keys {
-			keys = append(keys, CertReqDNSKeys{
-				KeyName: types.StringValue(key.KeyName)})
+			keys = append(keys, types.StringValue(key.KeyName))
+		}
+		parameters, diags := types.ListValue(types.StringType, keys)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
 		}
 		state := CertReqDNSProvider{
-			Provider:   types.StringValue(prov.Provider),
-			Parameters: keys,
+			DNSProvider: types.StringValue(prov.Provider),
+			Parameters:  parameters,
 		}
 
 		providers.Providers = append(providers.Providers, state)

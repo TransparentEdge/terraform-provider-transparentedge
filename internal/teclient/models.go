@@ -145,3 +145,36 @@ type CRDNSProvider struct {
 type CRDNSCNAMEVerification struct {
 	CNAME string `json:"cname"`
 }
+
+type CRDNSCreds struct {
+	Provider string `json:"provider"`
+	KeyName  string `json:"dns_key_name"`
+	KeyValue string `json:"dns_key_value"`
+}
+
+type CRDNSCredential struct {
+	ID    int          `json:"id"`
+	Alias string       `json:"alias"`
+	Creds []CRDNSCreds `json:"creds"`
+}
+
+type NewCRDNSCreds struct {
+	KeyName  string `json:"hook_key_name"`
+	KeyValue string `json:"hook_key_value"`
+}
+
+type NewCRDNSCredential struct {
+	Alias string          `json:"alias"`
+	Creds []NewCRDNSCreds `json:"creds"`
+}
+
+type CertReqDNS struct {
+	ID         int    `json:"id"`
+	Credential int    `json:"credential"`
+	Domains    string `json:"domains"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+	// as pointers since they can be null
+	CertificateID *int    `json:"certificate"`
+	Log           *string `json:"log"`
+}
