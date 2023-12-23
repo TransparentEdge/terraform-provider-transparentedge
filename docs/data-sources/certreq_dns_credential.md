@@ -3,12 +3,12 @@
 page_title: "transparentedge_certreq_dns_credential Data Source - transparentedge"
 subcategory: ""
 description: |-
-  DNS Credential
+  DNS Credential.
 ---
 
 # transparentedge_certreq_dns_credential (Data Source)
 
-DNS Credential
+DNS Credential.
 
 
 
@@ -17,10 +17,10 @@ DNS Credential
 
 ### Required
 
-- `id` (Number) ID of the DNS Credential
+- `id` (Number) ID of the DNS Credential.
 
 ### Read-Only
 
-- `alias` (String) Alias of the DNS Credential
-- `dns_provider` (String) DNS Provider
-- `parameters` (Map of String, Sensitive) Keys/parameters of the provider
+- `alias` (String) Alias of the DNS Credential.
+- `dns_provider` (String) DNS Provider.
+- `parameters` (Map of String, Sensitive) Keys/parameters of the provider.

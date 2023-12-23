@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_vclconf Resource - transparentedge"
 subcategory: ""
 description: |-
-  Manages Staging VCL Configuration
+  Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
 ---
 
 # transparentedge_staging_vclconf (Resource)
 
-Manages Staging VCL Configuration
+Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
 
 ## Example Usage
 
@@ -44,11 +44,11 @@ output "staging_config" {
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this Staging VCL Config
-- `id` (Number) ID of the Staging VCL Config
-- `productiondate` (String) Date when the configuration was fully applied in the CDN
-- `uploaddate` (String) Date when the configuration was uploaded
-- `user` (String) User that created the configuration
+- `company` (Number) Company ID that owns this Staging VCL Config.
+- `id` (Number) ID of the Staging VCL Config.
+- `productiondate` (String) Date when the configuration was fully applied in the CDN.
+- `uploaddate` (String) Date when the configuration was uploaded.
+- `user` (String) User that created the configuration.
 
 ## Import
 

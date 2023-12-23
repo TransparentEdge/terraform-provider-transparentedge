@@ -3,12 +3,12 @@
 page_title: "transparentedge_custom_certificate Resource - transparentedge"
 subcategory: ""
 description: |-
-  Manages Custom Certificates
+  Provides Custom Certificate resource. This allows to create, update and delete custom TLS Certificates.
 ---
 
 # transparentedge_custom_certificate (Resource)
 
-Manages Custom Certificates
+Provides Custom Certificate resource. This allows to create, update and delete custom TLS Certificates.
 
 ## Example Usage
 
@@ -45,15 +45,15 @@ EOF
 
 ### Required
 
-- `privatekey` (String) Private part of the certificate in PEM format, the certificate can't be protected with a password
-- `publickey` (String) Public part of the certificate in PEM format, it's recommended to include the full chain
+- `privatekey` (String) Private part of the certificate in PEM format, the certificate can't be protected with a password.
+- `publickey` (String) Public part of the certificate in PEM format, it's recommended to include the full chain.
 
 ### Read-Only
 
-- `commonname` (String) CN (_Common Name_) of the certificate
-- `domains` (String) SAN (_Subject Alternative Name_) domains included in the certificate, including the Common Name
-- `expiration` (String) Date when the certificate will expire
-- `id` (Number) ID of the Custom Certificate
+- `commonname` (String) CN (_Common Name_) of the certificate.
+- `domains` (String) SAN (_Subject Alternative Name_) domains included in the certificate, including the Common Name.
+- `expiration` (String) Date when the certificate will expire.
+- `id` (Number) ID of the Custom Certificate.
 
 ## Import
 

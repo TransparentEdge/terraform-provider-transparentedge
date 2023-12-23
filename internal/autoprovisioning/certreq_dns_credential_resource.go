@@ -39,32 +39,32 @@ func (r *crDNSCredentialResource) Metadata(_ context.Context, req resource.Metad
 // Schema defines the schema for the resource.
 func (r *crDNSCredentialResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Generates DNS Credentials",
-		MarkdownDescription: "Generates DNS Credentials",
+		Description:         "Generates DNS Credentials.",
+		MarkdownDescription: "Provides DNS Credential resource. This allows to create, update and delete DNS Credentials used in [DNS Certificate Requests](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "ID of the DNS Credential",
-				MarkdownDescription: "ID of the DNS Credential",
+				Description:         "ID of the DNS Credential.",
+				MarkdownDescription: "ID of the DNS Credential.",
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"alias": schema.StringAttribute{
 				Required:            true,
-				Description:         "Alias for the DNS Credential",
-				MarkdownDescription: "Alias for the DNS Credential",
+				Description:         "Alias for the DNS Credential.",
+				MarkdownDescription: "Alias for the DNS Credential.",
 			},
 			"dns_provider": schema.StringAttribute{
 				Computed:            true,
-				Description:         "DNS Provider",
-				MarkdownDescription: "DNS Provider",
+				Description:         "DNS Provider.",
+				MarkdownDescription: "DNS Provider.",
 			},
 			"parameters": schema.MapAttribute{
 				Required:            true,
-				Description:         "Keys/parameters of the provider",
-				MarkdownDescription: "Keys/parameters of the provider",
+				Description:         "Keys/parameters of the provider.",
+				MarkdownDescription: "Keys/parameters of the provider.",
 				Sensitive:           true,
 				ElementType:         types.StringType,
 			},

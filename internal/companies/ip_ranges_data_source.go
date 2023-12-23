@@ -31,21 +31,21 @@ func (d *ipRangesDataSource) Metadata(_ context.Context, req datasource.Metadata
 
 func (d *ipRangesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Retrieves IP Ranges from TransparentEdge nodes",
-		MarkdownDescription: "Retrieves IP Ranges from TransparentEdge nodes",
+		Description:         "Retrieves IP Ranges from TransparentEdge nodes.",
+		MarkdownDescription: "Retrieves IP Ranges from TransparentEdge nodes.",
 
 		Attributes: map[string]schema.Attribute{
 			"ipv4_cidr_blocks": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				Description:         "List of IPv4 CIDR blocks",
-				MarkdownDescription: "List of IPv4 CIDR blocks",
+				Description:         "List of IPv4 CIDR blocks.",
+				MarkdownDescription: "List of IPv4 CIDR blocks.",
 			},
 			"ipv6_cidr_blocks": schema.ListAttribute{
 				Computed:            true,
 				ElementType:         types.StringType,
-				Description:         "List of IPv6 CIDR blocks",
-				MarkdownDescription: "List of IPv6 CIDR blocks",
+				Description:         "List of IPv6 CIDR blocks.",
+				MarkdownDescription: "List of IPv6 CIDR blocks.",
 			},
 		},
 	}

@@ -47,8 +47,8 @@ func (r *siteResource) Metadata(_ context.Context, req resource.MetadataRequest,
 // Schema defines the schema for the resource.
 func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Manages company sites (domains)",
-		MarkdownDescription: "Manages company sites (domains)",
+		Description:         "Manages company sites (domains).",
+		MarkdownDescription: "Provides Site (domain) resource. This allows to create and delete domains.",
 
 		Attributes: map[string]schema.Attribute{
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
@@ -57,21 +57,21 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 			}),
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "ID of the site",
-				MarkdownDescription: "ID of the site",
+				Description:         "ID of the site.",
+				MarkdownDescription: "ID of the site.",
 			},
 			"domain": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				Description:         "Domain in FDQN form, i.e: 'www.example.com'",
-				MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`",
+				Description:         "Domain in FDQN form, i.e: 'www.example.com'.",
+				MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`.",
 			},
 			"active": schema.BoolAttribute{
 				Computed:            true,
-				Description:         "Internal value that indicates if the site is active in the CDN",
-				MarkdownDescription: "Internal value that indicates if the site is active in the CDN",
+				Description:         "Internal value that indicates if the site is active in the CDN.",
+				MarkdownDescription: "Internal value that indicates if the site is active in the CDN.",
 			},
 		},
 	}

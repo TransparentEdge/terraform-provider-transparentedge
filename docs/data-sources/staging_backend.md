@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_backend Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Read a staging backend
+  Read a staging backend.
 ---
 
 # transparentedge_staging_backend (Data Source)
 
-Read a staging backend
+Read a staging backend.
 
 ## Example Usage
 
@@ -39,16 +39,16 @@ output "vclname" {
 
 ### Required
 
-- `name` (String) Name of the staging backend
+- `name` (String) Name of the staging backend.
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this staging backend
-- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com
-- `hcpath` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`
-- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`
-- `id` (Number) ID of the staging backend
-- `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`
-- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
-- `ssl` (Boolean) Use TLS encription when contacting with the origin backend
-- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
+- `company` (Number) Company ID that owns this staging backend.
+- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.
+- `hcpath` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.
+- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.
+- `id` (Number) ID of the staging backend.
+- `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`.
+- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`.
+- `ssl` (Boolean) Use TLS encription when contacting with the origin backend.
+- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.

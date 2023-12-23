@@ -17,12 +17,12 @@ List of the available Certificate Request DNS Providers.
 
 ### Read-Only
 
-- `providers` (Attributes List) Available DNS providers (see [below for nested schema](#nestedatt--providers))
+- `providers` (Attributes List) Available DNS providers. (see [below for nested schema](#nestedatt--providers))
 
 <a id="nestedatt--providers"></a>
 ### Nested Schema for `providers`
 
 Read-Only:
 
-- `dns_provider` (String) DNS Provider
-- `parameters` (List of String) Keys/parameters of the provider
+- `dns_provider` (String) DNS Provider.
+- `parameters` (List of String) Keys/parameters of the provider.

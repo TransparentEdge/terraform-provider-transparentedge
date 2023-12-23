@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_backend Resource - transparentedge"
 subcategory: ""
 description: |-
-  Manages staging backend configuration
+  Provides a Staging Backend resource. This allows backends to be created, updated and deleted.
 ---
 
 # transparentedge_staging_backend (Resource)
 
-Manages staging backend configuration
+Provides a Staging Backend resource. This allows backends to be created, updated and deleted.
 
 ## Example Usage
 
@@ -51,19 +51,19 @@ output "origin2" {
 
 ### Required
 
-- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`
-- `hcpath` (String) Path that the healthcheck probe will use, for example: `/favicon.ico`
-- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`
-- `name` (String) Name of the staging backend
-- `origin` (String) Origin is the IP or DNS address to the origin backend, for example: `my-origin.com`
-- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
-- `ssl` (Boolean) Use TLS encription when contacting with the origin backend
+- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.
+- `hcpath` (String) Path that the healthcheck probe will use, for example: `/favicon.ico`.
+- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.
+- `name` (String) Name of the staging backend.
+- `origin` (String) Origin is the IP or DNS address to the origin backend, for example: `my-origin.com`.
+- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`.
+- `ssl` (Boolean) Use TLS encription when contacting with the origin backend.
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this staging backend
-- `id` (Number) ID of the staging backend
-- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
+- `company` (Number) Company ID that owns this staging backend.
+- `id` (Number) ID of the staging backend.
+- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.
 
 ## Import
 

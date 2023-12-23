@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_backends Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Staging backend listing
+  Staging backend listing.
 ---
 
 # transparentedge_staging_backends (Data Source)
 
-Staging backend listing
+Staging backend listing.
 
 ## Example Usage
 
@@ -25,20 +25,20 @@ output "all_staging_backends" {
 
 ### Read-Only
 
-- `staging_backends` (Attributes List) List of all staging backends (see [below for nested schema](#nestedatt--staging_backends))
+- `staging_backends` (Attributes List) List of all staging backends. (see [below for nested schema](#nestedatt--staging_backends))
 
 <a id="nestedatt--staging_backends"></a>
 ### Nested Schema for `staging_backends`
 
 Read-Only:
 
-- `company` (Number) Company ID that owns this staging backend
-- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com
-- `hcpath` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`
-- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`
-- `id` (Number) ID of the staging backend
-- `name` (String) Name of the staging backend
-- `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`
-- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`
-- `ssl` (Boolean) Use TLS encription when contacting with the origin backend
-- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`
+- `company` (Number) Company ID that owns this staging backend.
+- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.
+- `hcpath` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.
+- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.
+- `id` (Number) ID of the staging backend.
+- `name` (String) Name of the staging backend.
+- `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`.
+- `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`.
+- `ssl` (Boolean) Use TLS encription when contacting with the origin backend.
+- `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.

@@ -34,38 +34,38 @@ func (d *sitesDataSource) Metadata(_ context.Context, req datasource.MetadataReq
 // Schema defines the schema for the data source.
 func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Sites listing",
-		MarkdownDescription: "Sites listing",
+		Description:         "Sites listing.",
+		MarkdownDescription: "Sites listing.",
 		Attributes: map[string]schema.Attribute{
 			"sites": schema.ListNestedAttribute{
 				Computed:    true,
-				Description: "List of all active sites",
+				Description: "List of all active sites.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.Int64Attribute{
 							Computed:            true,
-							Description:         "ID of the site",
-							MarkdownDescription: "ID of the site",
+							Description:         "ID of the site.",
+							MarkdownDescription: "ID of the site.",
 						},
 						"company": schema.Int64Attribute{
 							Computed:            true,
-							Description:         "Company ID that owns this domain",
-							MarkdownDescription: "Company ID that owns this domain",
+							Description:         "Company ID that owns this domain.",
+							MarkdownDescription: "Company ID that owns this domain.",
 						},
 						"domain": schema.StringAttribute{
 							Computed:            true,
-							Description:         "Domain in FDQN form, i.e: 'www.example.com'",
-							MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`",
+							Description:         "Domain in FDQN form, i.e: 'www.example.com'.",
+							MarkdownDescription: "Domain in FDQN form, i.e: `www.example.com`.",
 						},
 						"active": schema.BoolAttribute{
 							Computed:            true,
-							Description:         "Internal value that indicates if the site is active in the CDN",
-							MarkdownDescription: "Internal value that indicates if the site is active in the CDN",
+							Description:         "Internal value that indicates if the site is active in the CDN.",
+							MarkdownDescription: "Internal value that indicates if the site is active in the CDN.",
 						},
 						"ssl": schema.BoolAttribute{
 							Computed:            true,
-							Description:         "If SSL is active (deprecated)",
-							MarkdownDescription: "If SSL is active (**deprecated**)",
+							Description:         "If SSL is active (deprecated).",
+							MarkdownDescription: "If SSL is active (**deprecated**).",
 						},
 					},
 				},

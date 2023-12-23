@@ -3,12 +3,12 @@
 page_title: "transparentedge_vclconf Data Source - transparentedge"
 subcategory: ""
 description: |-
-  VCL Configuration listing
+  VCL Configuration listing.
 ---
 
 # transparentedge_vclconf (Data Source)
 
-VCL Configuration listing
+VCL Configuration listing.
 
 ## Example Usage
 
@@ -25,9 +25,9 @@ output "active_vcl_config" {
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this VCL config
-- `id` (Number) ID of the VCL Config
-- `productiondate` (String) Date when the configuration was fully applied in the CDN
-- `uploaddate` (String) Date when the configuration was uploaded
-- `user` (String) User that created the configuration
-- `vclcode` (String) Verbatim of the VCL code
+- `company` (Number) Company ID that owns this VCL config.
+- `id` (Number) ID of the VCL Config.
+- `productiondate` (String) Date when the configuration was fully applied in the CDN.
+- `uploaddate` (String) Date when the configuration was uploaded.
+- `user` (String) User that created the configuration.
+- `vclcode` (String) Verbatim of the VCL code.

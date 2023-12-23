@@ -35,58 +35,58 @@ func (d *backendDataSource) Metadata(_ context.Context, req datasource.MetadataR
 // Schema defines the schema for the data source.
 func (d *backendDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Read a backend",
-		MarkdownDescription: "Read a backend",
+		Description:         "Read a backend.",
+		MarkdownDescription: "Read a backend.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "ID of the backend",
-				MarkdownDescription: "ID of the backend",
+				Description:         "ID of the backend.",
+				MarkdownDescription: "ID of the backend.",
 			},
 			"company": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "Company ID that owns this backend",
-				MarkdownDescription: "Company ID that owns this backend",
+				Description:         "Company ID that owns this backend.",
+				MarkdownDescription: "Company ID that owns this backend.",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Name of the backend",
-				MarkdownDescription: "Name of the backend",
+				Description:         "Name of the backend.",
+				MarkdownDescription: "Name of the backend.",
 			},
 			"vclname": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'",
-				MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`",
+				Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'.",
+				MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.",
 			},
 			"origin": schema.StringAttribute{
 				Computed:            true,
-				Description:         "IP or DNS name pointing to the origin backend, for example: 'my-origin.com'",
-				MarkdownDescription: "IP or DNS name pointing to the origin backend, for example: `my-origin.com`",
+				Description:         "IP or DNS name pointing to the origin backend, for example: 'my-origin.com'.",
+				MarkdownDescription: "IP or DNS name pointing to the origin backend, for example: `my-origin.com`.",
 			},
 			"ssl": schema.BoolAttribute{
 				Computed:            true,
-				Description:         "Use TLS encription when contacting with the origin backend",
-				MarkdownDescription: "Use TLS encription when contacting with the origin backend",
+				Description:         "Use TLS encription when contacting with the origin backend.",
+				MarkdownDescription: "Use TLS encription when contacting with the origin backend.",
 			},
 			"port": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443",
-				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`",
+				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443.",
+				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`.",
 			},
 			"hchost": schema.StringAttribute{
 				Computed:    true,
-				Description: "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
+				Description: "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.",
 			},
 			"hcpath": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
-				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`",
+				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.",
+				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.",
 			},
 			"hcstatuscode": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
-				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`",
+				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200.",
+				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.",
 			},
 		},
 	}

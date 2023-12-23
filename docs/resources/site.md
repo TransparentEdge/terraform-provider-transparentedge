@@ -72,7 +72,7 @@ resource "transparentedge_site" "www_example3_com" {
 
 ### Required
 
-- `domain` (String) Domain in FDQN form, i.e: `www.example.com`
+- `domain` (String) Domain in FDQN form, i.e: `www.example.com`.
 
 ### Optional
 
@@ -80,8 +80,8 @@ resource "transparentedge_site" "www_example3_com" {
 
 ### Read-Only
 
-- `active` (Boolean) Internal value that indicates if the site is active in the CDN
-- `id` (Number) ID of the site
+- `active` (Boolean) Internal value that indicates if the site is active in the CDN.
+- `id` (Number) ID of the site.
 
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`

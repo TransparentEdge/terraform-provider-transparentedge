@@ -44,8 +44,8 @@ func (r *customCertificateResource) Metadata(_ context.Context, req resource.Met
 // Schema defines the schema for the resource.
 func (r *customCertificateResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Manages Custom Certificates",
-		MarkdownDescription: "Manages Custom Certificates",
+		Description:         "Manages Custom Certificates.",
+		MarkdownDescription: "Provides Custom Certificate resource. This allows to create, update and delete custom TLS Certificates.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -53,33 +53,33 @@ func (r *customCertificateResource) Schema(ctx context.Context, _ resource.Schem
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description:         "ID of the Custom Certificate",
-				MarkdownDescription: "ID of the Custom Certificate",
+				Description:         "ID of the Custom Certificate.",
+				MarkdownDescription: "ID of the Custom Certificate.",
 			},
 			"commonname": schema.StringAttribute{
 				Computed:            true,
-				Description:         "CN (Common Name) of the certificate",
-				MarkdownDescription: "CN (_Common Name_) of the certificate",
+				Description:         "CN (Common Name) of the certificate.",
+				MarkdownDescription: "CN (_Common Name_) of the certificate.",
 			},
 			"domains": schema.StringAttribute{
 				Computed:            true,
-				Description:         "SAN (Subject Alternative Name) domains included in the certificate, including the Common Name",
-				MarkdownDescription: "SAN (_Subject Alternative Name_) domains included in the certificate, including the Common Name",
+				Description:         "SAN (Subject Alternative Name) domains included in the certificate, including the Common Name.",
+				MarkdownDescription: "SAN (_Subject Alternative Name_) domains included in the certificate, including the Common Name.",
 			},
 			"expiration": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Date when the certificate will expire",
-				MarkdownDescription: "Date when the certificate will expire",
+				Description:         "Date when the certificate will expire.",
+				MarkdownDescription: "Date when the certificate will expire.",
 			},
 			"publickey": schema.StringAttribute{
 				Required:            true,
-				Description:         "Public part of the certificate in PEM format, it's recommended to include the full chain",
-				MarkdownDescription: "Public part of the certificate in PEM format, it's recommended to include the full chain",
+				Description:         "Public part of the certificate in PEM format, it's recommended to include the full chain.",
+				MarkdownDescription: "Public part of the certificate in PEM format, it's recommended to include the full chain.",
 			},
 			"privatekey": schema.StringAttribute{
 				Required:            true,
-				Description:         "Private part of the certificate in PEM format, the certificate can't be protected with a password",
-				MarkdownDescription: "Private part of the certificate in PEM format, the certificate can't be protected with a password",
+				Description:         "Private part of the certificate in PEM format, the certificate can't be protected with a password.",
+				MarkdownDescription: "Private part of the certificate in PEM format, the certificate can't be protected with a password.",
 			},
 		},
 	}

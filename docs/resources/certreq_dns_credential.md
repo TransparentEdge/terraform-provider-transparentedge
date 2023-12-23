@@ -3,12 +3,12 @@
 page_title: "transparentedge_certreq_dns_credential Resource - transparentedge"
 subcategory: ""
 description: |-
-  Generates DNS Credentials
+  Provides DNS Credential resource. This allows to create, update and delete DNS Credentials used in DNS Certificate Requests https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl.
 ---
 
 # transparentedge_certreq_dns_credential (Resource)
 
-Generates DNS Credentials
+Provides DNS Credential resource. This allows to create, update and delete DNS Credentials used in [DNS Certificate Requests](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).
 
 
 
@@ -17,13 +17,13 @@ Generates DNS Credentials
 
 ### Required
 
-- `alias` (String) Alias for the DNS Credential
-- `parameters` (Map of String, Sensitive) Keys/parameters of the provider
+- `alias` (String) Alias for the DNS Credential.
+- `parameters` (Map of String, Sensitive) Keys/parameters of the provider.
 
 ### Read-Only
 
-- `dns_provider` (String) DNS Provider
-- `id` (Number) ID of the DNS Credential
+- `dns_provider` (String) DNS Provider.
+- `id` (Number) ID of the DNS Credential.
 
 ## Import
 

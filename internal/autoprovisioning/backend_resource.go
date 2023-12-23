@@ -44,8 +44,8 @@ func (r *backendResource) Metadata(_ context.Context, req resource.MetadataReque
 // Schema defines the schema for the resource.
 func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Manages backend configuration",
-		MarkdownDescription: "Manages backend configuration",
+		Description:         "Manages backend configuration.",
+		MarkdownDescription: "Provides a Backend resource. This allows backends to be created, updated and deleted.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -53,16 +53,16 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description:         "ID of the backend",
-				MarkdownDescription: "ID of the backend",
+				Description:         "ID of the backend.",
+				MarkdownDescription: "ID of the backend.",
 			},
 			"company": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description:         "Company ID that owns this backend",
-				MarkdownDescription: "Company ID that owns this backend",
+				Description:         "Company ID that owns this backend.",
+				MarkdownDescription: "Company ID that owns this backend.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -71,49 +71,49 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 						stringvalidator.RegexMatches(regexp.MustCompile("[^0-9][a-z0-9]+"), "The name must contain only lower case letters and numbers (cannot start with a number)"),
 					),
 				},
-				Description:         "Name of the backend",
-				MarkdownDescription: "Name of the backend",
+				Description:         "Name of the backend.",
+				MarkdownDescription: "Name of the backend.",
 			},
 			"vclname": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'",
-				MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`",
+				Description:         "Final unique name of the backend to be referenced in VCL Code: 'c{company_id}_{name}'.",
+				MarkdownDescription: "Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.",
 			},
 			"origin": schema.StringAttribute{
 				Required:            true,
-				Description:         "IP or DNS name pointing to the origin backend, for example: 'my-origin.com'",
-				MarkdownDescription: "IP or DNS name pointing to the origin backend, for example: `my-origin.com`",
+				Description:         "IP or DNS name pointing to the origin backend, for example: 'my-origin.com'.",
+				MarkdownDescription: "IP or DNS name pointing to the origin backend, for example: `my-origin.com`.",
 			},
 			"ssl": schema.BoolAttribute{
 				Required:            true,
-				Description:         "Use TLS encription when contacting with the origin backend",
-				MarkdownDescription: "Use TLS encription when contacting with the origin backend",
+				Description:         "Use TLS encription when contacting with the origin backend.",
+				MarkdownDescription: "Use TLS encription when contacting with the origin backend.",
 			},
 			"port": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
 					int64validator.Between(80, 65535),
 				},
-				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443",
-				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`",
+				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443.",
+				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`.",
 			},
 			"hchost": schema.StringAttribute{
 				Required:            true,
-				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com",
-				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`",
+				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.",
+				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.",
 			},
 			"hcpath": schema.StringAttribute{
 				Required:            true,
-				Description:         "Path that the healthcheck probe will use, for example: /favicon.ico",
-				MarkdownDescription: "Path that the healthcheck probe will use, for example: `/favicon.ico`",
+				Description:         "Path that the healthcheck probe will use, for example: /favicon.ico.",
+				MarkdownDescription: "Path that the healthcheck probe will use, for example: `/favicon.ico`.",
 			},
 			"hcstatuscode": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
 					int64validator.Between(200, 599),
 				},
-				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200",
-				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`",
+				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200.",
+				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.",
 			},
 		},
 	}

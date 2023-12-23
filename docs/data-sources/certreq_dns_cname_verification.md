@@ -3,12 +3,12 @@
 page_title: "transparentedge_certreq_dns_cname_verification Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Certificate Request DNS CNAME Verification
+  Certificate Request DNS CNAME Verification.
 ---
 
 # transparentedge_certreq_dns_cname_verification (Data Source)
 
-Certificate Request DNS CNAME Verification
+Certificate Request DNS CNAME Verification.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_vclconf Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Staging VCL Configuration listing
+  Staging VCL Configuration listing.
 ---
 
 # transparentedge_staging_vclconf (Data Source)
 
-Staging VCL Configuration listing
+Staging VCL Configuration listing.
 
 ## Example Usage
 
@@ -25,9 +25,9 @@ output "staging_vcl_config" {
 
 ### Read-Only
 
-- `company` (Number) Company ID that owns this Staging VCL config
-- `id` (Number) ID of the Staging VCL Config
-- `productiondate` (String) Date when the configuration was fully applied in the CDN
-- `uploaddate` (String) Date when the configuration was uploaded
-- `user` (String) User that created the configuration
-- `vclcode` (String) Verbatim of the VCL code
+- `company` (Number) Company ID that owns this Staging VCL config.
+- `id` (Number) ID of the Staging VCL Config.
+- `productiondate` (String) Date when the configuration was fully applied in the CDN.
+- `uploaddate` (String) Date when the configuration was uploaded.
+- `user` (String) User that created the configuration.
+- `vclcode` (String) Verbatim of the VCL code.

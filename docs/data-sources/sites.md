@@ -3,12 +3,12 @@
 page_title: "transparentedge_sites Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Sites listing
+  Sites listing.
 ---
 
 # transparentedge_sites (Data Source)
 
-Sites listing
+Sites listing.
 
 ## Example Usage
 
@@ -25,15 +25,15 @@ output "all_sites" {
 
 ### Read-Only
 
-- `sites` (Attributes List) List of all active sites (see [below for nested schema](#nestedatt--sites))
+- `sites` (Attributes List) List of all active sites. (see [below for nested schema](#nestedatt--sites))
 
 <a id="nestedatt--sites"></a>
 ### Nested Schema for `sites`
 
 Read-Only:
 
-- `active` (Boolean) Internal value that indicates if the site is active in the CDN
-- `company` (Number) Company ID that owns this domain
-- `domain` (String) Domain in FDQN form, i.e: `www.example.com`
-- `id` (Number) ID of the site
-- `ssl` (Boolean) If SSL is active (**deprecated**)
+- `active` (Boolean) Internal value that indicates if the site is active in the CDN.
+- `company` (Number) Company ID that owns this domain.
+- `domain` (String) Domain in FDQN form, i.e: `www.example.com`.
+- `id` (Number) ID of the site.
+- `ssl` (Boolean) If SSL is active (**deprecated**).

@@ -39,19 +39,19 @@ func (d *crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaR
 		Attributes: map[string]schema.Attribute{
 			"providers": schema.ListNestedAttribute{
 				Computed:    true,
-				Description: "Available DNS providers",
+				Description: "Available DNS providers.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"dns_provider": schema.StringAttribute{
 							Computed:            true,
-							Description:         "DNS Provider",
-							MarkdownDescription: "DNS Provider",
+							Description:         "DNS Provider.",
+							MarkdownDescription: "DNS Provider.",
 						},
 
 						"parameters": schema.ListAttribute{
 							Computed:            true,
-							Description:         "Keys/parameters of the provider",
-							MarkdownDescription: "Keys/parameters of the provider",
+							Description:         "Keys/parameters of the provider.",
+							MarkdownDescription: "Keys/parameters of the provider.",
 							ElementType:         types.StringType,
 						},
 					},

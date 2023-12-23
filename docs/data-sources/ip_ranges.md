@@ -3,12 +3,12 @@
 page_title: "transparentedge_ip_ranges Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Retrieves IP Ranges from TransparentEdge nodes
+  Retrieves IP Ranges from TransparentEdge nodes.
 ---
 
 # transparentedge_ip_ranges (Data Source)
 
-Retrieves IP Ranges from TransparentEdge nodes
+Retrieves IP Ranges from TransparentEdge nodes.
 
 ## Example Usage
 
@@ -53,5 +53,5 @@ resource "aws_security_group" "tcdn" {
 
 ### Read-Only
 
-- `ipv4_cidr_blocks` (List of String) List of IPv4 CIDR blocks
-- `ipv6_cidr_blocks` (List of String) List of IPv6 CIDR blocks
+- `ipv4_cidr_blocks` (List of String) List of IPv4 CIDR blocks.
+- `ipv6_cidr_blocks` (List of String) List of IPv6 CIDR blocks.

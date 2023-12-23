@@ -33,8 +33,8 @@ func (d *crDNSCNAMEVerifDataSource) Metadata(_ context.Context, req datasource.M
 // Schema defines the schema for the data source.
 func (d *crDNSCNAMEVerifDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Certificate Request DNS CNAME Verification",
-		MarkdownDescription: "Certificate Request DNS CNAME Verification",
+		Description:         "Certificate Request DNS CNAME Verification.",
+		MarkdownDescription: "Certificate Request DNS CNAME Verification.",
 		Attributes: map[string]schema.Attribute{
 			"cname": schema.StringAttribute{
 				Computed:            true,

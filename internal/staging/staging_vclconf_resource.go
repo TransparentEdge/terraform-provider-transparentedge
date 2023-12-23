@@ -41,19 +41,19 @@ func (r *stagingVclConfResource) Metadata(_ context.Context, req resource.Metada
 // Schema defines the schema for the resource.
 func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "Manages Staging VCL Configuration",
-		MarkdownDescription: "Manages Staging VCL Configuration",
+		Description:         "Manages Staging VCL Configuration.",
+		MarkdownDescription: "Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "ID of the Staging VCL Config",
-				MarkdownDescription: "ID of the Staging VCL Config",
+				Description:         "ID of the Staging VCL Config.",
+				MarkdownDescription: "ID of the Staging VCL Config.",
 			},
 			"company": schema.Int64Attribute{
 				Computed:            true,
-				Description:         "Company ID that owns this Staging VCL Config",
-				MarkdownDescription: "Company ID that owns this Staging VCL Config",
+				Description:         "Company ID that owns this Staging VCL Config.",
+				MarkdownDescription: "Company ID that owns this Staging VCL Config.",
 			},
 			"vclcode": schema.StringAttribute{
 				Required: true,
@@ -69,18 +69,18 @@ func (r *stagingVclConfResource) Schema(ctx context.Context, _ resource.SchemaRe
 			},
 			"uploaddate": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Date when the configuration was uploaded",
-				MarkdownDescription: "Date when the configuration was uploaded",
+				Description:         "Date when the configuration was uploaded.",
+				MarkdownDescription: "Date when the configuration was uploaded.",
 			},
 			"productiondate": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Date when the configuration was fully applied in the CDN",
-				MarkdownDescription: "Date when the configuration was fully applied in the CDN",
+				Description:         "Date when the configuration was fully applied in the CDN.",
+				MarkdownDescription: "Date when the configuration was fully applied in the CDN.",
 			},
 			"user": schema.StringAttribute{
 				Computed:            true,
-				Description:         "User that created the configuration",
-				MarkdownDescription: "User that created the configuration",
+				Description:         "User that created the configuration.",
+				MarkdownDescription: "User that created the configuration.",
 			},
 		},
 	}
