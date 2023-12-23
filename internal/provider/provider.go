@@ -244,6 +244,7 @@ func (p *TransparentEdgeProvider) Resources(_ context.Context) []func() resource
 		autoprovisioning.NewCustomCertificate,
 		autoprovisioning.NewCertReqDNSCredentialResource,
 		autoprovisioning.NewCertReqDNSResource,
+		autoprovisioning.NewCertReqHTTPResource,
 		staging.NewStagingBackendResource,
 		staging.NewStagingVclconfResource,
 	}

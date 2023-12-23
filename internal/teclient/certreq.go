@@ -268,3 +268,31 @@ func (c *Client) GetCertReqHTTP(id int) (CertReqHTTP, error) {
 
 	return data, nil
 }
+
+func (c *Client) CreateHTTPCertReq(certreq interface{}) (*CertReqHTTP, error) {
+	req, err := c.prepareJSONRequest(certreq, "POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/", c.HostURL, c.CompanyId))
+	if err != nil {
+		return nil, err
+	}
+
+	body, sc, err := c.doRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("%d - %s", sc, err.Error())
+	}
+	if sc == 400 {
+		apiError := c.parseAPIError(body)
+		if err := json.Unmarshal(body, &apiError); err == nil {
+			return nil, fmt.Errorf(apiError)
+		}
+	}
+	if !(sc == 200 || sc == 201) {
+		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
+	}
+
+	new_data := CertReqHTTP{}
+	if err := json.Unmarshal(body, &new_data); err != nil {
+		return nil, err
+	}
+
+	return &new_data, nil
+}
