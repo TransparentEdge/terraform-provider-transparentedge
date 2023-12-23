@@ -246,3 +246,25 @@ func (c *Client) UpdateDNSCertReq(certreq_id int, credential_id int) error {
 
 	return nil
 }
+
+func (c *Client) GetCertReqHTTP(id int) (CertReqHTTP, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/%d", c.HostURL, c.CompanyId, id), nil)
+	if err != nil {
+		return CertReqHTTP{}, err
+	}
+
+	body, sc, err := c.doRequest(req)
+	if err != nil {
+		return CertReqHTTP{}, err
+	}
+	if sc != 200 {
+		return CertReqHTTP{}, fmt.Errorf("Failure retrieving HTTP Certificate Request with id %d. %s", id, c.parseAPIError(body))
+	}
+
+	data := CertReqHTTP{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return CertReqHTTP{}, err
+	}
+
+	return data, nil
+}

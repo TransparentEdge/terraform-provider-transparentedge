@@ -81,7 +81,7 @@ type CustomCertificate struct {
 	PrivateKey types.String `tfsdk:"privatekey"`
 }
 
-// Certificate Requests
+// DNS Certificate Requests
 type CertReqDNSProvider struct {
 	DNSProvider types.String `tfsdk:"dns_provider"`
 	Parameters  types.List   `tfsdk:"parameters"`
@@ -106,6 +106,17 @@ type CertReqDNS struct {
 	ID            types.Int64  `tfsdk:"id"`
 	Domains       types.Set    `tfsdk:"domains"`
 	Credential    types.Int64  `tfsdk:"credential"`
+	CertificateID types.Int64  `tfsdk:"certificate_id"`
+	CreatedAt     types.String `tfsdk:"created_at"`
+	UpdatedAt     types.String `tfsdk:"updated_at"`
+	StatusMessage types.String `tfsdk:"status_message"`
+}
+
+// HTTP Certificate requests
+type CertReqHTTP struct {
+	ID            types.Int64  `tfsdk:"id"`
+	Domains       types.Set    `tfsdk:"domains"`
+	Standalone    types.Bool   `tfsdk:"standalone"`
 	CertificateID types.Int64  `tfsdk:"certificate_id"`
 	CreatedAt     types.String `tfsdk:"created_at"`
 	UpdatedAt     types.String `tfsdk:"updated_at"`

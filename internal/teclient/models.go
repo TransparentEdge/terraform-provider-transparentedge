@@ -129,7 +129,7 @@ type SSLCustomCertificate struct {
 	PrivateKey    string `json:"key"`
 }
 
-// Certificate Requests
+// DNS Certificate Requests
 type CRDNSKeys struct {
 	KeyNameID int    `json:"key_name_id"`
 	KeyName   string `json:"key_name"`
@@ -177,4 +177,17 @@ type CertReqDNS struct {
 	// as pointers since they can be null
 	CertificateID *int    `json:"certificate"`
 	Log           *string `json:"log"`
+}
+
+// HTTP Certificate Requests
+type CertReqHTTP struct {
+	ID         int    `json:"id"`
+	CommonName string `json:"cn"`
+	SAN        string `json:"san"`
+	Standalone bool   `json:"standalone"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"last_modified_at"`
+	// as pointers since they can be null
+	CertificateID *int    `json:"certificate"`
+	Log           *string `json:"error_text"`
 }

@@ -227,6 +227,7 @@ func (p *TransparentEdgeProvider) DataSources(_ context.Context) []func() dataso
 		autoprovisioning.NewCertReqDNSCNAMEVerifDataSource,
 		autoprovisioning.NewCertReqDNSCredentialDataSource,
 		autoprovisioning.NewCertReqDNSDataSource,
+		autoprovisioning.NewCertReqHTTPDataSource,
 		staging.NewStagingBackendDataSource,
 		staging.NewStagingBackendsDataSource,
 		staging.NewStagingVclconfDataSource,
