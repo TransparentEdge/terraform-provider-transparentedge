@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"slices"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -63,7 +63,9 @@ func SplitAndSort(input string) []string {
 		sortedWords = append(sortedWords, word)
 	}
 
-	slices.Sort(sortedWords)
+	// not available en freebsd
+	//slices.Sort(sortedWords)
+	sort.Strings(sortedWords)
 	return sortedWords
 }
 

@@ -97,7 +97,7 @@ func (d *certReqHTTPDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	// Generate the list of domains from CommonName and SAN
-	sorted_domains := helpers.SplitAndSort(api_model.CommonName + api_model.SAN)
+	sorted_domains := helpers.SplitAndSort(api_model.CommonName + "\n" + api_model.SAN)
 	domains, diags := types.SetValueFrom(ctx, types.StringType, sorted_domains)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
