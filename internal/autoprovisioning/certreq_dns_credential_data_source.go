@@ -34,8 +34,8 @@ func (d *crDNSCredentialDataSource) Metadata(_ context.Context, req datasource.M
 // Schema defines the schema for the data source.
 func (d *crDNSCredentialDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "DNS Credential.",
-		MarkdownDescription: "DNS Credential.",
+		Description:         "DNS Credential data source.",
+		MarkdownDescription: "DNS Credential data source.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

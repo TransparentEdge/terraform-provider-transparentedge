@@ -3,12 +3,12 @@
 page_title: "transparentedge_certreq_dns_credential Data Source - transparentedge"
 subcategory: ""
 description: |-
-  DNS Credential.
+  DNS Credential data source.
 ---
 
 # transparentedge_certreq_dns_credential (Data Source)
 
-DNS Credential.
+DNS Credential data source.
 
 ## Example Usage
 

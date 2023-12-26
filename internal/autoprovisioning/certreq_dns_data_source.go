@@ -34,8 +34,8 @@ func (d *certReqDNSDataSource) Metadata(_ context.Context, req datasource.Metada
 // Schema defines the schema for the data source.
 func (d *certReqDNSDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manages DNS Certificate Requests.",
-		MarkdownDescription: `Manages DNS Certificate Requests.
+		Description: "DNS Certificate Requests data source.",
+		MarkdownDescription: `DNS Certificate Requests data source.
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).`,
 

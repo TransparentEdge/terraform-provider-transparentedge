@@ -3,13 +3,13 @@
 page_title: "transparentedge_certreq_http Data Source - transparentedge"
 subcategory: ""
 description: |-
-  Manages HTTP Certificate Requests.
+  HTTP Certificate Requests data source.
   For detailed documentation (not Terraform-specific), please refer to this link https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl.
 ---
 
 # transparentedge_certreq_http (Data Source)
 
-Manages HTTP Certificate Requests.
+HTTP Certificate Requests data source.
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).
 

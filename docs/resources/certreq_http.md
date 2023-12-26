@@ -4,7 +4,7 @@ page_title: "transparentedge_certreq_http Resource - transparentedge"
 subcategory: ""
 description: |-
   Manages HTTP Certificate Requests.
-  This resource enables the creation of certificate requests using the HTTP challenge.
+  This resource enables the creation of certificate requests using the HTTP challenge. This challenge requires that the domain's DNS already points to the CDN.
   For detailed documentation (not Terraform-specific), please refer to this link https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl.
 ---
 
@@ -12,7 +12,7 @@ description: |-
 
 Manages HTTP Certificate Requests.
 
-This resource enables the creation of certificate requests using the HTTP challenge.
+This resource enables the creation of certificate requests using the HTTP challenge. This challenge requires that the domain's DNS already points to the CDN.
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).
 

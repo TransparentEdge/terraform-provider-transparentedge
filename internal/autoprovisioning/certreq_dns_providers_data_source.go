@@ -34,8 +34,8 @@ func (d *crDNSProviderDataSource) Metadata(_ context.Context, req datasource.Met
 // Schema defines the schema for the data source.
 func (d *crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         "List of the available Certificate Request DNS Providers.",
-		MarkdownDescription: "List of the available Certificate Request DNS Providers.",
+		Description:         "List available Certificate Request DNS Providers.",
+		MarkdownDescription: "List available Certificate Request DNS Providers.",
 		Attributes: map[string]schema.Attribute{
 			"providers": schema.ListNestedAttribute{
 				Computed:    true,

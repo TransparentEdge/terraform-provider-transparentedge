@@ -3,12 +3,12 @@
 page_title: "transparentedge_certreq_dns_providers Data Source - transparentedge"
 subcategory: ""
 description: |-
-  List of the available Certificate Request DNS Providers.
+  List available Certificate Request DNS Providers.
 ---
 
 # transparentedge_certreq_dns_providers (Data Source)
 
-List of the available Certificate Request DNS Providers.
+List available Certificate Request DNS Providers.
 
 ## Example Usage
 

@@ -5,8 +5,8 @@ subcategory: ""
 description: |-
   Manages DNS Certificate Requests.
   This resource enables the creation of certificate requests using various challenges, including:
-  - DNS Challenge
-  - DNS Challenge by CNAME
+  - DNS Challenge (a TXT record verifies the ownership of the domain)
+  - DNS Challenge by CNAME (refer to the transparentedge_certreq_dns_cname_verification data source)
   For detailed documentation (not Terraform-specific), please refer to this link https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl.
 ---
 
@@ -15,8 +15,8 @@ description: |-
 Manages DNS Certificate Requests.
 
 This resource enables the creation of certificate requests using various challenges, including:
-- DNS Challenge
-- DNS Challenge by CNAME
+- DNS Challenge (a TXT record verifies the ownership of the domain)
+- DNS Challenge by CNAME (refer to the `transparentedge_certreq_dns_cname_verification` data source)
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).
 
@@ -33,9 +33,22 @@ terraform {
   }
 }
 
+# This resource requires a credential
+# Example for 'AWS (Route53)'
+resource "transparentedge_certreq_dns_credential" "aws_01" {
+  alias = "aws-creds-01"
+
+  parameters = {
+    AWS_SECRET_ACCESS_KEY = "ABC"
+    AWS_ACCESS_KEY_ID     = "DEF"
+  }
+}
+
 resource "transparentedge_certreq_dns" "dns_cr_example_com" {
-  credential = 30
-  domains    = ["example.com", "*.example.com"]
+  credential = transparentedge_certreq_dns_credential.aws_01.id
+
+  # DNS Certificate Request can generated wildcard certificates
+  domains = ["example.com", "*.example.com"]
 }
 
 data "transparentedge_certreq_dns" "dns_cr_example_com" {

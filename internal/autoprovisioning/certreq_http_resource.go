@@ -50,7 +50,7 @@ func (r *certreqHTTPResource) Schema(ctx context.Context, _ resource.SchemaReque
 		Description: "Manages HTTP Certificate Requests.",
 		MarkdownDescription: `Manages HTTP Certificate Requests.
 
-This resource enables the creation of certificate requests using the HTTP challenge.
+This resource enables the creation of certificate requests using the HTTP challenge. This challenge requires that the domain's DNS already points to the CDN.
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).`,
 

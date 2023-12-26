@@ -8,6 +8,20 @@ description: |-
 
 # transparentedge_certreq_dns_cname_verification (Data Source)
 
+With this data source you can retrieve the CNAME record required to generate certificates using the DNS by CNAME challenge.
+To create a credential that uses the DNS by CNAME challenge you can use the `transparentedge_certreq_dns_credential` resource:
+
+```terraform
+# This credential must be attached to a DNS Certificate Request that wants to perform
+# the validation using a CNAME.
+resource "transparentedge_certreq_dns_credential" "cname_verif" {
+  alias = "cname-verification"
+  parameters = {
+    CNAME_VERIFICATION = ""
+  }
+}
+```
+
 This method relies on the CNAME or alias functionality of the DNS protocol to obtain SSL/TLS certificates. To use this method successfully, ensure that the `_acme-challenge` DNS record is set as a CNAME with the value obtained using this data-source.
 
 For instance, if you intend to create SSL/TLS certificates for both `example.com` and `*.example.com`, you must configure the following CNAME DNS record:

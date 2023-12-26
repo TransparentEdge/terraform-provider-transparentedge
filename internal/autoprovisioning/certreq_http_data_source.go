@@ -34,8 +34,8 @@ func (d *certReqHTTPDataSource) Metadata(_ context.Context, req datasource.Metad
 // Schema defines the schema for the data source.
 func (d *certReqHTTPDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manages HTTP Certificate Requests.",
-		MarkdownDescription: `Manages HTTP Certificate Requests.
+		Description: "HTTP Certificate Requests data source.",
+		MarkdownDescription: `HTTP Certificate Requests data source.
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).`,
 
