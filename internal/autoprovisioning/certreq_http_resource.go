@@ -144,7 +144,17 @@ func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateReq
 	// Wait until the CR is complete
 	updated_api_model := r.WaitCompleteHTTPCertReq(ctx, api_model)
 	if updated_api_model != nil {
-		api_model = updated_api_model
+		if updated_api_model.CertificateID != nil {
+			// Certificate was generated
+			api_model = updated_api_model
+		} else if updated_api_model.Log != nil && *updated_api_model.Log != "" {
+			// An error happened
+			resp.Diagnostics.AddError(
+				"Error generating the certificate",
+				helpers.ParseCertReqLogString(*updated_api_model.Log),
+			)
+			return
+		}
 	}
 
 	// Save API response in the state
