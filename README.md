@@ -81,15 +81,15 @@ To compile the provider, run `go install`. This builds and installs the provider
 
 To generate or update documentation, run `go generate`.
 
-To override the provider locally, it's usually enough to create the file `~/.terraformrc` (replace `<GOPATH>` with the correct one for your machine):
+To override the provider locally, it's usually enough to create the file `~/.terraformrc` (UNIX) or `%APPDATA%\terraform.rc` (Windows). Replace `${GOPATH}` or `${GOBIN}` with the correct one for your machine:
 
 ```
 # ~/.terraformrc
 provider_installation {
-  # Use $GOPATH/bin or $GOBIN
   dev_overrides {
-      "TransparentEdge/transparentedge" = "<GOPATH>/bin"
-      "registry.terraform.io/hashicorp/transparentedge" = "<GOPATH>/bin"
+      # Use $GOPATH/bin or $GOBIN
+      "TransparentEdge/transparentedge" = "${GOBIN}"
+      "registry.terraform.io/hashicorp/transparentedge" = "${GOBIN}"
   }
 
   # For all other providers, install them directly from their origin provider
