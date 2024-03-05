@@ -1,6 +1,8 @@
 module github.com/TransparentEdge/terraform-provider-transparentedge
 
-go 1.19
+go 1.21
+
+toolchain go1.21.7
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.18.0
