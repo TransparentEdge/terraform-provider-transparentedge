@@ -14,8 +14,9 @@ description: |-
 Manages DNS Certificate Requests.
 
 This resource enables the creation of certificate requests using various challenges, including:
-  - DNS Challenge (a TXT record verifies the ownership of the domain)
-  - DNS Challenge by CNAME (refer to the `transparentedge_certreq_dns_cname_verification` data source)
+
+* DNS Challenge (a TXT record verifies the ownership of the domain)
+* DNS Challenge by CNAME (refer to the `transparentedge_certreq_dns_cname_verification` data source)
 
 For detailed documentation (not Terraform-specific), please refer to this [link](https://docs.transparentedge.eu/getting-started/dashboard/auto-provisioning/ssl).
 
