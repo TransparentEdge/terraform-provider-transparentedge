@@ -103,7 +103,7 @@ func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest
 	vclconfState, errCreate := r.client.CreateVclconf(newVclconf, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
-			"Error creating vclconf",
+			"Error creating Production VCL Configuration",
 			fmt.Sprintf("Could not create the vclconf: %s", errCreate),
 		)
 		return
