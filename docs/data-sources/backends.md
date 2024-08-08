@@ -33,12 +33,14 @@ output "all_backends" {
 Read-Only:
 
 - `company` (Number) Company ID that owns this backend.
-- `hchost` (String) Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.
-- `hcpath` (String) Path that the healthcheck probe will use, for example: `/favicon.ico`.
-- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.
+- `hcdisabled` (Boolean) Whether the health check probe is disabled.
+- `hchost` (String) Host header that the health check probe will send to the origin, for example: `www.my-origin.com`.
+- `hcinterval` (Number) Interval in seconds within which the probes of each edge execute the HTTP request to validate the status of the backend.
+- `hcpath` (String) Path that the health check probe will use, for example: `/favicon.ico`.
+- `hcstatuscode` (Number) Status code expected when the probe receives the HTTP health check response, for example: `200`.
 - `id` (Number) ID of the backend.
 - `name` (String) Name of the backend.
 - `origin` (String) IP or DNS name pointing to the origin backend, for example: `my-origin.com`.
 - `port` (Number) Port where the origin is listening to HTTP requests, for example: `80` or `443`.
-- `ssl` (Boolean) Use TLS encription when contacting with the origin backend.
+- `ssl` (Boolean) Use TLS encryption when contacting with the origin backend.
 - `vclname` (String) Final unique name of the backend to be referenced in VCL Code: `c{company_id}_{name}`.

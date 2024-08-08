@@ -70,6 +70,8 @@ type BackendAPIModel struct {
 	HCHost       string `json:"host"`
 	HCPath       string `json:"health_check"`
 	HCStatusCode int    `json:"status_code"`
+	HCInterval   int    `json:"interval"`
+	HCDisabled   bool   `json:"no_probe"`
 }
 
 type NewBackendAPIModel struct {
@@ -80,6 +82,8 @@ type NewBackendAPIModel struct {
 	HCHost       string `json:"host"`
 	HCPath       string `json:"health_check"`
 	HCStatusCode int    `json:"status_code"`
+	HCInterval   int    `json:"interval"`
+	HCDisabled   bool   `json:"no_probe"`
 }
 
 // VCL Configs

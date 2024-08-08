@@ -14,7 +14,7 @@ terraform {
   required_providers {
     transparentedge = {
       source = "TransparentEdge/transparentedge"
-      version = ">=0.2.3"
+      version = ">=0.6.0"
     }
   }
 }
@@ -81,10 +81,12 @@ resource "transparentedge_backend" "origin1" {
   port   = 443
   ssl    = true
 
-  # healthcheck
+  # health check
   hchost       = "www.origin.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 200
+  hcinterval   = 40
+  hcdisabled   = false
 }
 ```
 

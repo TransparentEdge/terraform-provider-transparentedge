@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -86,8 +88,8 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 			},
 			"ssl": schema.BoolAttribute{
 				Required:            true,
-				Description:         "Use TLS encription when contacting with the origin backend.",
-				MarkdownDescription: "Use TLS encription when contacting with the origin backend.",
+				Description:         "Use TLS encryption when contacting with the origin backend.",
+				MarkdownDescription: "Use TLS encryption when contacting with the origin backend.",
 			},
 			"port": schema.Int64Attribute{
 				Required: true,
@@ -99,21 +101,38 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 			},
 			"hchost": schema.StringAttribute{
 				Required:            true,
-				Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.",
-				MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.",
+				Description:         "Host header that the health check probe will send to the origin, for example: www.my-origin.com.",
+				MarkdownDescription: "Host header that the health check probe will send to the origin, for example: `www.my-origin.com`.",
 			},
 			"hcpath": schema.StringAttribute{
 				Required:            true,
-				Description:         "Path that the healthcheck probe will use, for example: /favicon.ico.",
-				MarkdownDescription: "Path that the healthcheck probe will use, for example: `/favicon.ico`.",
+				Description:         "Path that the health check probe will use, for example: /favicon.ico.",
+				MarkdownDescription: "Path that the health check probe will use, for example: `/favicon.ico`.",
 			},
 			"hcstatuscode": schema.Int64Attribute{
 				Required: true,
 				Validators: []validator.Int64{
 					int64validator.Between(200, 599),
 				},
-				Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200.",
-				MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.",
+				Description:         "Status code expected when the probe receives the HTTP health check response, for example: 200.",
+				MarkdownDescription: "Status code expected when the probe receives the HTTP health check response, for example: `200`.",
+			},
+			"hcinterval": schema.Int64Attribute{
+				Computed: true,
+				Optional: true,
+				Validators: []validator.Int64{
+					int64validator.Between(15, 300),
+				},
+				Default:             int64default.StaticInt64(40),
+				Description:         "Interval in seconds within which the probes of each edge execute the HTTP request to validate the status of the backend.",
+				MarkdownDescription: "Interval in seconds within which the probes of each edge execute the HTTP request to validate the status of the backend.",
+			},
+			"hcdisabled": schema.BoolAttribute{
+				Computed:            true,
+				Optional:            true,
+				Default:             booldefault.StaticBool(false),
+				Description:         "Disable the health check probe.",
+				MarkdownDescription: "Disable the health check probe.",
 			},
 		},
 	}
@@ -138,6 +157,8 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		HCHost:       plan.HCHost.ValueString(),
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
+		HCInterval:   int(plan.HCInterval.ValueInt64()),
+		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 	backendState, errCreate := r.client.CreateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
@@ -159,6 +180,8 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 	plan.HCHost = types.StringValue(backendState.HCHost)
 	plan.HCPath = types.StringValue(backendState.HCPath)
 	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
+	plan.HCInterval = types.Int64Value(int64(backendState.HCInterval))
+	plan.HCDisabled = types.BoolValue(backendState.HCDisabled)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -183,6 +206,8 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		HCHost:       plan.HCHost.ValueString(),
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
+		HCInterval:   int(plan.HCInterval.ValueInt64()),
+		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 	backendState, errCreate := r.client.UpdateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
@@ -204,6 +229,8 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 	plan.HCHost = types.StringValue(backendState.HCHost)
 	plan.HCPath = types.StringValue(backendState.HCPath)
 	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
+	plan.HCInterval = types.Int64Value(int64(backendState.HCInterval))
+	plan.HCDisabled = types.BoolValue(backendState.HCDisabled)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -231,6 +258,8 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.HCHost = types.StringValue(backend.HCHost)
 			state.HCPath = types.StringValue(backend.HCPath)
 			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
+			state.HCInterval = types.Int64Value(int64(backend.HCInterval))
+			state.HCDisabled = types.BoolValue(backend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 			return
 		}
@@ -250,6 +279,8 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.HCHost = types.StringValue(backend.HCHost)
 			state.HCPath = types.StringValue(backend.HCPath)
 			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
+			state.HCInterval = types.Int64Value(int64(backend.HCInterval))
+			state.HCDisabled = types.BoolValue(backend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 			return
 		}

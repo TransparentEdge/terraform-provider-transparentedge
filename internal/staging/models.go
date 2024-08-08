@@ -13,6 +13,8 @@ type StagingBackend struct {
 	HCHost       types.String `tfsdk:"hchost"`
 	HCPath       types.String `tfsdk:"hcpath"`
 	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`
+	HCInterval   types.Int64  `tfsdk:"hcinterval"`
+	HCDisabled   types.Bool   `tfsdk:"hcdisabled"`
 }
 
 type StagingVCLConf struct {

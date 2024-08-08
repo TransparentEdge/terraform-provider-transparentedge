@@ -44,7 +44,7 @@ resource "transparentedge_backend" "myorig" {
   port   = 443
   ssl    = true
 
-  # healthcheck
+  # health check
   hchost       = "www.origin.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 200

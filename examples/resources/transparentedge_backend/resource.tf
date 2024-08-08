@@ -4,10 +4,11 @@ resource "transparentedge_backend" "origin1" {
   port   = 443
   ssl    = true
 
-  # healthcheck
+  # health check
   hchost       = "www.origin.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 200
+  hcinterval   = 40
 }
 
 resource "transparentedge_backend" "origin2" {
@@ -16,10 +17,11 @@ resource "transparentedge_backend" "origin2" {
   port   = 80
   ssl    = false
 
-  # healthcheck
+  # health check (disabled) - hchost, hcpath, hcstatuscode are still required
   hchost       = "www.origin2.example.com"
   hcpath       = "/favicon.ico"
   hcstatuscode = 403
+  hcdisabled   = true # the health check probe is disabled
 }
 
 output "origin1" {

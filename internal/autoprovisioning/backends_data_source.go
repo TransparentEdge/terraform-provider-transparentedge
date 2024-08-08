@@ -71,8 +71,8 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						},
 						"ssl": schema.BoolAttribute{
 							Computed:            true,
-							Description:         "Use TLS encription when contacting with the origin backend.",
-							MarkdownDescription: "Use TLS encription when contacting with the origin backend.",
+							Description:         "Use TLS encryption when contacting with the origin backend.",
+							MarkdownDescription: "Use TLS encryption when contacting with the origin backend.",
 						},
 						"port": schema.Int64Attribute{
 							Computed:            true,
@@ -81,18 +81,28 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						},
 						"hchost": schema.StringAttribute{
 							Computed:            true,
-							Description:         "Host header that the healthcheck probe will send to the origin, for example: www.my-origin.com.",
-							MarkdownDescription: "Host header that the healthcheck probe will send to the origin, for example: `www.my-origin.com`.",
+							Description:         "Host header that the health check probe will send to the origin, for example: www.my-origin.com.",
+							MarkdownDescription: "Host header that the health check probe will send to the origin, for example: `www.my-origin.com`.",
 						},
 						"hcpath": schema.StringAttribute{
 							Computed:            true,
-							Description:         "Path that the healthcheck probe will use, for example: /favicon.ico.",
-							MarkdownDescription: "Path that the healthcheck probe will use, for example: `/favicon.ico`.",
+							Description:         "Path that the health check probe will use, for example: /favicon.ico.",
+							MarkdownDescription: "Path that the health check probe will use, for example: `/favicon.ico`.",
 						},
 						"hcstatuscode": schema.Int64Attribute{
 							Computed:            true,
-							Description:         "Status code expected when the probe receives the HTTP healthcheck response, for example: 200.",
-							MarkdownDescription: "Status code expected when the probe receives the HTTP healthcheck response, for example: `200`.",
+							Description:         "Status code expected when the probe receives the HTTP health check response, for example: 200.",
+							MarkdownDescription: "Status code expected when the probe receives the HTTP health check response, for example: `200`.",
+						},
+						"hcinterval": schema.Int64Attribute{
+							Computed:            true,
+							Description:         "Interval in seconds within which the probes of each edge execute the HTTP request to validate the status of the backend.",
+							MarkdownDescription: "Interval in seconds within which the probes of each edge execute the HTTP request to validate the status of the backend.",
+						},
+						"hcdisabled": schema.BoolAttribute{
+							Computed:            true,
+							Description:         "Whether the health check probe is disabled.",
+							MarkdownDescription: "Whether the health check probe is disabled.",
 						},
 					},
 				},
@@ -127,6 +137,8 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 			HCHost:       types.StringValue(backend.HCHost),
 			HCPath:       types.StringValue(backend.HCPath),
 			HCStatusCode: types.Int64Value(int64(backend.HCStatusCode)),
+			HCInterval:   types.Int64Value(int64(backend.HCInterval)),
+			HCDisabled:   types.BoolValue(backend.HCDisabled),
 		}
 
 		state.Backends = append(state.Backends, backendState)
