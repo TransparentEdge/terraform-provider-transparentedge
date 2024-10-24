@@ -82,7 +82,7 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading sites",
-			fmt.Sprintf("Unexpected error trying to read sites state.\n"+err.Error()),
+			fmt.Sprintf("Unexpected error trying to read sites state.\n%s\n", err.Error()),
 		)
 		return
 	}

@@ -58,7 +58,7 @@ func (d *ipRangesDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading IP Ranges",
-			fmt.Sprintf("Unexpected error trying to read ip ranges.\n"+err.Error()),
+			fmt.Sprintf("Unexpected error trying to read ip ranges.\n%s\n", err.Error()),
 		)
 		return
 	}

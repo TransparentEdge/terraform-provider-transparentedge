@@ -92,7 +92,7 @@ func (c *Client) CreateDNSCredential(dns_credential NewCRDNSCredential) (*CRDNSC
 	if sc == 400 {
 		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf(apiError)
+			return nil, fmt.Errorf("%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
@@ -120,7 +120,7 @@ func (c *Client) UpdateDNSCredential(dns_credential NewCRDNSCredential, id int) 
 	if sc == 400 {
 		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf(apiError)
+			return nil, fmt.Errorf("%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
@@ -188,7 +188,7 @@ func (c *Client) CreateDNSCertReq(certreq interface{}) (*CertReqDNS, error) {
 	if sc == 400 {
 		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf(apiError)
+			return nil, fmt.Errorf("%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
@@ -237,7 +237,7 @@ func (c *Client) UpdateDNSCertReq(certreq_id int, credential_id int) error {
 	if sc == 400 {
 		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return fmt.Errorf(apiError)
+			return fmt.Errorf("%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
@@ -282,7 +282,7 @@ func (c *Client) CreateHTTPCertReq(certreq interface{}) (*CertReqHTTP, error) {
 	if sc == 400 {
 		apiError := c.parseAPIError(body)
 		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf(apiError)
+			return nil, fmt.Errorf("%s\n", apiError)
 		}
 	}
 	if !(sc == 200 || sc == 201) {
