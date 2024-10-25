@@ -109,6 +109,7 @@ type VCLConfAPIModel struct {
 
 type NewVCLConfAPIModel struct {
 	VCLCode string `json:"config_body"`
+	Comment string `json:"comment"`
 }
 
 // Certificates
