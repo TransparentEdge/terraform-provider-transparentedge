@@ -37,6 +37,7 @@ type Backend struct {
 	Origin       types.String `tfsdk:"origin"`
 	Ssl          types.Bool   `tfsdk:"ssl"`
 	Port         types.Int64  `tfsdk:"port"`
+	Headers      types.String `tfsdk:"headers"`
 	HCHost       types.String `tfsdk:"hchost"`
 	HCPath       types.String `tfsdk:"hcpath"`
 	HCStatusCode types.Int64  `tfsdk:"hcstatuscode"`

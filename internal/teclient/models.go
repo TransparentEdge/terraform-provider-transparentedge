@@ -67,6 +67,7 @@ type BackendAPIModel struct {
 	Origin       string `json:"origin"`
 	Ssl          bool   `json:"ssl"`
 	Port         int    `json:"port"`
+	Headers      string `json:"extra_headers"`
 	HCHost       string `json:"host"`
 	HCPath       string `json:"health_check"`
 	HCStatusCode int    `json:"status_code"`
@@ -79,6 +80,7 @@ type NewBackendAPIModel struct {
 	Origin       string `json:"origin"`
 	Ssl          bool   `json:"ssl"`
 	Port         int    `json:"port"`
+	Headers      string `json:"extra_headers"`
 	HCHost       string `json:"host"`
 	HCPath       string `json:"health_check"`
 	HCStatusCode int    `json:"status_code"`

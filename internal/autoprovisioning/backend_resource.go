@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -99,6 +100,19 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443.",
 				MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`.",
 			},
+			"headers": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Validators: []validator.String{
+					stringvalidator.All(
+						stringvalidator.RegexMatches(
+						regexp.MustCompile(`(?im)^(([a-z]\w*)[ ]*:[ ]*([^":]+))$`), "Extra headers must be in the format 'Key_1: Value_1\nKey_2: Value_2\n...\nKey_n: Value_n'"),
+					),
+				},
+				Default:  stringdefault.StaticString(""),
+				Description:         "Extra headers needed in order to validate backend status.",
+				MarkdownDescription: "Extra headers needed in order to validate backend status.",
+			},
 			"hchost": schema.StringAttribute{
 				Required:            true,
 				Description:         "Host header that the health check probe will send to the origin, for example: www.my-origin.com.",
@@ -154,6 +168,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		Origin:       plan.Origin.ValueString(),
 		Ssl:          plan.Ssl.ValueBool(),
 		Port:         int(plan.Port.ValueInt64()),
+		Headers:      plan.Headers.ValueString(),
 		HCHost:       plan.HCHost.ValueString(),
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
@@ -177,6 +192,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 	plan.Origin = types.StringValue(backendState.Origin)
 	plan.Ssl = types.BoolValue(backendState.Ssl)
 	plan.Port = types.Int64Value(int64(backendState.Port))
+	plan.Headers = types.StringValue(backendState.Headers)
 	plan.HCHost = types.StringValue(backendState.HCHost)
 	plan.HCPath = types.StringValue(backendState.HCPath)
 	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
@@ -203,6 +219,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		Origin:       plan.Origin.ValueString(),
 		Ssl:          plan.Ssl.ValueBool(),
 		Port:         int(plan.Port.ValueInt64()),
+		Headers:      plan.Headers.ValueString(),
 		HCHost:       plan.HCHost.ValueString(),
 		HCPath:       plan.HCPath.ValueString(),
 		HCStatusCode: int(plan.HCStatusCode.ValueInt64()),
@@ -226,6 +243,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 	plan.Origin = types.StringValue(backendState.Origin)
 	plan.Ssl = types.BoolValue(backendState.Ssl)
 	plan.Port = types.Int64Value(int64(backendState.Port))
+	plan.Headers = types.StringValue(backendState.Headers)
 	plan.HCHost = types.StringValue(backendState.HCHost)
 	plan.HCPath = types.StringValue(backendState.HCPath)
 	plan.HCStatusCode = types.Int64Value(int64(backendState.HCStatusCode))
@@ -255,6 +273,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.Origin = types.StringValue(backend.Origin)
 			state.Ssl = types.BoolValue(backend.Ssl)
 			state.Port = types.Int64Value(int64(backend.Port))
+			state.Headers = types.StringValue(backend.Headers)
 			state.HCHost = types.StringValue(backend.HCHost)
 			state.HCPath = types.StringValue(backend.HCPath)
 			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))
@@ -276,6 +295,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.Origin = types.StringValue(backend.Origin)
 			state.Ssl = types.BoolValue(backend.Ssl)
 			state.Port = types.Int64Value(int64(backend.Port))
+			state.Headers = types.StringValue(backend.Headers)
 			state.HCHost = types.StringValue(backend.HCHost)
 			state.HCPath = types.StringValue(backend.HCPath)
 			state.HCStatusCode = types.Int64Value(int64(backend.HCStatusCode))

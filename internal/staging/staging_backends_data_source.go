@@ -83,6 +83,11 @@ func (d *stagingBackendsDataSource) Schema(_ context.Context, _ datasource.Schem
 							Description:         "Port where the origin is listening to HTTP requests, for example: 80 or 443.",
 							MarkdownDescription: "Port where the origin is listening to HTTP requests, for example: `80` or `443`.",
 						},
+						"headers": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Extra headers needed in order to validate backend status.",
+							MarkdownDescription: "Extra headers needed in order to validate backend status.",
+						},
 						"hchost": schema.StringAttribute{
 							Computed:    true,
 							Description: "Host header that the health check probe will send to the origin, for example: www.my-origin.com.",
@@ -137,6 +142,7 @@ func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.Rea
 			Origin:       types.StringValue(stagingBackend.Origin),
 			Ssl:          types.BoolValue(stagingBackend.Ssl),
 			Port:         types.Int64Value(int64(stagingBackend.Port)),
+			Headers:      types.StringValue(stagingBackend.Headers),
 			HCHost:       types.StringValue(stagingBackend.HCHost),
 			HCPath:       types.StringValue(stagingBackend.HCPath),
 			HCStatusCode: types.Int64Value(int64(stagingBackend.HCStatusCode)),
