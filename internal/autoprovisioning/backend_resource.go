@@ -106,7 +106,7 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 				Validators: []validator.String{
 					stringvalidator.All(
 						stringvalidator.RegexMatches(
-						regexp.MustCompile(`(?im)^(([a-z]\w*)[ ]*:[ ]*([^":]+))$`), "Extra headers must be in the format 'Key_1: Value_1\nKey_2: Value_2\n...\nKey_n: Value_n'"),
+						regexp.MustCompile(`(?im)^(([a-z](\w|[-])*)[ ]*:[ ]*([^":]+))$`), "Extra headers must be in the format 'Key_1: Value_1\nKey_2: Value_2\n...\nKey_n: Value_n'"),
 					),
 				},
 				Default:  stringdefault.StaticString(""),
