@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,6 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -128,8 +129,8 @@ func (r *customCertificateResource) Create(ctx context.Context, req resource.Cre
 	plan.Domains = types.StringValue(san_domains)
 	plan.Expiration = types.StringValue(expiration)
 	// Do not update the plan for public and private key since our API may introduce newlines (or remove)
-	//plan.PublicKey = types.StringValue(customCertificateState.PublicKey)
-	//plan.PrivateKey = types.StringValue(customCertificateState.PrivateKey)
+	// plan.PublicKey = types.StringValue(customCertificateState.PublicKey)
+	// plan.PrivateKey = types.StringValue(customCertificateState.PrivateKey)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -178,8 +179,8 @@ func (r *customCertificateResource) Update(ctx context.Context, req resource.Upd
 	plan.Domains = types.StringValue(san_domains)
 	plan.Expiration = types.StringValue(expiration)
 	// Do not update the plan for public and private key since our API may introduce newlines (or remove)
-	//plan.PublicKey = types.StringValue(customCertificateState.PublicKey)
-	//plan.PrivateKey = types.StringValue(customCertificateState.PrivateKey)
+	// plan.PublicKey = types.StringValue(customCertificateState.PublicKey)
+	// plan.PrivateKey = types.StringValue(customCertificateState.PrivateKey)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

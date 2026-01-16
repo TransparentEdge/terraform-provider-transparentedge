@@ -6,11 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/companies"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -18,6 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/companies"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 const (

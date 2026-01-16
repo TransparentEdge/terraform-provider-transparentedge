@@ -64,7 +64,7 @@ func SplitAndSort(input string) []string {
 	}
 
 	// not available en freebsd
-	//slices.Sort(sortedWords)
+	// slices.Sort(sortedWords)
 	sort.Strings(sortedWords)
 	return sortedWords
 }

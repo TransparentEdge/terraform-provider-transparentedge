@@ -2,25 +2,35 @@
   description = "Nix Flake Development Shell";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # https://www.nixhub.io/packages/go
+    nixpkgs.url = "github:nixos/nixpkgs/f665af0cdb70ed27e1bd8f9fdfecaf451260fc55";
+    #nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs-unstable,
-    flake-utils,
-  }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
     flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = nixpkgs.legacyPackages.${system};
-        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
-      in {
+      system:
+      let
+        pkgs = import nixpkgs {
+          system = system;
+          config.allowUnfree = true;
+        };
+      in
+      {
         devShell = pkgs.mkShell {
           name = "go-shell";
-          buildInputs = with pkgs; [go gopls golangci-lint pkgs-unstable.terraform];
+          buildInputs = with pkgs; [
+            go_1_24
+            gopls
+            golangci-lint
+            terraform
+          ];
           shellHook = ''
             echo "shell ready"
           '';

@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,6 +17,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 const (

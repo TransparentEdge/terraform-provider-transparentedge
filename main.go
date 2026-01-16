@@ -5,8 +5,9 @@ import (
 	"flag"
 	"log"
 
-	transparentedge "github.com/TransparentEdge/terraform-provider-transparentedge/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+
+	transparentedge "github.com/TransparentEdge/terraform-provider-transparentedge/internal/provider"
 )
 
 // Provider documentation generation.
@@ -31,7 +32,6 @@ func main() {
 	}
 
 	err := providerserver.Serve(context.Background(), transparentedge.New(version, commit), opts)
-
 	if err != nil {
 		log.Fatal(err.Error())
 	}

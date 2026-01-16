@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -126,7 +127,7 @@ func (d *backendDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	// Map response body to model
 	state.ID = types.Int64Value(int64(backend.ID))
 	state.Company = types.Int64Value(int64(backend.Company))
-	//state.Name = types.StringValue(backend.Name)
+	// state.Name = types.StringValue(backend.Name)
 	state.VclName = types.StringValue("c" + strconv.Itoa(backend.Company) + "_" + backend.Name)
 	state.Origin = types.StringValue(backend.Origin)
 	state.Ssl = types.BoolValue(backend.Ssl)
