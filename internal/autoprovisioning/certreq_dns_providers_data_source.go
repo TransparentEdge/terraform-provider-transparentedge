@@ -3,11 +3,12 @@ package autoprovisioning
 import (
 	"context"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.

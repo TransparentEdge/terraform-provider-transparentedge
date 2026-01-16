@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,6 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
