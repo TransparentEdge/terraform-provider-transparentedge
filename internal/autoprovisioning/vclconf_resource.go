@@ -20,7 +20,6 @@ var (
 	_ resource.Resource                = &vclconfResource{}
 	_ resource.ResourceWithConfigure   = &vclconfResource{}
 	_ resource.ResourceWithImportState = &vclconfResource{}
-	_ resource.ResourceWithModifyPlan  = &vclconfResource{}
 )
 
 // helper function to simplify the provider implementation.
@@ -113,7 +112,7 @@ func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest
 	plan.ID = types.Int64Value(int64(vclconfState.ID))
 	plan.Company = types.Int64Value(int64(vclconfState.Company))
 	// do not update the VCL Config since our API does some string modifications
-	//plan.VCLCode = types.StringValue(vclconfState.VCLCode)
+	// plan.VCLCode = types.StringValue(vclconfState.VCLCode)
 	plan.UploadDate = types.StringValue(vclconfState.UploadDate)
 	plan.ProductionDate = types.StringValue(vclconfState.ProductionDate)
 	plan.User = types.StringValue(vclconfState.CreatorUser.FirstName + " " + vclconfState.CreatorUser.LastName + " <" + vclconfState.CreatorUser.Email + ">")
@@ -165,17 +164,23 @@ func (r *vclconfResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
 
-func (r *vclconfResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	// If the entire plan is null, the resource is planned for destruction.
-	if req.Plan.Raw.IsNull() {
-		resp.Diagnostics.AddWarning(
-			"Resource Destruction Considerations",
-			"Applying this resource destruction will only remove the resource from the Terraform state.\n"+
-				"It will not call the API for deletion since VCL configurations cannot be deleted.",
-		)
+	tflog.Info(ctx, "Deleting VCL configuration by creating placeholder config")
+
+	placeholderVclconf := teclient.NewVCLConfAPIModel{
+		VCLCode: `sub vcl_recv { set req.http.placeholder = "Modified by 'terraform destroy'"; }`,
 	}
+
+	_, errCreate := r.client.CreateVclconf(placeholderVclconf, teclient.ProdEnv)
+	if errCreate != nil {
+		resp.Diagnostics.AddError(
+			"Error deleting VCL Configuration",
+			fmt.Sprintf("Could not create placeholder VCL configuration: %s", errCreate),
+		)
+		return
+	}
+
+	tflog.Info(ctx, "Successfully deleted VCL configuration with an empty placeholder")
 }
 
 // Configure adds the provider configured client to the resource.
