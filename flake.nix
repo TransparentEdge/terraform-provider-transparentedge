@@ -26,7 +26,7 @@
         devShell = pkgs.mkShell {
           name = "go-shell";
           buildInputs = with pkgs; [
-            go
+            go_1_24
             gopls
             golangci-lint
             terraform
