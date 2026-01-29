@@ -21,6 +21,7 @@ var (
 	_ resource.Resource                = &stagingVclConfResource{}
 	_ resource.ResourceWithConfigure   = &stagingVclConfResource{}
 	_ resource.ResourceWithImportState = &stagingVclConfResource{}
+	_ resource.ResourceWithModifyPlan  = &stagingVclConfResource{}
 )
 
 // helper function to simplify the provider implementation.
@@ -165,23 +166,17 @@ func (r *stagingVclConfResource) Delete(ctx context.Context, req resource.Delete
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
 
-	tflog.Info(ctx, "Deleting VCL configuration by creating placeholder config")
-
-	placeholderVclconf := teclient.NewVCLConfAPIModel{
-		VCLCode: `sub vcl_recv { set req.http.placeholder = "Modified by 'terraform destroy'"; }`,
-	}
-
-	_, errCreate := r.client.CreateVclconf(placeholderVclconf, teclient.StagingEnv)
-	if errCreate != nil {
-		resp.Diagnostics.AddError(
-			"Error deleting VCL Configuration",
-			fmt.Sprintf("Could not create placeholder VCL configuration: %s", errCreate),
+func (r *stagingVclConfResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// If the entire plan is null, the resource is planned for destruction.
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning(
+			"Resource Destruction Considerations",
+			"Applying this resource destruction will only remove the resource from the Terraform state.\n"+
+				"It will not call the API for deletion since VCL configurations cannot be deleted.",
 		)
-		return
 	}
-
-	tflog.Info(ctx, "Successfully deleted VCL configuration with an empty placeholder")
 }
 
 // Configure adds the provider configured client to the resource.
