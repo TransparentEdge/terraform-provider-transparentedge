@@ -24,7 +24,7 @@ var (
 	_ resource.ResourceWithModifyPlan  = &vclconfResource{}
 )
 
-// helper function to simplify the provider implementation.
+// NewVclconfResource is a helper function to simplify the provider implementation.
 func NewVclconfResource() resource.Resource {
 	return &vclconfResource{}
 }
@@ -35,12 +35,12 @@ type vclconfResource struct {
 }
 
 // Metadata returns the resource type name.
-func (r *vclconfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (*vclconfResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_vclconf"
 }
 
 // Schema defines the schema for the resource.
-func (r *vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*vclconfResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manages VCL Configuration.",
 		MarkdownDescription: "Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.",
@@ -87,26 +87,31 @@ func (r *vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 	}
 }
 
-// Create
+// Create.
 func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan VCLConf
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	tflog.Info(ctx, "Creating new VCL configuration")
+
 	newVclconf := teclient.NewVCLConfAPIModel{
 		VCLCode: plan.VCLCode.ValueString(),
 	}
+
 	vclconfState, errCreate := r.client.CreateVclconf(newVclconf, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Production VCL Configuration",
 			fmt.Sprintf("Could not create the vclconf: %s", errCreate),
 		)
+
 		return
 	}
 
@@ -123,15 +128,17 @@ func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *vclconfResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (*vclconfResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
 }
 
-// Read resource information
+// Read resource information.
 func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
 	var state VCLConf
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -142,15 +149,18 @@ func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, re
 			"Unable to read VclConf info",
 			err.Error(),
 		)
+
 		return
 	}
 
 	// Set state
 	state.ID = types.Int64Value(int64(vclconf.ID))
 	state.Company = types.Int64Value(int64(vclconf.Company))
+
 	if helpers.SanitizeStringForDiff(vclconf.VCLCode) != helpers.SanitizeStringForDiff(state.VCLCode.ValueString()) {
 		state.VCLCode = types.StringValue(vclconf.VCLCode)
 	}
+
 	state.UploadDate = types.StringValue(vclconf.UploadDate)
 	state.ProductionDate = types.StringValue(vclconf.ProductionDate)
 	state.User = types.StringValue(vclconf.CreatorUser.FirstName + " " + vclconf.CreatorUser.LastName + " <" + vclconf.CreatorUser.Email + ">")
@@ -158,17 +168,19 @@ func (r *vclconfResource) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-// Delete
-func (r *vclconfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+// Delete.
+func (*vclconfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state VCLConf
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 }
 
-func (r *vclconfResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (*vclconfResource) ModifyPlan(_ context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	// If the entire plan is null, the resource is planned for destruction.
 	if req.Plan.Raw.IsNull() {
 		resp.Diagnostics.AddWarning(
@@ -180,15 +192,22 @@ func (r *vclconfResource) ModifyPlan(ctx context.Context, req resource.ModifyPla
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *vclconfResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *vclconfResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	r.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	r.client = client
 }
 
-func (r *vclconfResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*vclconfResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// path.Root here is ignored
 	// VCL Configs can be imported without issues, but they won't match perfectly
 	// the configuration because of newlines and spaces

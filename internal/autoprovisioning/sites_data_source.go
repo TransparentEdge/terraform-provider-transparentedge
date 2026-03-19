@@ -28,12 +28,12 @@ type sitesDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *sitesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*sitesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_sites"
 }
 
 // Schema defines the schema for the data source.
-func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Sites listing.",
 		MarkdownDescription: "Sites listing.",
@@ -76,7 +76,7 @@ func (d *sitesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *sitesDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Sites
 
 	sites, err := d.client.GetSites()
@@ -85,6 +85,7 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			"Error reading sites",
 			fmt.Sprintf("Unexpected error trying to read sites state.\n%s\n", err.Error()),
 		)
+
 		return
 	}
 
@@ -93,7 +94,7 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		siteState := SiteDataSourceModel{
 			ID:      types.Int64Value(int64(site.ID)),
 			Company: types.Int64Value(int64(site.Company)),
-			Domain:  types.StringValue(site.Url),
+			Domain:  types.StringValue(site.URL),
 			Ssl:     types.BoolValue(site.Ssl),
 			Active:  types.BoolValue(site.Active),
 		}
@@ -104,16 +105,24 @@ func (d *sitesDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	// Set state
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *sitesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *sitesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

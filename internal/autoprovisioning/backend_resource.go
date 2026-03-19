@@ -30,7 +30,7 @@ var (
 	_ resource.ResourceWithImportState = &backendResource{}
 )
 
-// helper function to simplify the provider implementation.
+// NewBackendResource is a helper function to simplify the provider implementation.
 func NewBackendResource() resource.Resource {
 	return &backendResource{}
 }
@@ -41,12 +41,12 @@ type backendResource struct {
 }
 
 // Metadata returns the resource type name.
-func (r *backendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (*backendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_backend"
 }
 
 // Schema defines the schema for the resource.
-func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*backendResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manages backend configuration.",
 		MarkdownDescription: "Provides a Backend resource. This allows backends to be created, updated and deleted.",
@@ -153,12 +153,14 @@ func (r *backendResource) Schema(ctx context.Context, _ resource.SchemaRequest, 
 	}
 }
 
-// Create
+// Create.
 func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan Backend
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -176,12 +178,14 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		HCInterval:   int(plan.HCInterval.ValueInt64()),
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
+
 	backendState, errCreate := r.client.CreateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating backend",
 			fmt.Sprintf("Could not create the backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
+
 		return
 	}
 
@@ -206,8 +210,10 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan Backend
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -227,12 +233,14 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		HCInterval:   int(plan.HCInterval.ValueInt64()),
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
+
 	backendState, errCreate := r.client.UpdateBackend(newBackend, teclient.ProdEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating backend",
 			fmt.Sprintf("Could not update the backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
+
 		return
 	}
 
@@ -254,19 +262,22 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-// Read resource information
+// Read resource information.
 func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
 	var state Backend
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		if backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err == nil {
+		backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.ProdEnv)
+		if err == nil {
 			state.ID = types.Int64Value(int64(backend.ID))
 			state.Company = types.Int64Value(int64(backend.Company))
 			state.Name = types.StringValue(backend.Name)
@@ -281,6 +292,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.HCInterval = types.Int64Value(int64(backend.HCInterval))
 			state.HCDisabled = types.BoolValue(backend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 			return
 		}
 	}
@@ -303,6 +315,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 			state.HCInterval = types.Int64Value(int64(backend.HCInterval))
 			state.HCDisabled = types.BoolValue(backend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 			return
 		}
 	}
@@ -311,35 +324,47 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.AddError("Backend not found", "Backend '"+state.Name.ValueString()+"' doesn't exist in API")
 }
 
-// Delete
+// Delete.
 func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Backend
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
-	if err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.ProdEnv); err != nil {
+
+	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.ProdEnv)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a backend",
 			"Could not delete the backend: "+state.Name.ValueString()+"\n"+err.Error(),
 		)
+
 		return
 	}
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *backendResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *backendResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	r.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	r.client = client
 }
 
-func (r *backendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*backendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

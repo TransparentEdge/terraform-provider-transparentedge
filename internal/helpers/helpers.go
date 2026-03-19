@@ -5,43 +5,47 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func SanitizeStringForDiff(config string) string {
 	config = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(config), "\n")
-	output := ""
 
-	for _, v := range strings.Split(config, "\n") {
-		output += strings.TrimSpace(v) + "\n"
+	var output strings.Builder
+	for v := range strings.SplitSeq(config, "\n") {
+		output.WriteString(strings.TrimSpace(v) + "\n")
 	}
 
-	return output
+	return output.String()
 }
 
 func GetIntEnv(key string, fallback int) (int, error) {
 	s, ok := os.LookupEnv(key)
 	if !ok {
-		return fallback, fmt.Errorf("Variable %s not set", key)
+		return fallback, fmt.Errorf("variable %s not set", key)
 	}
+
 	v, err := strconv.Atoi(s)
 	if err != nil {
 		return fallback, err
 	}
+
 	return v, nil
 }
 
 func GetEnvBool(key string, fallback bool) (bool, error) {
 	s, ok := os.LookupEnv(key)
 	if !ok {
-		return fallback, fmt.Errorf("Variable %s not set", key)
+		return fallback, fmt.Errorf("variable %s not set", key)
 	}
+
 	v, err := strconv.ParseBool(s)
 	if err != nil {
 		return fallback, err
 	}
+
 	return v, nil
 }
 
@@ -63,24 +67,26 @@ func SplitAndSort(input string) []string {
 		sortedWords = append(sortedWords, word)
 	}
 
-	// not available en freebsd
-	// slices.Sort(sortedWords)
-	sort.Strings(sortedWords)
+	slices.Sort(sortedWords)
+
 	return sortedWords
 }
 
 func ParseCertReqLogString(input string) string {
-	var logData map[string]interface{}
-	if err := json.Unmarshal([]byte(input), &logData); err == nil {
-		if en, ok := logData["en"].(string); ok {
-			if status, ok := logData["status"].(string); ok {
-				return fmt.Sprintf("%s: %s", status, en)
-			} else {
-				return en
-			}
-		}
+	var logData map[string]any
+
+	err := json.Unmarshal([]byte(input), &logData)
+	if err != nil {
+		return input
 	}
 
-	// Return original input if parsing fails
+	if en, ok := logData["en"].(string); ok {
+		if status, ok := logData["status"].(string); ok {
+			return fmt.Sprintf("%s: %s", status, en)
+		}
+
+		return en
+	}
+
 	return input
 }

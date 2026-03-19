@@ -42,11 +42,11 @@ func NewCertReqHTTPResource() resource.Resource {
 	return &certreqHTTPResource{}
 }
 
-func (r *certreqHTTPResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (*certreqHTTPResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_certreq_http"
 }
 
-func (r *certreqHTTPResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*certreqHTTPResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Manages HTTP Certificate Requests.",
 		MarkdownDescription: `Manages HTTP Certificate Requests.
@@ -113,8 +113,10 @@ For detailed documentation (not Terraform-specific), please refer to this [link]
 func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve current Plan
 	var plan CertReqHTTP
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -122,15 +124,16 @@ func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateReq
 	// Create the Certificate Request in the API
 	domains := make([]string, 0, len(plan.Domains.Elements()))
 	diags = plan.Domains.ElementsAs(ctx, &domains, false)
+
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	standalone := false
-	if !plan.Standalone.IsNull() && plan.Standalone.ValueBool() {
-		standalone = true
-	}
-	api_model, err := r.client.CreateHTTPCertReq(map[string]interface{}{
+
+	standalone := !plan.Standalone.IsNull() && plan.Standalone.ValueBool()
+
+	apiModel, err := r.client.CreateHTTPCertReq(map[string]any{
 		"domains":    domains,
 		"standalone": standalone,
 	})
@@ -139,21 +142,23 @@ func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateReq
 			"Error creating HTTP Certificate Request",
 			err.Error(),
 		)
+
 		return
 	}
 
 	// Wait until the CR is complete
-	updated_api_model := r.WaitCompleteHTTPCertReq(ctx, api_model)
-	if updated_api_model != nil {
-		if updated_api_model.CertificateID != nil {
+	updatedAPIModel := r.WaitCompleteHTTPCertReq(ctx, apiModel)
+	if updatedAPIModel != nil {
+		if updatedAPIModel.CertificateID != nil {
 			// Certificate was generated
-			api_model = updated_api_model
-		} else if updated_api_model.Log != nil && *updated_api_model.Log != "" {
+			apiModel = updatedAPIModel
+		} else if updatedAPIModel.Log != nil && *updatedAPIModel.Log != "" {
 			// An error happened
 			resp.Diagnostics.AddError(
 				"Error generating the certificate",
-				helpers.ParseCertReqLogString(*updated_api_model.Log),
+				helpers.ParseCertReqLogString(*updatedAPIModel.Log),
 			)
+
 			return
 		}
 	}
@@ -161,28 +166,32 @@ func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateReq
 	// Save API response in the state
 
 	// Generate the list of domains
-	sorted_domains := helpers.SplitAndSort(api_model.CommonName + "\n" + api_model.SAN)
-	new_domains, diags := types.SetValueFrom(ctx, types.StringType, sorted_domains)
+	sortedDomains := helpers.SplitAndSort(apiModel.CommonName + "\n" + apiModel.SAN)
+	newDomains, diags := types.SetValueFrom(ctx, types.StringType, sortedDomains)
+
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Set state
-	plan.ID = types.Int64Value(int64(api_model.ID))
-	plan.Domains = new_domains
-	plan.Standalone = types.BoolValue(api_model.Standalone)
-	plan.CreatedAt = types.StringValue(api_model.CreatedAt)
-	plan.UpdatedAt = types.StringValue(api_model.UpdatedAt)
-	if api_model.CertificateID == nil {
+	plan.ID = types.Int64Value(int64(apiModel.ID))
+	plan.Domains = newDomains
+	plan.Standalone = types.BoolValue(apiModel.Standalone)
+	plan.CreatedAt = types.StringValue(apiModel.CreatedAt)
+	plan.UpdatedAt = types.StringValue(apiModel.UpdatedAt)
+
+	if apiModel.CertificateID == nil {
 		plan.CertificateID = types.Int64Null()
 	} else {
-		plan.CertificateID = types.Int64Value(int64(*api_model.CertificateID))
+		plan.CertificateID = types.Int64Value(int64(*apiModel.CertificateID))
 	}
-	if api_model.Log == nil {
+
+	if apiModel.Log == nil {
 		plan.StatusMessage = types.StringNull()
 	} else {
-		plan.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*api_model.Log))
+		plan.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*apiModel.Log))
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -191,57 +200,64 @@ func (r *certreqHTTPResource) Create(ctx context.Context, req resource.CreateReq
 func (r *certreqHTTPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
 	var state CertReqHTTP
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Get current
-	api_model, err := r.client.GetCertReqHTTP(int(state.ID.ValueInt64()))
+	apiModel, err := r.client.GetCertReqHTTP(int(state.ID.ValueInt64()))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure retrieving HTTP Certificate Request",
 			err.Error(),
 		)
+
 		return
 	}
 
 	// Generate the list of domains
-	sorted_domains := helpers.SplitAndSort(api_model.CommonName + "\n" + api_model.SAN)
-	domains, diags := types.SetValueFrom(ctx, types.StringType, sorted_domains)
+	sortedDomains := helpers.SplitAndSort(apiModel.CommonName + "\n" + apiModel.SAN)
+	domains, diags := types.SetValueFrom(ctx, types.StringType, sortedDomains)
+
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Set state
-	state.ID = types.Int64Value(int64(api_model.ID))
+	state.ID = types.Int64Value(int64(apiModel.ID))
 	state.Domains = domains
-	state.Standalone = types.BoolValue(api_model.Standalone)
-	state.CreatedAt = types.StringValue(api_model.CreatedAt)
-	state.UpdatedAt = types.StringValue(api_model.UpdatedAt)
-	if api_model.CertificateID == nil {
+	state.Standalone = types.BoolValue(apiModel.Standalone)
+	state.CreatedAt = types.StringValue(apiModel.CreatedAt)
+	state.UpdatedAt = types.StringValue(apiModel.UpdatedAt)
+
+	if apiModel.CertificateID == nil {
 		state.CertificateID = types.Int64Null()
 	} else {
-		state.CertificateID = types.Int64Value(int64(*api_model.CertificateID))
+		state.CertificateID = types.Int64Value(int64(*apiModel.CertificateID))
 	}
-	if api_model.Log == nil {
+
+	if apiModel.Log == nil {
 		state.StatusMessage = types.StringNull()
 	} else {
-		state.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*api_model.Log))
+		state.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*apiModel.Log))
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *certreqHTTPResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (*certreqHTTPResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
 }
 
-func (r *certreqHTTPResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (*certreqHTTPResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 }
 
-func (r *certreqHTTPResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (*certreqHTTPResource) ModifyPlan(_ context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	// If the entire plan is null, the resource is planned for destruction.
 	if req.Plan.Raw.IsNull() {
 		resp.Diagnostics.AddWarning(
@@ -252,24 +268,35 @@ func (r *certreqHTTPResource) ModifyPlan(ctx context.Context, req resource.Modif
 	}
 }
 
-func (r *certreqHTTPResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *certreqHTTPResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	r.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	r.client = client
 }
 
-func (r *certreqHTTPResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*certreqHTTPResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	id, err := strconv.Atoi(req.ID)
 	if err != nil {
 		resp.Diagnostics.AddError("Invalid identifier", "ID must be a valid number.")
+
 		return
 	}
+
 	if id <= 0 {
 		resp.Diagnostics.AddError("Invalid identifier", "ID must be a valid number greater than 0.")
+
 		return
 	}
+
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 }
 
@@ -278,18 +305,20 @@ func (r *certreqHTTPResource) WaitCompleteHTTPCertReq(ctx context.Context, certr
 	remainingTime := certreqHTTPCreateTimeout.Seconds()
 
 	for {
-		api_model, err := r.client.GetCertReqHTTP(certreq.ID)
+		apiModel, err := r.client.GetCertReqHTTP(certreq.ID)
 		if err == nil {
-			if api_model.CertificateID != nil || (api_model.Log != nil && *api_model.Log != "") {
-				return &api_model
+			if apiModel.CertificateID != nil || (apiModel.Log != nil && *apiModel.Log != "") {
+				return &apiModel
 			}
 		}
 
 		if remainingTime <= 0 {
 			break
 		}
+
 		time.Sleep(certreqHTTPCreateRetry)
 		remainingTime -= (certreqHTTPCreateRetry.Seconds() + 1)
+
 		tflog.Info(ctx, fmt.Sprintf("Waiting for the HTTP Certificate Request %d to be completed.", certreq.ID))
 	}
 

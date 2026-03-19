@@ -16,7 +16,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &stagingVclConfDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewStagingVclconfDataSource is a helper function to simplify the provider implementation.
 func NewStagingVclconfDataSource() datasource.DataSource {
 	return &stagingVclConfDataSource{}
 }
@@ -27,12 +27,12 @@ type stagingVclConfDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *stagingVclConfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*stagingVclConfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_vclconf"
 }
 
 // Schema defines the schema for the data source.
-func (d *stagingVclConfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*stagingVclConfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Staging VCL Configuration listing.",
 		MarkdownDescription: "Staging VCL Configuration listing.",
@@ -73,7 +73,7 @@ func (d *stagingVclConfDataSource) Schema(_ context.Context, _ datasource.Schema
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *stagingVclConfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *stagingVclConfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state StagingVCLConf
 
 	stagingVclConf, err := d.client.GetActiveVCLConf(teclient.StagingEnv)
@@ -82,6 +82,7 @@ func (d *stagingVclConfDataSource) Read(ctx context.Context, req datasource.Read
 			"Unable to read Staging VclConf info",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -97,10 +98,17 @@ func (d *stagingVclConfDataSource) Read(ctx context.Context, req datasource.Read
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *stagingVclConfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *stagingVclConfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

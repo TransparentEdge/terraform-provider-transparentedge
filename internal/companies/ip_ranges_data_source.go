@@ -3,7 +3,7 @@ package companies
 import (
 	"context"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -18,7 +18,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &ipRangesDataSource{}
 )
 
-func NewIpRangesDataSource() datasource.DataSource {
+func NewIPRangesDataSource() datasource.DataSource {
 	return &ipRangesDataSource{}
 }
 
@@ -26,11 +26,11 @@ type ipRangesDataSource struct {
 	client *teclient.Client
 }
 
-func (d *ipRangesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*ipRangesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ip_ranges"
 }
 
-func (d *ipRangesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*ipRangesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Retrieves IP Ranges from TransparentEdge nodes.",
 		MarkdownDescription: "Retrieves IP Ranges from TransparentEdge nodes.",
@@ -52,57 +52,72 @@ func (d *ipRangesDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 	}
 }
 
-func (d *ipRangesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *ipRangesDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state IPRanges
 
-	cidr_ranges, err := d.client.GetIPRanges()
+	cidrRanges, err := d.client.GetIPRanges()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading IP Ranges",
 			fmt.Sprintf("Unexpected error trying to read ip ranges.\n%s\n", err.Error()),
 		)
+
 		return
 	}
 
-	ipv4_list := []string{}
-	ipv6_list := []string{}
-	for _, ip := range cidr_ranges {
+	ipv4List := []string{}
+	ipv6List := []string{}
+
+	for _, ip := range cidrRanges {
 		if strings.Contains(ip, ":") {
-			ipv6_list = append(ipv6_list, ip)
+			ipv6List = append(ipv6List, ip)
 		} else {
-			ipv4_list = append(ipv4_list, ip)
+			ipv4List = append(ipv4List, ip)
 		}
 	}
-	sort.Strings(ipv4_list)
-	sort.Strings(ipv6_list)
+
+	slices.Sort(ipv4List)
+	slices.Sort(ipv6List)
 
 	// Map response body to model
-	ipv4_cidr_ranges, diag := types.ListValueFrom(ctx, types.StringType, ipv4_list)
+	ipv4CIDRRanges, diag := types.ListValueFrom(ctx, types.StringType, ipv4List)
 	if diag != nil {
 		resp.Diagnostics.Append(diag...)
+
 		return
 	}
-	ipv6_cidr_ranges, diag := types.ListValueFrom(ctx, types.StringType, ipv6_list)
+
+	ipv6CIDRRanges, diag := types.ListValueFrom(ctx, types.StringType, ipv6List)
 	if diag != nil {
 		resp.Diagnostics.Append(diag...)
+
 		return
 	}
-	state.Ipv4CidrBlocks = ipv4_cidr_ranges
-	state.Ipv6CidrBlocks = ipv6_cidr_ranges
+
+	state.Ipv4CidrBlocks = ipv4CIDRRanges
+	state.Ipv6CidrBlocks = ipv6CIDRRanges
 
 	// Set state
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *ipRangesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *ipRangesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

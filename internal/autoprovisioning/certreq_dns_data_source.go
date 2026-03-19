@@ -17,7 +17,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &certReqDNSDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewCertReqDNSDataSource is a helper function to simplify the provider implementation.
 func NewCertReqDNSDataSource() datasource.DataSource {
 	return &certReqDNSDataSource{}
 }
@@ -28,12 +28,12 @@ type certReqDNSDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *certReqDNSDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*certReqDNSDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_certreq_dns"
 }
 
 // Schema defines the schema for the data source.
-func (d *certReqDNSDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*certReqDNSDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "DNS Certificate Requests data source.",
 		MarkdownDescription: `DNS Certificate Requests data source.
@@ -87,48 +87,60 @@ func (d *certReqDNSDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-	api_model, err := d.client.GetCertReqDNS(int(data.ID.ValueInt64()))
+	apiModel, err := d.client.GetCertReqDNS(int(data.ID.ValueInt64()))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure retrieving DNS Certificate Request",
 			err.Error(),
 		)
+
 		return
 	}
 
 	// Generate the list of domains
-	sorted_domains := helpers.SplitAndSort(api_model.Domains)
-	domains, diags := types.SetValueFrom(ctx, types.StringType, sorted_domains)
+	sortedDomains := helpers.SplitAndSort(apiModel.Domains)
+	domains, diags := types.SetValueFrom(ctx, types.StringType, sortedDomains)
+
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Set state
-	data.ID = types.Int64Value(int64(api_model.ID))
+	data.ID = types.Int64Value(int64(apiModel.ID))
 	data.Domains = domains
-	data.Credential = types.Int64Value(int64(api_model.Credential))
-	data.CreatedAt = types.StringValue(api_model.CreatedAt)
-	data.UpdatedAt = types.StringValue(api_model.UpdatedAt)
-	if api_model.CertificateID == nil {
+	data.Credential = types.Int64Value(int64(apiModel.Credential))
+	data.CreatedAt = types.StringValue(apiModel.CreatedAt)
+	data.UpdatedAt = types.StringValue(apiModel.UpdatedAt)
+
+	if apiModel.CertificateID == nil {
 		data.CertificateID = types.Int64Null()
 	} else {
-		data.CertificateID = types.Int64Value(int64(*api_model.CertificateID))
+		data.CertificateID = types.Int64Value(int64(*apiModel.CertificateID))
 	}
-	if api_model.Log == nil {
+
+	if apiModel.Log == nil {
 		data.StatusMessage = types.StringNull()
 	} else {
-		data.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*api_model.Log))
+		data.StatusMessage = types.StringValue(helpers.ParseCertReqLogString(*apiModel.Log))
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *certReqDNSDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *certReqDNSDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

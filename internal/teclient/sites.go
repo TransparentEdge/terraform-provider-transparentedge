@@ -2,14 +2,16 @@ package teclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 )
 
-func (c *Client) GetSiteVerifyString(site_domain string) string {
-	data := SiteVerifyStringAPIModelRequest{Domain: site_domain}
-	req, err := c.prepareJSONRequest(data, "POST", fmt.Sprintf("%s/v1/companies/%d/siteverification/", c.HostURL, c.CompanyId))
+func (c *Client) GetSiteVerifyString(siteDomain string) string {
+	data := SiteVerifyStringAPIModelRequest{Domain: siteDomain}
+
+	req, err := c.prepareJSONRequest(data, "POST", fmt.Sprintf("%s/v1/companies/%d/siteverification/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return ""
 	}
@@ -20,7 +22,9 @@ func (c *Client) GetSiteVerifyString(site_domain string) string {
 	}
 
 	svsResp := SiteVerifyStringAPIModelResponse{}
-	if err := json.Unmarshal(body, &svsResp); err != nil {
+
+	err = json.Unmarshal(body, &svsResp)
+	if err != nil {
 		return ""
 	}
 
@@ -28,7 +32,7 @@ func (c *Client) GetSiteVerifyString(site_domain string) string {
 }
 
 func (c *Client) GetSites() ([]SiteAPIModel, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyId), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +41,15 @@ func (c *Client) GetSites() ([]SiteAPIModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of sites: %s", c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failure while retrieving the list of sites: %s", c.parseAPIError(body))
 	}
 
 	sites := []SiteAPIModel{}
-	if err := json.Unmarshal(body, &sites); err != nil {
+
+	err = json.Unmarshal(body, &sites)
+	if err != nil {
 		return nil, err
 	}
 
@@ -50,7 +57,7 @@ func (c *Client) GetSites() ([]SiteAPIModel, error) {
 }
 
 func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyId, siteID), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyID, siteID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +66,15 @@ func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the site with ID %d: %s", siteID, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failure while retrieving the site with ID %d: %s", siteID, c.parseAPIError(body))
 	}
 
 	site := SiteAPIModel{}
-	if err := json.Unmarshal(body, &site); err != nil {
+
+	err = json.Unmarshal(body, &site)
+	if err != nil {
 		return nil, err
 	}
 
@@ -73,75 +83,83 @@ func (c *Client) GetSite(siteID int) (*SiteAPIModel, error) {
 
 func (c *Client) CreateSite(site SiteNewAPIModel) (*SiteAPIModel, bool, error) {
 	// returns model, error, verify_error
-	req, err := c.prepareJSONRequest(site, "POST", fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyId))
+	req, err := c.prepareJSONRequest(site, "POST", fmt.Sprintf("%s/v1/companies/%d/sites/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return nil, false, err
 	}
 
 	body, sc, err := c.doRequest(req)
-	if sc == 502 {
-		return nil, false, fmt.Errorf("502 - Error creating the site.")
+	if sc == http.StatusBadGateway {
+		return nil, false, errors.New("failed to create the site - API error")
 	}
-	if sc == 403 {
+
+	if sc == http.StatusForbidden {
 		// Verification error
 		msg := "Please ensure that the site can be verified with one of the following two options:\n" +
 			"  * Option 1: A tcdn.txt file in the root of your site with the verification string\n" +
-			"  * Option 2: A TXT record: _tcdn_challenge." + site.Url + " with the verification string\n"
+			"  * Option 2: A TXT record: _tcdn_challenge." + site.URL + " with the verification string\n"
 
 		// Best effor here to show the user the verification string
-		verify_string := c.GetSiteVerifyString(site.Url)
-		if verify_string != "" {
-			msg = msg + "\nThe verification string for this site is: " + verify_string + "\n"
+		verifyString := c.GetSiteVerifyString(site.URL)
+		if verifyString != "" {
+			msg = msg + "\nThe verification string for this site is: " + verifyString + "\n"
 		}
 
 		msg = msg + "\nAPI Response: " + c.parseAPIError(body) + "\n\n" +
 			"If you need to get the verification string again, run 'terraform plan' and 'terraform show'" +
 			" with the datasource 'siteverify'.\nIn case of doubts please contact with support."
 
-		return nil, true, fmt.Errorf("Validation error:\n%s", msg)
+		return nil, true, fmt.Errorf("validation error:\n%s", msg)
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		if strings.Contains(c.parseAPIError(body), "Site ownership denied") {
 			// site belongs to another company
-			return nil, false, fmt.Errorf("Site not owned: %s", c.parseAPIError(body))
+			return nil, false, fmt.Errorf("site not owned: %s", c.parseAPIError(body))
 		}
 		// check if the site already exists
-		if existingSite := c.GetIfExists(body, site.Url); existingSite != nil {
+		if existingSite := c.GetIfExists(body, site.URL); existingSite != nil {
 			return existingSite, false, nil
 		}
 	}
+
 	if err != nil {
 		return nil, false, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if !(sc == 200 || sc == 201) { // 200 = new, 201 = activated again
+
+	if sc != http.StatusOK && sc != http.StatusCreated { // 200 = new, 201 = activated again
 		return nil, false, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newSite := SiteAPIModel{}
-	if err := json.Unmarshal(body, &newSite); err != nil {
+
+	err = json.Unmarshal(body, &newSite)
+	if err != nil {
 		return nil, false, err
 	}
 
 	return &newSite, false, nil
 }
 
-func (c *Client) GetIfExists(body []byte, site_domain string) *SiteAPIModel {
+func (c *Client) GetIfExists(body []byte, siteDomain string) *SiteAPIModel {
 	errorMessage := c.parseAPIError(body)
 	if strings.Contains(errorMessage, "already exists") {
 		// Try to find the site
-		if sites, err := c.GetSites(); err == nil {
+		sites, err := c.GetSites()
+		if err == nil {
 			for _, site := range sites {
-				if site.Url == site_domain {
+				if site.URL == siteDomain {
 					return &site
 				}
 			}
 		}
 	}
+
 	return nil
 }
 
 func (c *Client) DeleteSite(siteID int) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyId, siteID), nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/companies/%d/sites/%d/", c.HostURL, c.CompanyID, siteID), nil)
 	if err != nil {
 		return err
 	}
@@ -150,7 +168,8 @@ func (c *Client) DeleteSite(siteID int) error {
 	if err != nil {
 		return err
 	}
-	if sc != 204 {
+
+	if sc != http.StatusNoContent {
 		return fmt.Errorf("%d - API request failed trying to DELETE the site ID %d: %s", sc, siteID, c.parseAPIError(body))
 	}
 

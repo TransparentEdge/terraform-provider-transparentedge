@@ -7,7 +7,7 @@ import (
 )
 
 func (c *Client) GetCertificates() ([]SSLCertificate, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/", c.HostURL, c.CompanyId), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/", c.HostURL, c.CompanyID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,12 +16,15 @@ func (c *Client) GetCertificates() ([]SSLCertificate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of certificates: %s", c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failed retrieving the list of certificates: %s", c.parseAPIError(body))
 	}
 
 	certs := []SSLCertificate{}
-	if err := json.Unmarshal(body, &certs); err != nil {
+
+	err = json.Unmarshal(body, &certs)
+	if err != nil {
 		return nil, err
 	}
 
@@ -29,7 +32,7 @@ func (c *Client) GetCertificates() ([]SSLCertificate, error) {
 }
 
 func (c *Client) GetCertificate(certID int) (*SSLCertificate, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyId, certID), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyID, certID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +41,15 @@ func (c *Client) GetCertificate(certID int) (*SSLCertificate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the Custom Certificate with ID: %d. %s", certID, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failed to retrieve the Custom Certificate with ID: %d. %s", certID, c.parseAPIError(body))
 	}
 
 	cert := SSLCertificate{}
-	if err := json.Unmarshal(body, &cert); err != nil {
+
+	err = json.Unmarshal(body, &cert)
+	if err != nil {
 		return nil, err
 	}
 
@@ -51,7 +57,7 @@ func (c *Client) GetCertificate(certID int) (*SSLCertificate, error) {
 }
 
 func (c *Client) CreateCustomCertificate(cert SSLCustomCertificate) (*SSLCertificate, error) {
-	req, err := c.prepareJSONRequest(cert, "POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/", c.HostURL, c.CompanyId))
+	req, err := c.prepareJSONRequest(cert, http.MethodPost, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +66,15 @@ func (c *Client) CreateCustomCertificate(cert SSLCustomCertificate) (*SSLCertifi
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newCustomCertificate := SSLCertificate{}
-	if err := json.Unmarshal(body, &newCustomCertificate); err != nil {
+
+	err = json.Unmarshal(body, &newCustomCertificate)
+	if err != nil {
 		return nil, err
 	}
 
@@ -73,7 +82,7 @@ func (c *Client) CreateCustomCertificate(cert SSLCustomCertificate) (*SSLCertifi
 }
 
 func (c *Client) UpdateCustomCertificate(cert SSLCustomCertificate) (*SSLCertificate, error) {
-	req, err := c.prepareJSONRequest(cert, "PUT", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyId, cert.ID))
+	req, err := c.prepareJSONRequest(cert, http.MethodPut, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyID, cert.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -82,21 +91,22 @@ func (c *Client) UpdateCustomCertificate(cert SSLCustomCertificate) (*SSLCertifi
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	// API doesnt return the new model at this moment, try to get the updated certificate
 	newCustomCertificate, err := c.GetCertificate(cert.ID)
 	if err != nil {
-		return nil, fmt.Errorf("Certificate was updated but couldn't retrieve the new data from API, an import is required. " + err.Error())
+		return nil, fmt.Errorf("certificate was updated but couldn't retrieve the new data from API, an import is required: %w", err)
 	}
 
 	return newCustomCertificate, nil
 }
 
 func (c *Client) DeleteCustomCertificate(certID int) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyId, certID), nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslconfig/%d/", c.HostURL, c.CompanyID, certID), nil)
 	if err != nil {
 		return err
 	}

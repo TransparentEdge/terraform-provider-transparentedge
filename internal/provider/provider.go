@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	defaultApiUrl = "https://api.transparentcdn.com"
+	defaultAPIURL = "https://api.transparentcdn.com"
 )
 
-// Ensure the implementation satisfies the expected interfaces
+// Ensure the implementation satisfies the expected interfaces.
 var (
 	_ provider.Provider = &TransparentEdgeProvider{}
 )
@@ -43,7 +43,7 @@ func (p *TransparentEdgeProvider) Metadata(ctx context.Context, _ provider.Metad
 }
 
 // Schema defines the provider-level schema for configuration data.
-func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (*TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "A terraform provider for the CDN of Transparent Edge.",
 		MarkdownDescription: "A terraform provider for the CDN of [Transparent Edge](https://www.transparentedge.eu/).",
@@ -87,9 +87,9 @@ func (p *TransparentEdgeProvider) Schema(_ context.Context, _ provider.SchemaReq
 
 // maps provider schema data to a Go type.
 type transparentedgeProviderModel struct {
-	ApiURL       types.String `tfsdk:"api_url"`
-	CompanyId    types.Int64  `tfsdk:"company_id"`
-	ClientId     types.String `tfsdk:"client_id"`
+	APIURL       types.String `tfsdk:"api_url"`
+	CompanyID    types.Int64  `tfsdk:"company_id"`
+	ClientID     types.String `tfsdk:"client_id"`
 	ClientSecret types.String `tfsdk:"client_secret"`
 	Insecure     types.Bool   `tfsdk:"insecure"`
 	Auth         types.Bool   `tfsdk:"auth"`
@@ -100,15 +100,17 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 
 	// Retrieve provider data from configuration
 	var config transparentedgeProviderModel
+
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Default values to environment variables, but override
 	// with Terraform configuration value if set.
-	api_url := os.Getenv("TCDN_API_URL")
+	apiURL := os.Getenv("TCDN_API_URL")
 	clientid := os.Getenv("TCDN_CLIENT_ID")
 	clientsecret := os.Getenv("TCDN_CLIENT_SECRET")
 
@@ -118,21 +120,26 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	auth := true
 
 	// Override with terraform configuration values
-	if !config.ApiURL.IsNull() {
-		api_url = config.ApiURL.ValueString()
+	if !config.APIURL.IsNull() {
+		apiURL = config.APIURL.ValueString()
 	}
-	if !config.CompanyId.IsNull() {
-		companyid = int(config.CompanyId.ValueInt64())
+
+	if !config.CompanyID.IsNull() {
+		companyid = int(config.CompanyID.ValueInt64())
 	}
-	if !config.ClientId.IsNull() {
-		clientid = config.ClientId.ValueString()
+
+	if !config.ClientID.IsNull() {
+		clientid = config.ClientID.ValueString()
 	}
+
 	if !config.ClientSecret.IsNull() {
 		clientsecret = config.ClientSecret.ValueString()
 	}
+
 	if !config.Insecure.IsNull() {
 		insecure = config.Insecure.ValueBool()
 	}
+
 	if !config.Auth.IsNull() {
 		auth = config.Auth.ValueBool()
 	}
@@ -140,8 +147,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 	// Values that need conversion (if not set in the configuration)
 
 	// Default values
-	if api_url == "" {
-		api_url = defaultApiUrl
+	if apiURL == "" {
+		apiURL = defaultAPIURL
 	}
 
 	if !auth {
@@ -149,9 +156,11 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 		if companyid < 1 {
 			companyid = 1
 		}
+
 		if clientid == "" {
 			clientid = "noauth"
 		}
+
 		if clientsecret == "" {
 			clientsecret = "noauth"
 		}
@@ -164,6 +173,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 			"Company ID is an integer greater than 0.",
 		)
 	}
+
 	if clientid == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client_id"),
@@ -171,6 +181,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 			"Please provide a valid Client ID.",
 		)
 	}
+
 	if clientsecret == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client_secret"),
@@ -178,7 +189,8 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 			"Please provide a valid Client Secret.",
 		)
 	}
-	if !(strings.HasPrefix(api_url, "http://") || strings.HasPrefix(api_url, "https://")) {
+
+	if !strings.HasPrefix(apiURL, "http://") && !strings.HasPrefix(apiURL, "https://") {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_url"),
 			"Invalid API URL",
@@ -190,13 +202,14 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	ctx = tflog.SetField(ctx, "tedge_api_url", api_url)
+	ctx = tflog.SetField(ctx, "tedge_api_url", apiURL)
 	ctx = tflog.SetField(ctx, "tedge_companyid", companyid)
 	tflog.Debug(ctx, "Creating Transparent Edge API client")
 
 	// Create a new client using the configuration values
 	useragent := "terraform-provider-transparentedge/" + p.version
-	client, err := teclient.NewClient(&api_url, &companyid, &clientid, &clientsecret, &insecure, &auth, &useragent)
+
+	client, err := teclient.NewClient(&apiURL, &companyid, &clientid, &clientsecret, &insecure, &auth, &useragent)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Transparent Edge API Client",
@@ -204,6 +217,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 				"If the error is not clear, please contact the provider developers.\n\n"+
 				"Client Error: "+err.Error(),
 		)
+
 		return
 	}
 
@@ -216,7 +230,7 @@ func (p *TransparentEdgeProvider) Configure(ctx context.Context, req provider.Co
 }
 
 // DataSources defines the data sources implemented in the provider.
-func (p *TransparentEdgeProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+func (*TransparentEdgeProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		autoprovisioning.NewSitesDataSource,
 		autoprovisioning.NewSiteVerifyDataSource,
@@ -232,12 +246,12 @@ func (p *TransparentEdgeProvider) DataSources(_ context.Context) []func() dataso
 		staging.NewStagingBackendDataSource,
 		staging.NewStagingBackendsDataSource,
 		staging.NewStagingVclconfDataSource,
-		companies.NewIpRangesDataSource,
+		companies.NewIPRangesDataSource,
 	}
 }
 
 // Resources defines the resources implemented in the provider.
-func (p *TransparentEdgeProvider) Resources(_ context.Context) []func() resource.Resource {
+func (*TransparentEdgeProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		autoprovisioning.NewSiteResource,
 		autoprovisioning.NewBackendResource,

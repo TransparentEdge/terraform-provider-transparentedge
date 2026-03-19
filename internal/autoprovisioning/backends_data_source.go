@@ -17,7 +17,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &backendsDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewBackendsDataSource is a helper function to simplify the provider implementation.
 func NewBackendsDataSource() datasource.DataSource {
 	return &backendsDataSource{}
 }
@@ -28,12 +28,12 @@ type backendsDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *backendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*backendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_backends"
 }
 
 // Schema defines the schema for the data source.
-func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*backendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Backend listing.",
 		MarkdownDescription: "Backend listing.",
@@ -118,7 +118,7 @@ func (d *backendsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *backendsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Backends
 
 	backends, err := d.client.GetBackends(teclient.ProdEnv)
@@ -127,6 +127,7 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 			"Unable to read Backends info",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -156,10 +157,17 @@ func (d *backendsDataSource) Read(ctx context.Context, req datasource.ReadReques
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *backendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *backendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure backends client", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

@@ -17,7 +17,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &crDNSCredentialDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewCertReqDNSCredentialDataSource is a helper function to simplify the provider implementation.
 func NewCertReqDNSCredentialDataSource() datasource.DataSource {
 	return &crDNSCredentialDataSource{}
 }
@@ -28,12 +28,12 @@ type crDNSCredentialDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *crDNSCredentialDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*crDNSCredentialDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_certreq_dns_credential"
 }
 
 // Schema defines the schema for the data source.
-func (d *crDNSCredentialDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*crDNSCredentialDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "DNS Credential data source.",
 		MarkdownDescription: "DNS Credential data source.",
@@ -71,45 +71,56 @@ func (d *crDNSCredentialDataSource) Read(ctx context.Context, req datasource.Rea
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-	dns_credential, err := d.client.GetCRDNSCredential(int(data.ID.ValueInt64()))
+	dnsCredential, err := d.client.GetCRDNSCredential(int(data.ID.ValueInt64()))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure retrieving DNS Credential.",
 			err.Error(),
 		)
+
 		return
 	}
 
 	// Set state
-	data.ID = types.Int64Value(int64(dns_credential.ID))
-	data.Alias = types.StringValue(dns_credential.Alias)
+	data.ID = types.Int64Value(int64(dnsCredential.ID))
+	data.Alias = types.StringValue(dnsCredential.Alias)
 
 	// Extract the parameters/keys obtained from the API into a map
 	keys := make(map[string]attr.Value)
-	var dns_provider string
-	for _, key := range dns_credential.Creds {
+
+	var dnsProvider string
+
+	for _, key := range dnsCredential.Creds {
 		keys[key.KeyName] = types.StringValue(key.KeyValue)
-		dns_provider = key.Provider
+		dnsProvider = key.Provider
 	}
 
 	// Transform the map into a Terraform type
 	parameters, diags := types.MapValue(types.StringType, keys)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	data.Parameters = parameters
-	data.DNSProvider = types.StringValue(dns_provider)
+	data.DNSProvider = types.StringValue(dnsProvider)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *crDNSCredentialDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *crDNSCredentialDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

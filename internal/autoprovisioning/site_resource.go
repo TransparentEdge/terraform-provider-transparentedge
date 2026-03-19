@@ -2,6 +2,7 @@ package autoprovisioning
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -41,12 +42,12 @@ type siteResource struct {
 }
 
 // Metadata returns the resource type name.
-func (r *siteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (*siteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_site"
 }
 
 // Schema defines the schema for the resource.
-func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manages company sites (domains).",
 		MarkdownDescription: "Provides Site (domain) resource. This allows to create and delete domains.",
@@ -78,12 +79,14 @@ func (r *siteResource) Schema(ctx context.Context, _ resource.SchemaRequest, res
 	}
 }
 
-// Create new site
+// Create new site.
 func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan Site
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -94,16 +97,19 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 			"Error applying timeouts",
 			"Could not apply the timeouts configuration.",
 		)
+
 		return
 	}
 
 	tflog.Info(ctx, "Creating site: "+plan.Domain.ValueString())
+
 	siteState, errCreate := r.HelperCreateSite(ctx, plan.Domain.ValueString(), maxTimeout)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating site",
 			fmt.Sprintf("Could not create the site '%s': %s", plan.Domain.ValueString(), errCreate),
 		)
+
 		return
 	}
 
@@ -117,20 +123,24 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan Site
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Try to find by ID
 	if !plan.ID.IsNull() {
-		if siteAPI, err := r.client.GetSite(int(plan.ID.ValueInt64())); err == nil {
+		siteAPI, err := r.client.GetSite(int(plan.ID.ValueInt64()))
+		if err == nil {
 			if siteAPI.Active {
 				plan.ID = types.Int64Value(int64(siteAPI.ID))
-				plan.Domain = types.StringValue(siteAPI.Url)
+				plan.Domain = types.StringValue(siteAPI.URL)
 				plan.Active = types.BoolValue(siteAPI.Active)
 				resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+
 				return
 			}
 		}
@@ -140,11 +150,12 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	sites, err := r.client.GetSites()
 	if err == nil {
 		for _, siteAPI := range sites {
-			if siteAPI.Url == plan.Domain.ValueString() && siteAPI.Active {
+			if siteAPI.URL == plan.Domain.ValueString() && siteAPI.Active {
 				plan.ID = types.Int64Value(int64(siteAPI.ID))
-				plan.Domain = types.StringValue(siteAPI.Url)
+				plan.Domain = types.StringValue(siteAPI.URL)
 				plan.Active = types.BoolValue(siteAPI.Active)
 				resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+
 				return
 			}
 		}
@@ -153,24 +164,28 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	// Error retrieving the site, bail out without updating the state
 }
 
-// Read resource information
+// Read resource information.
 func (r *siteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
 	var state Site
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		if siteAPI, err := r.client.GetSite(int(state.ID.ValueInt64())); err == nil {
+		siteAPI, err := r.client.GetSite(int(state.ID.ValueInt64()))
+		if err == nil {
 			if siteAPI.Active {
 				state.ID = types.Int64Value(int64(siteAPI.ID))
-				state.Domain = types.StringValue(siteAPI.Url)
+				state.Domain = types.StringValue(siteAPI.URL)
 				state.Active = types.BoolValue(siteAPI.Active)
 				resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 				return
 			}
 		}
@@ -180,11 +195,12 @@ func (r *siteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	sites, err := r.client.GetSites()
 	if err == nil {
 		for _, siteAPI := range sites {
-			if siteAPI.Url == state.Domain.ValueString() && siteAPI.Active {
+			if siteAPI.URL == state.Domain.ValueString() && siteAPI.Active {
 				state.ID = types.Int64Value(int64(siteAPI.ID))
-				state.Domain = types.StringValue(siteAPI.Url)
+				state.Domain = types.StringValue(siteAPI.URL)
 				state.Active = types.BoolValue(siteAPI.Active)
 				resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 				return
 			}
 		}
@@ -194,25 +210,31 @@ func (r *siteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if !strings.Contains(state.Domain.ValueString(), "<inactive>") {
 		state.Domain = types.StringValue(state.Domain.ValueString() + " <inactive>")
 	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-// Deletes the site and removes the terraform plan on success
+// Delete deletes the site and removes the terraform plan on success.
 func (r *siteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Site
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting site: "+state.Domain.ValueString()+" with id: "+state.ID.String())
-	if err := r.client.DeleteSite(int(state.ID.ValueInt64())); err != nil {
+
+	err := r.client.DeleteSite(int(state.ID.ValueInt64()))
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a site",
 			"Could not delete the site: "+state.Domain.ValueString(),
 		)
+
 		return
 	}
 
@@ -227,15 +249,22 @@ func (r *siteResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *siteResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *siteResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	r.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	r.client = client
 }
 
-func (r *siteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*siteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Import without a default create timeout
 	resource.ImportStatePassthroughID(ctx, path.Root("domain"), req, resp)
 
@@ -260,42 +289,33 @@ func (r *siteResource) ImportState(ctx context.Context, req resource.ImportState
 	*/
 }
 
-// Helpers
+// HelperCreateSite.
 func (r *siteResource) HelperCreateSite(ctx context.Context, domain string, maxTimeout time.Duration) (*Site, error) {
-	var err error = nil
 	remainingTimeForVerification := maxTimeout.Seconds()
-	siteCreate := teclient.SiteNewAPIModel{Url: domain}
+	siteCreate := teclient.SiteNewAPIModel{URL: domain}
 	siteState := Site{}
 
-	site := &teclient.SiteAPIModel{}
-	verify_error := false
-
 	for {
-		site, verify_error, err = r.client.CreateSite(siteCreate)
+		site, verifyError, err := r.client.CreateSite(siteCreate)
 		if err == nil {
 			siteState.ID = types.Int64Value(int64(site.ID))
-			siteState.Domain = types.StringValue(site.Url)
+			siteState.Domain = types.StringValue(site.URL)
 			siteState.Active = types.BoolValue(true)
-			break
+
+			return &siteState, nil
 		}
 
-		// break if err != nil and it wasn't a verification error
-		if !verify_error {
-			break
+		if !verifyError {
+			return nil, err
 		}
 
-		// break if we exhausted the remaining time
 		if remainingTimeForVerification <= 0 {
-			break
+			return nil, errors.New("timeout")
 		}
+
 		time.Sleep(delayBetweenCreateRetry)
 		remainingTimeForVerification -= (delayBetweenCreateRetry.Seconds() + 5)
+
 		tflog.Info(ctx, "Retry site verification for "+domain)
 	}
-
-	if err == nil {
-		return &siteState, nil
-	}
-
-	return nil, err
 }

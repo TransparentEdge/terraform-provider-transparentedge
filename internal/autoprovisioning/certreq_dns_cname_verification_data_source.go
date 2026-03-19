@@ -27,12 +27,12 @@ type crDNSCNAMEVerifDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *crDNSCNAMEVerifDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*crDNSCNAMEVerifDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_certreq_dns_cname_verification"
 }
 
 // Schema defines the schema for the data source.
-func (d *crDNSCNAMEVerifDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*crDNSCNAMEVerifDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Certificate Request DNS CNAME Verification.",
 		MarkdownDescription: "Certificate Request DNS CNAME Verification.",
@@ -58,6 +58,7 @@ func (d *crDNSCNAMEVerifDataSource) Read(ctx context.Context, req datasource.Rea
 			"Unable to retrieve DNS CNAME Verification",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -70,10 +71,17 @@ func (d *crDNSCNAMEVerifDataSource) Read(ctx context.Context, req datasource.Rea
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *crDNSCNAMEVerifDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *crDNSCNAMEVerifDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

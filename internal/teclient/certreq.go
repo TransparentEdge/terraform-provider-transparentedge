@@ -2,12 +2,13 @@ package teclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
 
 func (c *Client) GetCRDNSProviders() ([]CRDNSProvider, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/dnshook/", c.HostURL), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/dnshook/", c.HostURL), nil) // nolint: perfsprint
 	if err != nil {
 		return nil, err
 	}
@@ -16,12 +17,15 @@ func (c *Client) GetCRDNSProviders() ([]CRDNSProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Failure retrieving DNS Providers: %s", c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failure retrieving DNS Providers: %s", c.parseAPIError(body))
 	}
 
 	providers := []CRDNSProvider{}
-	if err := json.Unmarshal(body, &providers); err != nil {
+
+	err = json.Unmarshal(body, &providers)
+	if err != nil {
 		return nil, err
 	}
 
@@ -29,7 +33,7 @@ func (c *Client) GetCRDNSProviders() ([]CRDNSProvider, error) {
 }
 
 func (c *Client) GetDNSCNAMEVerification() (string, error) {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/ssldnsverificationcname/", c.HostURL, c.CompanyId), nil)
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/v1/autoprovisioning/%d/ssldnsverificationcname/", c.HostURL, c.CompanyID), nil)
 	if err != nil {
 		return "", err
 	}
@@ -38,27 +42,28 @@ func (c *Client) GetDNSCNAMEVerification() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if sc != 200 {
-		return "", fmt.Errorf("Failure retrieving CNAME verification: %s", c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return "", fmt.Errorf("failure retrieving CNAME verification: %s", c.parseAPIError(body))
 	}
 
-	var data map[string]interface{}
+	var data map[string]any
 
-	if err := json.Unmarshal(body, &data); err != nil {
-		fmt.Println("Error:", err)
+	err = json.Unmarshal(body, &data)
+	if err != nil {
 		return "", err
 	}
 
 	cnameValue, exists := data["cname"].(string)
 	if !exists {
-		return "", fmt.Errorf("[API ERROR] Cname not found in the payload.")
+		return "", errors.New("fatal: CNAME not found in the API response")
 	}
 
 	return cnameValue, nil
 }
 
 func (c *Client) GetCRDNSCredential(id int) (CRDNSCredential, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d/", c.HostURL, c.CompanyId, id), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d/", c.HostURL, c.CompanyID, id), nil)
 	if err != nil {
 		return CRDNSCredential{}, err
 	}
@@ -67,20 +72,23 @@ func (c *Client) GetCRDNSCredential(id int) (CRDNSCredential, error) {
 	if err != nil {
 		return CRDNSCredential{}, err
 	}
-	if sc != 200 {
-		return CRDNSCredential{}, fmt.Errorf("Failure retrieving DNS Credential with id %d. %s", id, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return CRDNSCredential{}, fmt.Errorf("failure retrieving DNS Credential with id %d. %s", id, c.parseAPIError(body))
 	}
 
 	data := CRDNSCredential{}
-	if err := json.Unmarshal(body, &data); err != nil {
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
 		return CRDNSCredential{}, err
 	}
 
 	return data, nil
 }
 
-func (c *Client) CreateDNSCredential(dns_credential NewCRDNSCredential) (*CRDNSCredential, error) {
-	req, err := c.prepareJSONRequest(dns_credential, "POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/", c.HostURL, c.CompanyId))
+func (c *Client) CreateDNSCredential(dnsCredential NewCRDNSCredential) (*CRDNSCredential, error) {
+	req, err := c.prepareJSONRequest(dnsCredential, http.MethodPost, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -89,26 +97,32 @@ func (c *Client) CreateDNSCredential(dns_credential NewCRDNSCredential) (*CRDNSC
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		apiError := c.parseAPIError(body)
-		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf("%s\n", apiError)
+
+		err := json.Unmarshal(body, &apiError)
+		if err == nil {
+			return nil, errors.New(apiError)
 		}
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
-	new_data := CRDNSCredential{}
-	if err := json.Unmarshal(body, &new_data); err != nil {
+	newData := CRDNSCredential{}
+
+	err = json.Unmarshal(body, &newData)
+	if err != nil {
 		return nil, err
 	}
 
-	return &new_data, nil
+	return &newData, nil
 }
 
-func (c *Client) UpdateDNSCredential(dns_credential NewCRDNSCredential, id int) (*CRDNSCredential, error) {
-	req, err := c.prepareJSONRequest(dns_credential, "PUT", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d", c.HostURL, c.CompanyId, id))
+func (c *Client) UpdateDNSCredential(dnsCredential NewCRDNSCredential, id int) (*CRDNSCredential, error) {
+	req, err := c.prepareJSONRequest(dnsCredential, http.MethodPut, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d", c.HostURL, c.CompanyID, id))
 	if err != nil {
 		return nil, err
 	}
@@ -117,26 +131,32 @@ func (c *Client) UpdateDNSCredential(dns_credential NewCRDNSCredential, id int) 
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		apiError := c.parseAPIError(body)
-		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf("%s\n", apiError)
+
+		err := json.Unmarshal(body, &apiError)
+		if err == nil {
+			return nil, errors.New(apiError)
 		}
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
-	new_data := CRDNSCredential{}
-	if err := json.Unmarshal(body, &new_data); err != nil {
+	newData := CRDNSCredential{}
+
+	err = json.Unmarshal(body, &newData)
+	if err != nil {
 		return nil, err
 	}
 
-	return &new_data, nil
+	return &newData, nil
 }
 
 func (c *Client) DeleteCRCredential(id int) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d", c.HostURL, c.CompanyId, id), nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscredential/%d", c.HostURL, c.CompanyID, id), nil)
 	if err != nil {
 		return err
 	}
@@ -154,7 +174,7 @@ func (c *Client) DeleteCRCredential(id int) error {
 }
 
 func (c *Client) GetCertReqDNS(id int) (CertReqDNS, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyId, id), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyID, id), nil)
 	if err != nil {
 		return CertReqDNS{}, err
 	}
@@ -163,20 +183,23 @@ func (c *Client) GetCertReqDNS(id int) (CertReqDNS, error) {
 	if err != nil {
 		return CertReqDNS{}, err
 	}
-	if sc != 200 {
-		return CertReqDNS{}, fmt.Errorf("Failure retrieving DNS Certificate Request with id %d. %s", id, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return CertReqDNS{}, fmt.Errorf("failure retrieving DNS Certificate Request with id %d. %s", id, c.parseAPIError(body))
 	}
 
 	data := CertReqDNS{}
-	if err := json.Unmarshal(body, &data); err != nil {
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
 		return CertReqDNS{}, err
 	}
 
 	return data, nil
 }
 
-func (c *Client) CreateDNSCertReq(certreq interface{}) (*CertReqDNS, error) {
-	req, err := c.prepareJSONRequest(certreq, "POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/", c.HostURL, c.CompanyId))
+func (c *Client) CreateDNSCertReq(certreq any) (*CertReqDNS, error) {
+	req, err := c.prepareJSONRequest(certreq, http.MethodPost, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -185,26 +208,32 @@ func (c *Client) CreateDNSCertReq(certreq interface{}) (*CertReqDNS, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		apiError := c.parseAPIError(body)
-		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf("%s\n", apiError)
+
+		err := json.Unmarshal(body, &apiError)
+		if err == nil {
+			return nil, errors.New(apiError)
 		}
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
-	new_data := CertReqDNS{}
-	if err := json.Unmarshal(body, &new_data); err != nil {
+	newData := CertReqDNS{}
+
+	err = json.Unmarshal(body, &newData)
+	if err != nil {
 		return nil, err
 	}
 
-	return &new_data, nil
+	return &newData, nil
 }
 
-func (c *Client) DeteleDNSCertReq(id int) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyId, id), nil)
+func (c *Client) DeleteDNSCertReq(id int) error {
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyID, id), nil)
 	if err != nil {
 		return err
 	}
@@ -214,18 +243,19 @@ func (c *Client) DeteleDNSCertReq(id int) error {
 		return err
 	}
 
-	if sc != 204 {
+	if sc != http.StatusNoContent {
 		return fmt.Errorf("%d - DELETE Failed for ID %d: %s", sc, id, c.parseAPIError(body))
 	}
 
 	return nil
 }
 
-func (c *Client) UpdateDNSCertReq(certreq_id int, credential_id int) error {
-	data := map[string]interface{}{
-		"credential": credential_id,
+func (c *Client) UpdateDNSCertReq(certReqID int, credID int) error {
+	data := map[string]any{
+		"credential": credID,
 	}
-	req, err := c.prepareJSONRequest(data, "PUT", fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyId, certreq_id))
+
+	req, err := c.prepareJSONRequest(data, http.MethodPut, fmt.Sprintf("%s/v1/autoprovisioning/%d/dnscertrequest/%d", c.HostURL, c.CompanyID, certReqID))
 	if err != nil {
 		return err
 	}
@@ -234,13 +264,17 @@ func (c *Client) UpdateDNSCertReq(certreq_id int, credential_id int) error {
 	if err != nil {
 		return fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		apiError := c.parseAPIError(body)
-		if err := json.Unmarshal(body, &apiError); err == nil {
-			return fmt.Errorf("%s\n", apiError)
+
+		err := json.Unmarshal(body, &apiError)
+		if err == nil {
+			return errors.New(apiError)
 		}
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
@@ -248,7 +282,7 @@ func (c *Client) UpdateDNSCertReq(certreq_id int, credential_id int) error {
 }
 
 func (c *Client) GetCertReqHTTP(id int) (CertReqHTTP, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/%d", c.HostURL, c.CompanyId, id), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/%d", c.HostURL, c.CompanyID, id), nil)
 	if err != nil {
 		return CertReqHTTP{}, err
 	}
@@ -257,20 +291,23 @@ func (c *Client) GetCertReqHTTP(id int) (CertReqHTTP, error) {
 	if err != nil {
 		return CertReqHTTP{}, err
 	}
-	if sc != 200 {
-		return CertReqHTTP{}, fmt.Errorf("Failure retrieving HTTP Certificate Request with id %d. %s", id, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return CertReqHTTP{}, fmt.Errorf("failure retrieving HTTP Certificate Request with id %d. %s", id, c.parseAPIError(body))
 	}
 
 	data := CertReqHTTP{}
-	if err := json.Unmarshal(body, &data); err != nil {
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
 		return CertReqHTTP{}, err
 	}
 
 	return data, nil
 }
 
-func (c *Client) CreateHTTPCertReq(certreq interface{}) (*CertReqHTTP, error) {
-	req, err := c.prepareJSONRequest(certreq, "POST", fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/", c.HostURL, c.CompanyId))
+func (c *Client) CreateHTTPCertReq(certreq any) (*CertReqHTTP, error) {
+	req, err := c.prepareJSONRequest(certreq, http.MethodPost, fmt.Sprintf("%s/v1/autoprovisioning/%d/sslcertificaterequest/", c.HostURL, c.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -279,20 +316,26 @@ func (c *Client) CreateHTTPCertReq(certreq interface{}) (*CertReqHTTP, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if sc == 400 {
+
+	if sc == http.StatusBadRequest {
 		apiError := c.parseAPIError(body)
-		if err := json.Unmarshal(body, &apiError); err == nil {
-			return nil, fmt.Errorf("%s\n", apiError)
+
+		err := json.Unmarshal(body, &apiError)
+		if err == nil {
+			return nil, errors.New(apiError)
 		}
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
-	new_data := CertReqHTTP{}
-	if err := json.Unmarshal(body, &new_data); err != nil {
+	newData := CertReqHTTP{}
+
+	err = json.Unmarshal(body, &newData)
+	if err != nil {
 		return nil, err
 	}
 
-	return &new_data, nil
+	return &newData, nil
 }

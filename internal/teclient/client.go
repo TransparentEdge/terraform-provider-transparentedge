@@ -17,7 +17,7 @@ const (
 
 func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, insecure *bool, auth *bool, useragent *string) (*Client, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure}, // nolint: gosec
 		Proxy:           http.ProxyFromEnvironment,
 	}
 
@@ -28,15 +28,16 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 		Token:      token,
 
 		HostURL:      *host,
-		CompanyId:    *companyid,
-		ClientId:     *clientid,
+		CompanyID:    *companyid,
+		ClientID:     *clientid,
 		ClientSecret: *clientsecret,
 		VerifySSL:    *insecure,
 		UserAgent:    *useragent,
 	}
 
 	if *auth {
-		if err := c.getToken(); err != nil {
+		err := c.getToken()
+		if err != nil {
 			return nil, err
 		}
 	} else {
@@ -47,12 +48,13 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 }
 
 func (c *Client) getToken() error {
-	req_body := []byte(fmt.Sprintf("client_id=%s&client_secret=%s&grant_type=client_credentials", c.ClientId, c.ClientSecret))
+	reqBody := fmt.Appendf(nil, "client_id=%s&client_secret=%s&grant_type=client_credentials", c.ClientID, c.ClientSecret)
 
-	req, err := http.NewRequest("POST", c.HostURL+"/v1/oauth2/access_token/", bytes.NewBuffer(req_body))
+	req, err := http.NewRequest(http.MethodPost, c.HostURL+"/v1/oauth2/access_token/", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return err
 	}
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", c.UserAgent)
 
@@ -62,27 +64,29 @@ func (c *Client) getToken() error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("%d - Could not create API client, please ensure credentials are correct.", resp.StatusCode)
+	if resp.StatusCode == http.StatusUnauthorized {
+		return fmt.Errorf("received status code %d, could not create API client, please ensure credentials are correct", resp.StatusCode)
 	}
-	if resp.StatusCode != 200 {
-		resp_body, err := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("%d - Failure creating API Token: %w", resp.StatusCode, err)
 		}
-		return fmt.Errorf("%d - Unable to create API Token: %s", resp.StatusCode, c.parseAPIError(resp_body))
+
+		return fmt.Errorf("received status code %d, unable to create API Token: %s", resp.StatusCode, c.parseAPIError(respBody))
 	}
 
-	err_decode := json.NewDecoder(resp.Body).Decode(&c.Token)
-	if err_decode != nil || c.Token.Token == "" {
-		return fmt.Errorf("Fatal error creating API Token: %s", err_decode.Error())
+	errDecode := json.NewDecoder(resp.Body).Decode(&c.Token)
+	if errDecode != nil || c.Token.Token == "" {
+		return fmt.Errorf("fatal error creating API Token: %s", errDecode.Error())
 	}
 
 	return err
 }
 
 func (c *Client) doRequest(req *http.Request) ([]byte, int, error) {
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token.Token))
+	req.Header.Set("Authorization", "Bearer "+c.Token.Token)
 	req.Header.Set("User-Agent", c.UserAgent)
 
 	resp, err := c.HTTPClient.Do(req)
@@ -99,23 +103,27 @@ func (c *Client) doRequest(req *http.Request) ([]byte, int, error) {
 	return body, resp.StatusCode, err
 }
 
-func (c *Client) prepareJSONRequest(jdata interface{}, method string, url string) (*http.Request, error) {
+func (*Client) prepareJSONRequest(jdata any, method string, url string) (*http.Request, error) {
 	data, err := json.Marshal(jdata)
 	if err != nil {
 		return nil, err
 	}
+
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Set("Content-Type", "application/json")
+
 	return req, nil
 }
 
-func (c *Client) MustGetAPIEnvironmentPath(environment APIEnvironment) string {
-	if environment == ProdEnv {
+func (*Client) MustGetAPIEnvironmentPath(environment APIEnvironment) string {
+	switch environment {
+	case ProdEnv:
 		return "autoprovisioning"
-	} else if environment == StagingEnv {
+	case StagingEnv:
 		return "staging"
 	}
 
@@ -123,19 +131,23 @@ func (c *Client) MustGetAPIEnvironmentPath(environment APIEnvironment) string {
 	panic(fmt.Sprintf("Invalid environment: %+v", environment))
 }
 
-func (c *Client) parseAPIError(body []byte) string {
+func (*Client) parseAPIError(body []byte) string {
 	apiError := APIMessage{}
 	apiDetail := APIDetail{}
 
 	decoder := json.NewDecoder(strings.NewReader(string(body)))
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&apiError); err == nil {
+
+	err := decoder.Decode(&apiError)
+	if err == nil {
 		return apiError.Message
 	}
 
 	decoder = json.NewDecoder(strings.NewReader(string(body)))
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&apiDetail); err == nil {
+
+	err = decoder.Decode(&apiDetail)
+	if err == nil {
 		return apiDetail.Detail
 	}
 

@@ -17,7 +17,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &crDNSProviderDataSource{}
 )
 
-// helper function to simplify the provider implementation.
+// NewCertReqDNSProvidersDataSource is a helper function to simplify the provider implementation.
 func NewCertReqDNSProvidersDataSource() datasource.DataSource {
 	return &crDNSProviderDataSource{}
 }
@@ -28,12 +28,12 @@ type crDNSProviderDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *crDNSProviderDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*crDNSProviderDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_certreq_dns_providers"
 }
 
 // Schema defines the schema for the data source.
-func (d *crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*crDNSProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "List available Certificate Request DNS Providers.",
 		MarkdownDescription: "List available Certificate Request DNS Providers.",
@@ -68,26 +68,30 @@ func (d *crDNSProviderDataSource) Read(ctx context.Context, req datasource.ReadR
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &providers)...)
 
-	resp_providers, err := d.client.GetCRDNSProviders()
-	if err != nil || resp_providers == nil {
+	respProviders, err := d.client.GetCRDNSProviders()
+	if err != nil || respProviders == nil {
 		resp.Diagnostics.AddError(
 			"Unable to retrieve DNS Providers",
 			"Unable to retrieve DNS Providers",
 		)
+
 		return
 	}
 
 	// Map response body to model
-	for _, prov := range resp_providers {
+	for _, prov := range respProviders {
 		var keys []attr.Value
 		for _, key := range prov.Keys {
 			keys = append(keys, types.StringValue(key.KeyName))
 		}
+
 		parameters, diags := types.ListValue(types.StringType, keys)
 		resp.Diagnostics.Append(diags...)
+
 		if resp.Diagnostics.HasError() {
 			return
 		}
+
 		state := CertReqDNSProvider{
 			DNSProvider: types.StringValue(prov.Provider),
 			Parameters:  parameters,
@@ -101,10 +105,17 @@ func (d *crDNSProviderDataSource) Read(ctx context.Context, req datasource.ReadR
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *crDNSProviderDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *crDNSProviderDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable configure CR DNS Provider", "error while configuring the API client")
+
+		return
+	}
+
+	d.client = client
 }

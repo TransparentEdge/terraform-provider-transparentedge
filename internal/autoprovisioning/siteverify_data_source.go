@@ -27,12 +27,12 @@ type siteVerifyDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *siteVerifyDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*siteVerifyDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_siteverify"
 }
 
 // Schema defines the schema for the data source.
-func (d *siteVerifyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*siteVerifyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Shows the verification string of sites.",
 		MarkdownDescription: "Shows the verification string of sites.",
@@ -58,18 +58,20 @@ func (d *siteVerifyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	domain := data.Domain.ValueString()
-	verify_string := d.client.GetSiteVerifyString(domain)
-	if verify_string == "" {
+
+	verifyString := d.client.GetSiteVerifyString(domain)
+	if verifyString == "" {
 		resp.Diagnostics.AddError(
 			"Unable to retrieve Site Verification string",
 			"Could not retrieve the site verification string for the domain: "+domain,
 		)
+
 		return
 	}
 
 	data = SiteVerify{
 		Domain:              types.StringValue(domain),
-		VerificantionString: types.StringValue(verify_string),
+		VerificantionString: types.StringValue(verifyString),
 	}
 
 	// Save data into Terraform state
@@ -77,10 +79,17 @@ func (d *siteVerifyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *siteVerifyDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *siteVerifyDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

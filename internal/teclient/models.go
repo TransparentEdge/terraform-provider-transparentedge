@@ -2,7 +2,7 @@ package teclient
 
 import "net/http"
 
-// Environment
+// APIEnvironment.
 type APIEnvironment int
 
 const (
@@ -10,7 +10,7 @@ const (
 	StagingEnv APIEnvironment = 1
 )
 
-// API
+// APIMessage.
 type APIMessage struct {
 	Message string `json:"message"`
 }
@@ -31,24 +31,24 @@ type Client struct {
 	Token      TokenStruct
 
 	HostURL      string
-	CompanyId    int
-	ClientId     string
+	CompanyID    int
+	ClientID     string
 	ClientSecret string
 	VerifySSL    bool
 	UserAgent    string
 }
 
-// Sites
+// SiteAPIModel.
 type SiteAPIModel struct {
 	ID      int    `json:"id"`
 	Company int    `json:"company"`
-	Url     string `json:"url"`
+	URL     string `json:"url"`
 	Active  bool   `json:"active"`
 	Ssl     bool   `json:"ssl"`
 }
 
 type SiteNewAPIModel struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type SiteVerifyStringAPIModelRequest struct {
@@ -59,7 +59,7 @@ type SiteVerifyStringAPIModelResponse struct {
 	Txt string `json:"txt"`
 }
 
-// Backends
+// BackendAPIModel.
 type BackendAPIModel struct {
 	ID           int    `json:"id"`
 	Company      int    `json:"company"`
@@ -88,7 +88,7 @@ type NewBackendAPIModel struct {
 	HCDisabled   bool   `json:"no_probe"`
 }
 
-// VCL Configs
+// VCLConfCreator.
 type VCLConfCreator struct {
 	ID        int    `json:"id"`
 	Email     string `json:"email"`
@@ -114,7 +114,7 @@ type NewVCLConfAPIModel struct {
 	Comment string `json:"comment"`
 }
 
-// Certificates
+// SSLCertificate.
 type SSLCertificate struct {
 	ID            int      `json:"id"`
 	Company       int      `json:"company"`
@@ -136,7 +136,7 @@ type SSLCustomCertificate struct {
 	PrivateKey    string `json:"key"`
 }
 
-// DNS Certificate Requests
+// CRDNSKeys for DNS Certificate Requests.
 type CRDNSKeys struct {
 	KeyNameID int    `json:"key_name_id"`
 	KeyName   string `json:"key_name"`
@@ -186,7 +186,7 @@ type CertReqDNS struct {
 	Log           *string `json:"log"`
 }
 
-// HTTP Certificate Requests
+// CertReqHTTP (HTTP Certificate Request).
 type CertReqHTTP struct {
 	ID         int    `json:"id"`
 	CommonName string `json:"cn"`

@@ -1,13 +1,17 @@
 SHELL := bash
 
 
-.PHONY: install
 install:
 	go generate
-	go install
+	go install -ldflags="-X main.version=dev-$(shell git log -1 --pretty=%h)" .
 
-.PHONY: fmt
 fmt:
+	@golangci-lint fmt .
 	@goimports -local $(shell go list -m) -w .
 	@gofumpt -l -w .
 
+static-check:
+	golangci-lint run
+
+
+.PHONY: install fmt static-check

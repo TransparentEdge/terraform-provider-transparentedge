@@ -18,7 +18,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &stagingBackendDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewStagingBackendDataSource is a helper function to simplify the provider implementation.
 func NewStagingBackendDataSource() datasource.DataSource {
 	return &stagingBackendDataSource{}
 }
@@ -29,12 +29,12 @@ type stagingBackendDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *stagingBackendDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*stagingBackendDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_backend"
 }
 
 // Schema defines the schema for the data source.
-func (d *stagingBackendDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*stagingBackendDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Read a staging backend.",
 		MarkdownDescription: "Read a staging backend.",
@@ -121,6 +121,7 @@ func (d *stagingBackendDataSource) Read(ctx context.Context, req datasource.Read
 			fmt.Sprintf("Unable to read the backend with name: %+v", state.Name),
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -144,10 +145,17 @@ func (d *stagingBackendDataSource) Read(ctx context.Context, req datasource.Read
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *stagingBackendDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *stagingBackendDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

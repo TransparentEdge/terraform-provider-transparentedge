@@ -16,7 +16,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &vclconfDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewVclconfDataSource is a helper function to simplify the provider implementation.
 func NewVclconfDataSource() datasource.DataSource {
 	return &vclconfDataSource{}
 }
@@ -27,12 +27,12 @@ type vclconfDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *vclconfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*vclconfDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_vclconf"
 }
 
 // Schema defines the schema for the data source.
-func (d *vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "VCL Configuration listing.",
 		MarkdownDescription: "VCL Configuration listing.",
@@ -73,7 +73,7 @@ func (d *vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *vclconfDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *vclconfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state VCLConf
 
 	vclconf, err := d.client.GetActiveVCLConf(teclient.ProdEnv)
@@ -82,6 +82,7 @@ func (d *vclconfDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			"Unable to read VclConf info",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -97,10 +98,17 @@ func (d *vclconfDataSource) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *vclconfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *vclconfDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

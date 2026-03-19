@@ -18,7 +18,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &backendDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewBackendDataSource is a helper function to simplify the provider implementation.
 func NewBackendDataSource() datasource.DataSource {
 	return &backendDataSource{}
 }
@@ -29,12 +29,12 @@ type backendDataSource struct {
 }
 
 // Metadata returns the data source type name.
-func (d *backendDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*backendDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_backend"
 }
 
 // Schema defines the schema for the data source.
-func (d *backendDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*backendDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Read a backend.",
 		MarkdownDescription: "Read a backend.",
@@ -121,6 +121,7 @@ func (d *backendDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			fmt.Sprintf("Unable to read the backend with name: %+v", state.Name),
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -144,10 +145,17 @@ func (d *backendDataSource) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *backendDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *backendDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

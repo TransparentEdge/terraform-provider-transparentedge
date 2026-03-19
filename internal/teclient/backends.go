@@ -2,6 +2,7 @@ package teclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,7 +10,8 @@ import (
 
 func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyID, backendID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -18,12 +20,15 @@ func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*Backend
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the backend with ID %d: %s", backendID, c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failed to retrieve the backend with ID %d: %s", backendID, c.parseAPIError(body))
 	}
 
 	backend := BackendAPIModel{}
-	if err := json.Unmarshal(body, &backend); err != nil {
+
+	err = json.Unmarshal(body, &backend)
+	if err != nil {
 		return nil, err
 	}
 
@@ -32,7 +37,8 @@ func (c *Client) GetBackend(backendID int, environment APIEnvironment) (*Backend
 
 func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId), nil)
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,12 +47,15 @@ func (c *Client) GetBackends(environment APIEnvironment) ([]BackendAPIModel, err
 	if err != nil {
 		return nil, err
 	}
-	if sc != 200 {
-		return nil, fmt.Errorf("Couldn't retrieve the list of backends: %s", c.parseAPIError(body))
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failed to retrieve the list of backends: %s", c.parseAPIError(body))
 	}
 
 	backends := []BackendAPIModel{}
-	if err := json.Unmarshal(body, &backends); err != nil {
+
+	err = json.Unmarshal(body, &backends)
+	if err != nil {
 		return nil, err
 	}
 
@@ -58,17 +67,20 @@ func (c *Client) GetBackendByName(name string, environment APIEnvironment) (*Bac
 	if err != nil {
 		return nil, err
 	}
+
 	for _, backend := range backends {
 		if backend.Name == name {
 			return &backend, nil
 		}
 	}
-	return nil, fmt.Errorf("A backend named '%s' wasn't found.", name)
+
+	return nil, fmt.Errorf("no backend named '%s' found", name)
 }
 
 func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
-	req, err := c.prepareJSONRequest(backend, "POST", fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyId))
+
+	req, err := c.prepareJSONRequest(backend, http.MethodPost, fmt.Sprintf("%s/v1/%s/%d/backends/", c.HostURL, envpath, c.CompanyID))
 	if err != nil {
 		return nil, err
 	}
@@ -77,12 +89,15 @@ func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnviro
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newBackend := BackendAPIModel{}
-	if err := json.Unmarshal(body, &newBackend); err != nil {
+
+	err = json.Unmarshal(body, &newBackend)
+	if err != nil {
 		return nil, err
 	}
 
@@ -91,7 +106,8 @@ func (c *Client) CreateBackend(backend NewBackendAPIModel, environment APIEnviro
 
 func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironment) (*BackendAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
-	req, err := c.prepareJSONRequest(backend, "PUT", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backend.ID))
+
+	req, err := c.prepareJSONRequest(backend, http.MethodPut, fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyID, backend.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +116,15 @@ func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironme
 	if err != nil {
 		return nil, fmt.Errorf("%d - %s", sc, err.Error())
 	}
-	if !(sc == 200 || sc == 201) {
+
+	if sc != http.StatusOK && sc != http.StatusCreated {
 		return nil, fmt.Errorf("%d - %s", sc, c.parseAPIError(body))
 	}
 
 	newBackend := BackendAPIModel{}
-	if err := json.Unmarshal(body, &newBackend); err != nil {
+
+	err = json.Unmarshal(body, &newBackend)
+	if err != nil {
 		return nil, err
 	}
 
@@ -114,7 +133,8 @@ func (c *Client) UpdateBackend(backend BackendAPIModel, environment APIEnvironme
 
 func (c *Client) DeleteBackend(backendID int, environment APIEnvironment) error {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyId, backendID), nil)
+
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/%s/%d/backends/%d/", c.HostURL, envpath, c.CompanyID, backendID), nil)
 	if err != nil {
 		return err
 	}
@@ -123,12 +143,14 @@ func (c *Client) DeleteBackend(backendID int, environment APIEnvironment) error 
 	if err != nil {
 		return err
 	}
-	if sc == 403 {
+
+	if sc == http.StatusForbidden {
 		if strings.Contains(c.parseAPIError(body), "references in active config") {
-			return fmt.Errorf("Cannot delete a backend with references in the active autoprovisioning configuration, please remove all the references from the configuration first.")
+			return errors.New("cannot delete a backend with references in the active autoprovisioning configuration, please remove all the references from the configuration first")
 		}
 	}
-	if sc != 204 {
+
+	if sc != http.StatusNoContent {
 		return fmt.Errorf("%d - API request failed trying to DELETE the backend ID %d: %s", sc, backendID, c.parseAPIError(body))
 	}
 

@@ -17,7 +17,7 @@ var (
 	_ datasource.DataSourceWithConfigure = &stagingBackendsDataSource{}
 )
 
-// Helper function to simplify the provider implementation.
+// NewStagingBackendsDataSource is a helper function to simplify the provider implementation.
 func NewStagingBackendsDataSource() datasource.DataSource {
 	return &stagingBackendsDataSource{}
 }
@@ -33,12 +33,12 @@ type stagingBackendsDataSourceModel struct {
 }
 
 // Metadata returns the data source type name.
-func (d *stagingBackendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*stagingBackendsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_backends"
 }
 
 // Schema defines the schema for the data source.
-func (d *stagingBackendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*stagingBackendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Staging backend listing.",
 		MarkdownDescription: "Staging backend listing.",
@@ -121,7 +121,7 @@ func (d *stagingBackendsDataSource) Schema(_ context.Context, _ datasource.Schem
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *stagingBackendsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state stagingBackendsDataSourceModel
 
 	stagingBackends, err := d.client.GetBackends(teclient.StagingEnv)
@@ -130,6 +130,7 @@ func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.Rea
 			"Unable to read Staging Backends info",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -159,10 +160,17 @@ func (d *stagingBackendsDataSource) Read(ctx context.Context, req datasource.Rea
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *stagingBackendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *stagingBackendsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	d.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	d.client = client
 }

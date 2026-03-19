@@ -30,7 +30,7 @@ var (
 	_ resource.ResourceWithImportState = &stagingBackendResource{}
 )
 
-// helper function to simplify the provider implementation.
+// NewStagingBackendResource is a helper function to simplify the provider implementation.
 func NewStagingBackendResource() resource.Resource {
 	return &stagingBackendResource{}
 }
@@ -41,12 +41,12 @@ type stagingBackendResource struct {
 }
 
 // Metadata returns the resource type name.
-func (r *stagingBackendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (*stagingBackendResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_staging_backend"
 }
 
 // Schema defines the schema for the resource.
-func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*stagingBackendResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manages staging backend configuration.",
 		MarkdownDescription: "Provides a Staging Backend resource. This allows backends to be created, updated and deleted.",
@@ -153,12 +153,14 @@ func (r *stagingBackendResource) Schema(ctx context.Context, _ resource.SchemaRe
 	}
 }
 
-// Create
+// Create.
 func (r *stagingBackendResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan StagingBackend
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -176,12 +178,14 @@ func (r *stagingBackendResource) Create(ctx context.Context, req resource.Create
 		HCInterval:   int(plan.HCInterval.ValueInt64()),
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
+
 	stagingBackendState, errCreate := r.client.CreateBackend(newStagingBackend, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating staging backend",
 			fmt.Sprintf("Could not create the staging backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
+
 		return
 	}
 
@@ -206,8 +210,10 @@ func (r *stagingBackendResource) Create(ctx context.Context, req resource.Create
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *stagingBackendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan StagingBackend
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -227,12 +233,14 @@ func (r *stagingBackendResource) Update(ctx context.Context, req resource.Update
 		HCInterval:   int(plan.HCInterval.ValueInt64()),
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
+
 	stagingBackendState, errCreate := r.client.UpdateBackend(newStagingBackend, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating staging backend",
 			fmt.Sprintf("Could not update the staging backend '%s': %s", plan.Name.ValueString(), errCreate),
 		)
+
 		return
 	}
 
@@ -254,19 +262,22 @@ func (r *stagingBackendResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-// Read resource information
+// Read resource information.
 func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
 	var state StagingBackend
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		if stagingBackend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.StagingEnv); err == nil {
+		stagingBackend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.StagingEnv)
+		if err == nil {
 			state.ID = types.Int64Value(int64(stagingBackend.ID))
 			state.Company = types.Int64Value(int64(stagingBackend.Company))
 			state.Name = types.StringValue(stagingBackend.Name)
@@ -281,6 +292,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 			state.HCInterval = types.Int64Value(int64(stagingBackend.HCInterval))
 			state.HCDisabled = types.BoolValue(stagingBackend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 			return
 		}
 	}
@@ -303,6 +315,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 			state.HCInterval = types.Int64Value(int64(stagingBackend.HCInterval))
 			state.HCDisabled = types.BoolValue(stagingBackend.HCDisabled)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+
 			return
 		}
 	}
@@ -311,35 +324,47 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.AddError("Staging Backend not found", "Staging Backend '"+state.Name.ValueString()+"' doesn't exist in API")
 }
 
-// Delete
+// Delete.
 func (r *stagingBackendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state StagingBackend
+
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting Staging Backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
-	if err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.StagingEnv); err != nil {
+
+	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.StagingEnv)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a Staging Backend",
 			"Could not delete the Staging Backend: "+state.Name.ValueString()+"\n"+err.Error(),
 		)
+
 		return
 	}
 }
 
 // Configure adds the provider configured client to the resource.
-func (r *stagingBackendResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (r *stagingBackendResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
 
-	r.client = req.ProviderData.(*teclient.Client)
+	client, ok := req.ProviderData.(*teclient.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unable to configure", "error while configuring API client")
+
+		return
+	}
+
+	r.client = client
 }
 
-func (r *stagingBackendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*stagingBackendResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

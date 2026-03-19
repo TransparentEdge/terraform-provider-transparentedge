@@ -1,3 +1,4 @@
+// Package main for the T.E. terraform plugin.
 package main
 
 import (
@@ -15,7 +16,7 @@ import (
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name transparentedge --rendered-provider-name TransparentEdge
 
 var (
-	// variables are set by goreleaser
+	// variables are set by goreleaser.
 	version = "dev"
 	commit  = "none"
 )
