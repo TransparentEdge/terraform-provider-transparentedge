@@ -3,6 +3,8 @@ package autoprovisioning
 import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
 )
 
 type Site struct {
@@ -50,12 +52,13 @@ type Backends struct {
 }
 
 type VCLConf struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
+	ID             types.Int64              `tfsdk:"id"`
+	Company        types.Int64              `tfsdk:"company"`
+	VCLCode        customtypes.VCLCodeValue `tfsdk:"vclcode"`
+	UploadDate     types.String             `tfsdk:"uploaddate"`
+	ProductionDate types.String             `tfsdk:"productiondate"`
+	User           types.String             `tfsdk:"user"`
+	Comment        types.String             `tfsdk:"comment"`
 }
 
 type Certificates struct {

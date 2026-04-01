@@ -25,6 +25,7 @@ output "staging_vcl_config" {
 
 ### Read-Only
 
+- `comment` (String) Optional comment describing the changes introduced by this configuration.
 - `company` (Number) Company ID that owns this Staging VCL config.
 - `id` (Number) ID of the Staging VCL Config.
 - `productiondate` (String) Date when the configuration was fully applied in the CDN.

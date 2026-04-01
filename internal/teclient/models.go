@@ -30,12 +30,13 @@ type Client struct {
 	HTTPClient *http.Client
 	Token      TokenStruct
 
-	HostURL      string
-	CompanyID    int
-	ClientID     string
-	ClientSecret string
-	VerifySSL    bool
-	UserAgent    string
+	HostURL         string
+	CompanyID       int
+	ClientID        string
+	ClientSecret    string
+	VerifySSL       bool
+	UserAgent       string
+	ProviderVersion string
 }
 
 // SiteAPIModel.
@@ -107,6 +108,7 @@ type VCLConfAPIModel struct {
 	Active         bool           `json:"active"`
 	Deployed       bool           `json:"deployed"`
 	CreatorUser    VCLConfCreator `json:"creator_user"`
+	Comment        string         `json:"comment"`
 }
 
 type NewVCLConfAPIModel struct {

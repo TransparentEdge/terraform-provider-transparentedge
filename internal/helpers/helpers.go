@@ -4,22 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 )
-
-func SanitizeStringForDiff(config string) string {
-	config = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(config), "\n")
-
-	var output strings.Builder
-	for v := range strings.SplitSeq(config, "\n") {
-		output.WriteString(strings.TrimSpace(v) + "\n")
-	}
-
-	return output.String()
-}
 
 func GetIntEnv(key string, fallback int) (int, error) {
 	s, ok := os.LookupEnv(key)

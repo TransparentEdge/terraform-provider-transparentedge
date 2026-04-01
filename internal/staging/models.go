@@ -1,6 +1,10 @@
 package staging
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
+)
 
 type StagingBackend struct {
 	ID           types.Int64  `tfsdk:"id"`
@@ -19,10 +23,11 @@ type StagingBackend struct {
 }
 
 type StagingVCLConf struct {
-	ID             types.Int64  `tfsdk:"id"`
-	Company        types.Int64  `tfsdk:"company"`
-	VCLCode        types.String `tfsdk:"vclcode"`
-	UploadDate     types.String `tfsdk:"uploaddate"`
-	ProductionDate types.String `tfsdk:"productiondate"`
-	User           types.String `tfsdk:"user"`
+	ID             types.Int64              `tfsdk:"id"`
+	Company        types.Int64              `tfsdk:"company"`
+	VCLCode        customtypes.VCLCodeValue `tfsdk:"vclcode"`
+	UploadDate     types.String             `tfsdk:"uploaddate"`
+	ProductionDate types.String             `tfsdk:"productiondate"`
+	User           types.String             `tfsdk:"user"`
+	Comment        types.String             `tfsdk:"comment"`
 }

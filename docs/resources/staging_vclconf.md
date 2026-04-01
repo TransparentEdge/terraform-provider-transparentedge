@@ -42,6 +42,10 @@ output "staging_config" {
 
 - `vclcode` (String) Verbatim of the VCL (_Varnish Configuration Language_) code configuration to apply. After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully replicated in all the CDN edge nodes. You can check if a configuration is already in **staging** by running `terraform plan` and checking the `productiondate` field.
 
+### Optional
+
+- `comment` (String) Optional comment describing the changes introduced by this configuration.
+
 ### Read-Only
 
 - `company` (Number) Company ID that owns this Staging VCL Config.

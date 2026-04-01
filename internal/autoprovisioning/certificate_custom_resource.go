@@ -245,11 +245,11 @@ func (r *customCertificateResource) Read(ctx context.Context, req resource.ReadR
 	state.Domains = types.StringValue(sanDomains)
 	state.Expiration = types.StringValue(expiration)
 
-	if helpers.SanitizeStringForDiff(customCertificate.PublicKey) != helpers.SanitizeStringForDiff(state.PublicKey.ValueString()) {
+	if helpers.NormalizeStringForComparison(customCertificate.PublicKey) != helpers.NormalizeStringForComparison(state.PublicKey.ValueString()) {
 		state.PublicKey = types.StringValue(customCertificate.PublicKey)
 	}
 
-	if helpers.SanitizeStringForDiff(customCertificate.PrivateKey) != helpers.SanitizeStringForDiff(state.PrivateKey.ValueString()) {
+	if helpers.NormalizeStringForComparison(customCertificate.PrivateKey) != helpers.NormalizeStringForComparison(state.PrivateKey.ValueString()) {
 		state.PrivateKey = types.StringValue(customCertificate.PrivateKey)
 	}
 

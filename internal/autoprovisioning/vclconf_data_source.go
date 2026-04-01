@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
@@ -50,6 +51,7 @@ func (*vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 			},
 			"vclcode": schema.StringAttribute{
 				Computed:            true,
+				CustomType:          customtypes.VCLCodeType{},
 				Description:         "Verbatim of the VCL code.",
 				MarkdownDescription: "Verbatim of the VCL code.",
 			},
@@ -68,6 +70,11 @@ func (*vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				Description:         "User that created the configuration.",
 				MarkdownDescription: "User that created the configuration.",
 			},
+			"comment": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Optional comment describing the changes introduced by this configuration.",
+				MarkdownDescription: "Optional comment describing the changes introduced by this configuration.",
+			},
 		},
 	}
 }
@@ -76,7 +83,7 @@ func (*vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 func (d *vclconfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state VCLConf
 
-	vclconf, err := d.client.GetActiveVCLConf(teclient.ProdEnv)
+	apiResp, err := d.client.GetActiveVCLConf(teclient.ProdEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read VclConf info",
@@ -86,13 +93,13 @@ func (d *vclconfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, 
 		return
 	}
 
-	// Set state
-	state.ID = types.Int64Value(int64(vclconf.ID))
-	state.Company = types.Int64Value(int64(vclconf.ID))
-	state.VCLCode = types.StringValue(vclconf.VCLCode)
-	state.UploadDate = types.StringValue(vclconf.UploadDate)
-	state.ProductionDate = types.StringValue(vclconf.ProductionDate)
-	state.User = types.StringValue(vclconf.CreatorUser.FirstName + " " + vclconf.CreatorUser.LastName + " <" + vclconf.CreatorUser.Email + ">")
+	state.ID = types.Int64Value(int64(apiResp.ID))
+	state.Company = types.Int64Value(int64(apiResp.ID))
+	state.VCLCode = customtypes.NewVCLCodeValue(apiResp.VCLCode)
+	state.UploadDate = types.StringValue(apiResp.UploadDate)
+	state.ProductionDate = types.StringValue(apiResp.ProductionDate)
+	state.User = types.StringValue(apiResp.CreatorUser.FirstName + " " + apiResp.CreatorUser.LastName + " <" + apiResp.CreatorUser.Email + ">")
+	state.Comment = types.StringValue(apiResp.Comment)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }

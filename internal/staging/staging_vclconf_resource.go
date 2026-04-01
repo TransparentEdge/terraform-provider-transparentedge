@@ -8,11 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/planmodifiers"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
 
@@ -57,9 +59,10 @@ func (*stagingVclConfResource) Schema(_ context.Context, _ resource.SchemaReques
 				MarkdownDescription: "Company ID that owns this Staging VCL Config.",
 			},
 			"vclcode": schema.StringAttribute{
-				Required: true,
+				Required:   true,
+				CustomType: customtypes.VCLCodeType{},
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					planmodifiers.VCLCodeRequiresReplace(),
 				},
 				Description: "Verbatim of the VCL (Varnish Configuration Language) code configuration to apply." +
 					" After a successful code upload, it may take between 5 and 10 minutes for the new configuration to be fully applied." +
@@ -83,6 +86,16 @@ func (*stagingVclConfResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description:         "User that created the configuration.",
 				MarkdownDescription: "User that created the configuration.",
 			},
+			"comment": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Description:         "Optional comment describing the changes introduced by this configuration.",
+				MarkdownDescription: "Optional comment describing the changes introduced by this configuration.",
+			},
 		},
 	}
 }
@@ -101,11 +114,12 @@ func (r *stagingVclConfResource) Create(ctx context.Context, req resource.Create
 
 	tflog.Info(ctx, "Creating new VCL configuration")
 
-	newStagingVclconf := teclient.NewVCLConfAPIModel{
+	newConf := teclient.NewVCLConfAPIModel{
 		VCLCode: plan.VCLCode.ValueString(),
+		Comment: plan.Comment.ValueString(),
 	}
 
-	stagingVclConfState, errCreate := r.client.CreateVclconf(newStagingVclconf, teclient.StagingEnv)
+	apiResp, errCreate := r.client.CreateVclconf(newConf, teclient.StagingEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Staging VCL Configuration",
@@ -116,13 +130,12 @@ func (r *stagingVclConfResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Set state to fully populated data
-	plan.ID = types.Int64Value(int64(stagingVclConfState.ID))
-	plan.Company = types.Int64Value(int64(stagingVclConfState.Company))
-	// do not update the VCL Config since our API does some string modifications
-	// plan.VCLCode = types.StringValue(stagingVclConfState.VCLCode)
-	plan.UploadDate = types.StringValue(stagingVclConfState.UploadDate)
-	plan.ProductionDate = types.StringValue(stagingVclConfState.ProductionDate)
-	plan.User = types.StringValue(stagingVclConfState.CreatorUser.FirstName + " " + stagingVclConfState.CreatorUser.LastName + " <" + stagingVclConfState.CreatorUser.Email + ">")
+	plan.ID = types.Int64Value(int64(apiResp.ID))
+	plan.Company = types.Int64Value(int64(apiResp.Company))
+	plan.VCLCode = customtypes.NewVCLCodeValue(apiResp.VCLCode)
+	plan.UploadDate = types.StringValue(apiResp.UploadDate)
+	plan.ProductionDate = types.StringValue(apiResp.ProductionDate)
+	plan.User = types.StringValue(apiResp.CreatorUser.FirstName + " " + apiResp.CreatorUser.LastName + " <" + apiResp.CreatorUser.Email + ">")
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -143,7 +156,7 @@ func (r *stagingVclConfResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	stagingVclConf, err := r.client.GetActiveVCLConf(teclient.StagingEnv)
+	apiResp, err := r.client.GetActiveVCLConf(teclient.StagingEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Staging VclConf info",
@@ -153,17 +166,18 @@ func (r *stagingVclConfResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	// Set state
-	state.ID = types.Int64Value(int64(stagingVclConf.ID))
+	state.ID = types.Int64Value(int64(apiResp.ID))
+	state.Company = types.Int64Value(int64(apiResp.Company))
+	state.VCLCode = customtypes.NewVCLCodeValue(apiResp.VCLCode)
+	state.UploadDate = types.StringValue(apiResp.UploadDate)
+	state.ProductionDate = types.StringValue(apiResp.ProductionDate)
+	state.User = types.StringValue(apiResp.CreatorUser.FirstName + " " + apiResp.CreatorUser.LastName + " <" + apiResp.CreatorUser.Email + ">")
 
-	state.Company = types.Int64Value(int64(stagingVclConf.Company))
-	if helpers.SanitizeStringForDiff(stagingVclConf.VCLCode) != helpers.SanitizeStringForDiff(state.VCLCode.ValueString()) {
-		state.VCLCode = types.StringValue(stagingVclConf.VCLCode)
+	// Do not update comment on Read, its just metadata, this also ensures compatibility between provider versions that did not have the comment field
+	// only set if its null to set a default value.
+	if state.Comment.IsNull() || state.Comment.IsUnknown() {
+		state.Comment = types.StringValue("")
 	}
-
-	state.UploadDate = types.StringValue(stagingVclConf.UploadDate)
-	state.ProductionDate = types.StringValue(stagingVclConf.ProductionDate)
-	state.User = types.StringValue(stagingVclConf.CreatorUser.FirstName + " " + stagingVclConf.CreatorUser.LastName + " <" + stagingVclConf.CreatorUser.Email + ">")
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }

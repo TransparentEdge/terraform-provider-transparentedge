@@ -15,7 +15,14 @@ const (
 	defaultAPIHTTPTimeout time.Duration = 50 * time.Second
 )
 
-func NewClient(host *string, companyid *int, clientid *string, clientsecret *string, insecure *bool, auth *bool, useragent *string) (*Client, error) {
+func NewClient(host *string,
+	companyid *int,
+	clientid *string,
+	clientsecret *string,
+	insecure *bool,
+	auth *bool,
+	providerVersion *string,
+) (*Client, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure}, // nolint: gosec
 		Proxy:           http.ProxyFromEnvironment,
@@ -27,12 +34,13 @@ func NewClient(host *string, companyid *int, clientid *string, clientsecret *str
 		HTTPClient: &http.Client{Timeout: defaultAPIHTTPTimeout, Transport: tr},
 		Token:      token,
 
-		HostURL:      *host,
-		CompanyID:    *companyid,
-		ClientID:     *clientid,
-		ClientSecret: *clientsecret,
-		VerifySSL:    *insecure,
-		UserAgent:    *useragent,
+		HostURL:         *host,
+		CompanyID:       *companyid,
+		ClientID:        *clientid,
+		ClientSecret:    *clientsecret,
+		VerifySSL:       *insecure,
+		UserAgent:       "terraform-provider-transparentedge/" + *providerVersion,
+		ProviderVersion: *providerVersion,
 	}
 
 	if *auth {

@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 )
+
+var tfProviderSuffixRe = regexp.MustCompile(`\s{0,1}\[Terraform/[^\]]+\]$`)
 
 func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
@@ -35,31 +38,33 @@ func (c *Client) GetVclConfs(offset int, environment APIEnvironment) ([]VCLConfA
 }
 
 func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel, error) {
-	vclconfs, err := c.GetVclConfs(1, environment)
+	confs, err := c.GetVclConfs(1, environment)
 	if err != nil {
 		return nil, err
 	}
 
-	topVclConf := VCLConfAPIModel{ID: -1}
-	for _, vclconf := range vclconfs {
-		if vclconf.ID > topVclConf.ID {
-			topVclConf = vclconf
+	top := VCLConfAPIModel{ID: -1}
+	for _, vc := range confs {
+		if vc.ID > top.ID {
+			top = vc
 		}
 	}
 
-	if topVclConf.ID <= 0 {
+	if top.ID <= 0 {
 		return nil, errors.New("no VCL configurations found")
 	}
 
-	return &topVclConf, nil
+	// remove version suffix
+	top.Comment = stripProviderSuffix(top.Comment)
+
+	return &top, nil
 }
 
 func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
 
-	// Add a fixed comment to annotate that this configuration is being managed by terraform
-	// consider porting this to the state in the future
-	vclconf.Comment = "Managed with " + c.UserAgent
+	// append version suffix
+	vclconf.Comment = appendProviderSuffix(vclconf.Comment, c.ProviderVersion)
 
 	req, err := c.prepareJSONRequest(vclconf, "POST", fmt.Sprintf("%s/v1/%s/%d/config/", c.HostURL, envpath, c.CompanyID))
 	if err != nil {
@@ -91,5 +96,21 @@ func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnviro
 		return nil, err
 	}
 
+	// remove version suffix
+	newVclConf.Comment = stripProviderSuffix(newVclConf.Comment)
+
 	return &newVclConf, nil
+}
+
+// appendProviderSuffix adds the provider version suffix to a comment.
+func appendProviderSuffix(comment, version string) string {
+	clean := tfProviderSuffixRe.ReplaceAllString(comment, "")
+	suffix := " [Terraform/" + version + "]"
+
+	return clean + suffix
+}
+
+// stripProviderSuffix removes the provider suffix from a comment if present.
+func stripProviderSuffix(comment string) string {
+	return tfProviderSuffixRe.ReplaceAllString(comment, "")
 }
