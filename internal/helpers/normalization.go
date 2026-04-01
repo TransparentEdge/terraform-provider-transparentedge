@@ -13,8 +13,10 @@ func VCLSemanticEquals(c1, c2 string) bool {
 	return normalizeVCL(c1) == normalizeVCL(c2)
 }
 
+// normalizeVCL normalizes the VCL string to be compatible with the API response.
+// API response uses django's: https://www.django-rest-framework.org/api-guide/fields/#charfield (basically s.strip()).
 func normalizeVCL(s string) string {
-	return strings.TrimRight(s, "\n\r ")
+	return strings.TrimSpace(s)
 }
 
 // NormalizeStringForComparison normalizes a string for semantic comparison by collapsing
