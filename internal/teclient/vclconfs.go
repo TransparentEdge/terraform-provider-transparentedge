@@ -60,6 +60,36 @@ func (c *Client) GetActiveVCLConf(environment APIEnvironment) (*VCLConfAPIModel,
 	return &top, nil
 }
 
+func (c *Client) GetVCLConfByID(environment APIEnvironment, id int) (*VCLConfAPIModel, error) {
+	envpath := c.MustGetAPIEnvironmentPath(environment)
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/%s/%d/config/%d", c.HostURL, envpath, c.CompanyID, id), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, sc, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("failure while retrieving the list of configurations: %s", c.parseAPIError(body))
+	}
+
+	conf := VCLConfAPIModel{}
+
+	err = json.Unmarshal(body, &conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// remove version suffix
+	conf.Comment = stripProviderSuffix(conf.Comment)
+
+	return &conf, nil
+}
+
 func (c *Client) CreateVclconf(vclconf NewVCLConfAPIModel, environment APIEnvironment) (*VCLConfAPIModel, error) {
 	envpath := c.MustGetAPIEnvironmentPath(environment)
 

@@ -1,6 +1,7 @@
 package staging
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
@@ -30,4 +31,5 @@ type StagingVCLConf struct {
 	ProductionDate types.String             `tfsdk:"productiondate"`
 	User           types.String             `tfsdk:"user"`
 	Comment        types.String             `tfsdk:"comment"`
+	Timeouts       timeouts.Value           `tfsdk:"timeouts"`
 }

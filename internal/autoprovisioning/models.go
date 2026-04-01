@@ -59,6 +59,7 @@ type VCLConf struct {
 	ProductionDate types.String             `tfsdk:"productiondate"`
 	User           types.String             `tfsdk:"user"`
 	Comment        types.String             `tfsdk:"comment"`
+	Timeouts       timeouts.Value           `tfsdk:"timeouts"`
 }
 
 type Certificates struct {

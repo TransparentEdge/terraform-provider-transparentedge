@@ -3,7 +3,9 @@ package autoprovisioning
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -42,7 +44,7 @@ func (*vclconfResource) Metadata(_ context.Context, req resource.MetadataRequest
 }
 
 // Schema defines the schema for the resource.
-func (*vclconfResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*vclconfResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manages VCL Configuration.",
 		MarkdownDescription: "Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.",
@@ -96,6 +98,12 @@ func (*vclconfResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description:         "Optional comment describing the changes introduced by this configuration.",
 				MarkdownDescription: "Optional comment describing the changes introduced by this configuration.",
 			},
+			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
+				Create: true,
+				CreateDescription: "If set, the provider will wait until the VCL configuration is fully deployed " +
+					"across all CDN edge nodes before completing. Must be either null (don't wait) or a duration " +
+					"greater than 5m, since propagation typically takes between 5 and 10 minutes (e.g. \"15m\").",
+			}),
 		},
 	}
 }
@@ -137,11 +145,69 @@ func (r *vclconfResource) Create(ctx context.Context, req resource.CreateRequest
 	plan.ProductionDate = types.StringValue(apiResp.ProductionDate)
 	plan.User = types.StringValue(apiResp.CreatorUser.FirstName + " " + apiResp.CreatorUser.LastName + " <" + apiResp.CreatorUser.Email + ">")
 
+	createTimeout, diags := plan.Timeouts.Create(ctx, 0)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if createTimeout == 0 {
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+
+		return
+	}
+
+	// Wait for the configuration to be deployed (when productiondate field is set)
+	// if the user specified a value for the create timeout.
+	pollCtx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
+
+poll:
+	for {
+		select {
+		case <-pollCtx.Done():
+			resp.Diagnostics.AddWarning(
+				"Timeout waiting for VCL deployment",
+				"The configuration was uploaded but did not reach production within the expected time.",
+			)
+
+			break poll
+
+		case <-time.After(10 * time.Second):
+			vclconf, err := r.client.GetVCLConfByID(teclient.ProdEnv, apiResp.ID)
+			if err != nil {
+				continue
+			}
+
+			if vclconf.ProductionDate != "" && vclconf.ID == apiResp.ID {
+				plan.ProductionDate = types.StringValue(vclconf.ProductionDate)
+
+				break poll
+			}
+
+			tflog.Info(ctx, "VCL configuration not yet in production, waiting...")
+		}
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (*vclconfResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
+// The only in-place change allowed is the timeouts block, which is client-side only and does not require any API interaction.
+func (*vclconfResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state, plan VCLConf
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	state.Timeouts = plan.Timeouts
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Read resource information.

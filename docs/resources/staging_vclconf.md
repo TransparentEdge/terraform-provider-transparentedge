@@ -45,6 +45,7 @@ output "staging_config" {
 ### Optional
 
 - `comment` (String) Optional comment describing the changes introduced by this configuration.
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
@@ -53,6 +54,13 @@ output "staging_config" {
 - `productiondate` (String) Date when the configuration was fully applied in the CDN.
 - `uploaddate` (String) Date when the configuration was uploaded.
 - `user` (String) User that created the configuration.
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) If set, the provider will wait until the VCL configuration is fully deployed across all CDN edge nodes before completing. Must be either null (don't wait) or a duration greater than 5m, since propagation typically takes between 5 and 10 minutes (e.g. "15m").
 
 ## Import
 
