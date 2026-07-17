@@ -3,12 +3,12 @@
 page_title: "transparentedge_vclconf Resource - TransparentEdge"
 subcategory: ""
 description: |-
-  Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
+  Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one. Changing vclcode or comment uploads a new configuration version in place (no destroy/recreate). Destroying the resource uploads an empty VCL configuration so that any backends referenced by the current code can be removed afterwards.
 ---
 
 # transparentedge_vclconf (Resource)
 
-Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
+Provides VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one. Changing `vclcode` or `comment` uploads a new configuration version in place (no destroy/recreate). Destroying the resource uploads an empty VCL configuration so that any backends referenced by the current code can be removed afterwards.
 
 ## Example Usage
 
@@ -45,7 +45,17 @@ output "prod_config" {
 #################
 # You can also set the heredoc string directly on the resource or reference an external file:
 resource "transparentedge_vclconf" "external_file" {
+  # Optional comment to attach to this VCL configuration (visible on our dashboard)
+  comment = "My deployment"
+
   vclcode = file("${path.module}/config.vcl")
+
+  # Optional timeout for create.
+  # If set, the provider will wait until the VCL configuration is fully deployed across all CDN edge
+  # nodes before completing.
+  timeouts = {
+    create = "10m"
+  }
 }
 
 #################

@@ -124,7 +124,7 @@ func (*stagingBackendsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 func (d *stagingBackendsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state stagingBackendsDataSourceModel
 
-	stagingBackends, err := d.client.GetBackends(teclient.StagingEnv)
+	stagingBackends, err := d.client.GetBackends(apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Staging Backends info",

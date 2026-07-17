@@ -179,7 +179,7 @@ func (r *stagingBackendResource) Create(ctx context.Context, req resource.Create
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 
-	stagingBackendState, errCreate := r.client.CreateBackend(newStagingBackend, teclient.StagingEnv)
+	stagingBackendState, errCreate := r.client.CreateBackend(newStagingBackend, apiEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating staging backend",
@@ -234,7 +234,7 @@ func (r *stagingBackendResource) Update(ctx context.Context, req resource.Update
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 
-	stagingBackendState, errCreate := r.client.UpdateBackend(newStagingBackend, teclient.StagingEnv)
+	stagingBackendState, errCreate := r.client.UpdateBackend(newStagingBackend, apiEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating staging backend",
@@ -276,7 +276,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		stagingBackend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.StagingEnv)
+		stagingBackend, err := r.client.GetBackend(int(state.ID.ValueInt64()), apiEnv)
 		if err == nil {
 			state.ID = types.Int64Value(int64(stagingBackend.ID))
 			state.Company = types.Int64Value(int64(stagingBackend.Company))
@@ -298,7 +298,7 @@ func (r *stagingBackendResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Try to find by Name
-	stagingBackend, err := r.client.GetBackendByName(state.Name.ValueString(), teclient.StagingEnv)
+	stagingBackend, err := r.client.GetBackendByName(state.Name.ValueString(), apiEnv)
 	if err == nil {
 		if stagingBackend.Name == state.Name.ValueString() {
 			state.ID = types.Int64Value(int64(stagingBackend.ID))
@@ -338,7 +338,7 @@ func (r *stagingBackendResource) Delete(ctx context.Context, req resource.Delete
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting Staging Backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
 
-	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.StagingEnv)
+	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a Staging Backend",

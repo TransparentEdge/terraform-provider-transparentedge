@@ -5,7 +5,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/customtypes"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
+
+// apiEnv is the API environment managed by this package.
+const apiEnv = teclient.ProdEnv
 
 type Site struct {
 	Timeouts timeouts.Value `tfsdk:"timeouts"`

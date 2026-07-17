@@ -115,7 +115,7 @@ func (d *backendDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	// Read the config to the state
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 
-	backend, err := d.client.GetBackendByName(state.Name.ValueString(), teclient.ProdEnv)
+	backend, err := d.client.GetBackendByName(state.Name.ValueString(), apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read the backend with name: %+v", state.Name),

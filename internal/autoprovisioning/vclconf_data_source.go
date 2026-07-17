@@ -83,7 +83,7 @@ func (*vclconfDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 func (d *vclconfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state VCLConf
 
-	apiResp, err := d.client.GetActiveVCLConf(teclient.ProdEnv)
+	apiResp, err := d.client.GetActiveVCLConf(apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read VclConf info",

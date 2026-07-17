@@ -121,7 +121,7 @@ func (*backendsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 func (d *backendsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Backends
 
-	backends, err := d.client.GetBackends(teclient.ProdEnv)
+	backends, err := d.client.GetBackends(apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Backends info",

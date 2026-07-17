@@ -3,12 +3,12 @@
 page_title: "transparentedge_staging_vclconf Resource - TransparentEdge"
 subcategory: ""
 description: |-
-  Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
+  Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one. Changing vclcode or comment uploads a new configuration version in place (no destroy/recreate). Destroying the resource uploads an empty VCL configuration so that any backends referenced by the current code can be removed afterwards.
 ---
 
 # transparentedge_staging_vclconf (Resource)
 
-Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one.
+Provides Staging VCL Configuration resource. This allows to generate a new VCL configuration that replaces the current one. Changing `vclcode` or `comment` uploads a new configuration version in place (no destroy/recreate). Destroying the resource uploads an empty VCL configuration so that any backends referenced by the current code can be removed afterwards.
 
 ## Example Usage
 

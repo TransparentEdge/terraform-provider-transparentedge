@@ -12,12 +12,13 @@ linters:
     - gocognit
     - goconst
     - gocyclo
+    - gomodguard # deprecated in favor of gomodguard_v2
     - ireturn
     - lll
     - maintidx
     - mnd
-    - nolintlint
     - noctx # TODO: fix this
+    - nolintlint
     - testpackage
     - unparam
     - varnamelen

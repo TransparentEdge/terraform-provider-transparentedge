@@ -7,6 +7,10 @@ import (
 
 var cleanStrRe = regexp.MustCompile(`[\t\r\n]+`)
 
+// EmptyVCLCode is a minimal, valid VCL configuration uploaded when a vclconf resource
+// is destroyed. The API rejects a blank config_body.
+const EmptyVCLCode = "sub vcl_recv {\n    set req.http.X-Terraform-Destroyed = \"true\";\n}\n"
+
 // VCLSemanticEquals returns true if both VCL configurations are equal semantically.
 // it strips trailing newlines and whitespaces to match API response.
 func VCLSemanticEquals(c1, c2 string) bool {
@@ -26,7 +30,8 @@ func NormalizeStringForComparison(s string) string {
 
 	var output strings.Builder
 	for v := range strings.SplitSeq(s, "\n") {
-		output.WriteString(strings.TrimSpace(v) + "\n")
+		output.WriteString(strings.TrimSpace(v))
+		output.WriteString("\n")
 	}
 
 	return output.String()

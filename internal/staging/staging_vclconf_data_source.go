@@ -83,7 +83,7 @@ func (*stagingVclConfDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 func (d *stagingVclConfDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state StagingVCLConf
 
-	apiResp, err := d.client.GetActiveVCLConf(teclient.StagingEnv)
+	apiResp, err := d.client.GetActiveVCLConf(apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Staging VclConf info",

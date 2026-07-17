@@ -30,7 +30,17 @@ output "prod_config" {
 #################
 # You can also set the heredoc string directly on the resource or reference an external file:
 resource "transparentedge_vclconf" "external_file" {
+  # Optional comment to attach to this VCL configuration (visible on our dashboard)
+  comment = "My deployment"
+
   vclcode = file("${path.module}/config.vcl")
+
+  # Optional timeout for create.
+  # If set, the provider will wait until the VCL configuration is fully deployed across all CDN edge
+  # nodes before completing.
+  timeouts = {
+    create = "10m"
+  }
 }
 
 #################

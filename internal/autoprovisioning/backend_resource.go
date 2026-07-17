@@ -179,7 +179,7 @@ func (r *backendResource) Create(ctx context.Context, req resource.CreateRequest
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 
-	backendState, errCreate := r.client.CreateBackend(newBackend, teclient.ProdEnv)
+	backendState, errCreate := r.client.CreateBackend(newBackend, apiEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error creating backend",
@@ -234,7 +234,7 @@ func (r *backendResource) Update(ctx context.Context, req resource.UpdateRequest
 		HCDisabled:   plan.HCDisabled.ValueBool(),
 	}
 
-	backendState, errCreate := r.client.UpdateBackend(newBackend, teclient.ProdEnv)
+	backendState, errCreate := r.client.UpdateBackend(newBackend, apiEnv)
 	if errCreate != nil {
 		resp.Diagnostics.AddError(
 			"Error updating backend",
@@ -276,7 +276,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	// Try to find by ID
 	if !state.ID.IsNull() {
-		backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), teclient.ProdEnv)
+		backend, err := r.client.GetBackend(int(state.ID.ValueInt64()), apiEnv)
 		if err == nil {
 			state.ID = types.Int64Value(int64(backend.ID))
 			state.Company = types.Int64Value(int64(backend.Company))
@@ -298,7 +298,7 @@ func (r *backendResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Try to find by Name
-	backend, err := r.client.GetBackendByName(state.Name.ValueString(), teclient.ProdEnv)
+	backend, err := r.client.GetBackendByName(state.Name.ValueString(), apiEnv)
 	if err == nil {
 		if backend.Name == state.Name.ValueString() {
 			state.ID = types.Int64Value(int64(backend.ID))
@@ -338,7 +338,7 @@ func (r *backendResource) Delete(ctx context.Context, req resource.DeleteRequest
 	// 204 on successful delete
 	tflog.Info(ctx, "Deleting backend: '"+state.Name.ValueString()+"' with id: "+state.ID.String())
 
-	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), teclient.ProdEnv)
+	err := r.client.DeleteBackend(int(state.ID.ValueInt64()), apiEnv)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting a backend",
