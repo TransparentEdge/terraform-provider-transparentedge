@@ -94,6 +94,7 @@ func (*certificatesDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 						},
 						"privatekey": schema.StringAttribute{
 							Computed:            true,
+							Sensitive:           true,
 							Description:         "Private key of the certificate in PEM format, it cannot be password protected.",
 							MarkdownDescription: "Private key of the certificate in PEM format, it cannot be password protected.",
 						},

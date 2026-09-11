@@ -79,6 +79,7 @@ func (*customCertificateResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"privatekey": schema.StringAttribute{
 				Required:            true,
+				Sensitive:           true,
 				Description:         "Private part of the certificate in PEM format, the certificate can't be protected with a password.",
 				MarkdownDescription: "Private part of the certificate in PEM format, the certificate can't be protected with a password.",
 			},
