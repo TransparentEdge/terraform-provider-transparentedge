@@ -123,7 +123,7 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 			VideoBitrate:    types.Int64Value(1000),
 			VideoAspect:     types.StringNull(),
 			AudioBitrate:    types.Int64Value(96),
-			AudioCodec:      types.StringNull(),
+			AudioCodec:      types.StringValue("libfdk_aac"),
 			Segmentation:    types.StringNull(),
 			RestrictBitrate: types.BoolValue(false),
 		},
@@ -133,8 +133,8 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 			ScaleWidth:  types.Int64Value(128),
 			ScaleHeight: types.Int64Value(128),
 			Opacity:     types.Float64Value(0.8),
-			Horizontal:  types.StringNull(),
-			Vertical:    types.StringNull(),
+			Horizontal:  types.StringValue("right"),
+			Vertical:    types.StringValue("top"),
 			OffsetX:     types.Int64Value(44),
 			OffsetY:     types.Int64Value(44),
 		},
@@ -153,8 +153,9 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 	}
 
 	// A cleared field has to reach the API as an explicit null, or its previous value
-	// survives the update.
-	for _, key := range []string{"video_aspect", "audio_codec", "segmentation", "video_width", "video_height"} {
+	// survives the update. audio_codec is not in the list: the API rejects a null there, so
+	// the schema gives it a default instead.
+	for _, key := range []string{"video_aspect", "segmentation", "video_width", "video_height"} {
 		if v, ok := payload[key]; !ok || v != nil {
 			t.Fatalf("%s: want explicit null, got %v (present: %t)", key, v, ok)
 		}
@@ -170,13 +171,78 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 		t.Fatalf("custom_profiles[0]: want an object, got %v", profiles[0])
 	}
 
-	if v, present := overlay["horizontal"]; !present || v != nil {
-		t.Fatalf("overlay.horizontal: want explicit null, got %v (present: %t)", v, present)
+	if v := overlay["horizontal"]; v != "right" {
+		t.Fatalf("overlay.horizontal: want the planned default, got %v", v)
 	}
 
 	// The overlay payload must not carry the hls fields of the response union.
 	if _, present := overlay["hls_time"]; present {
 		t.Fatalf("overlay payload leaks hls fields: %v", overlay)
+	}
+}
+
+func TestHLSPayload(t *testing.T) {
+	t.Parallel()
+
+	plan := TranscodingProfile{
+		TranscodingProfileSummary: TranscodingProfileSummary{
+			Name:         types.StringValue("hls"),
+			VideoFormat:  types.StringValue("mpegts"),
+			VideoCodec:   types.StringValue("h264"),
+			AudioCodec:   types.StringValue("libfdk_aac"),
+			Segmentation: types.StringNull(),
+		},
+		HLS: &HLS{
+			HLSTime:      types.Int64Value(5),
+			HLSListSize:  types.Int64Value(0),
+			MasterPlName: types.StringValue("master.m3u8"),
+			HLSFlags:     types.StringNull(),
+			PixFmt:       types.StringValue("yuv420p"),
+			Framerate:    types.Int64Value(25),
+			H264Preset:   types.StringNull(),
+			H264Profile:  types.StringNull(),
+			H264Level:    types.StringNull(),
+			Maxrate:      types.StringNull(),
+			Bufsize:      types.StringNull(),
+			BStrategy:    types.Int64Null(),
+			Refs:         types.Int64Null(),
+			Coder:        types.Int64Value(1),
+			ScThreshold:  types.Int64Null(),
+		},
+	}
+
+	body, err := json.Marshal(toAPIModel(plan))
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+
+	payload := struct {
+		CustomProfiles []map[string]any `json:"custom_profiles"`
+	}{}
+
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	if len(payload.CustomProfiles) != 1 {
+		t.Fatalf("custom_profiles: want one element, got %v", payload.CustomProfiles)
+	}
+
+	hls := payload.CustomProfiles[0]
+
+	// The API does not store a position for hls, so it is not sent.
+	if _, present := hls["position"]; present {
+		t.Fatalf("hls payload carries position: %v", hls)
+	}
+
+	// framerate and coder are integers in the API.
+	if hls["framerate"] != float64(25) || hls["coder"] != float64(1) {
+		t.Fatalf("framerate/coder: want numbers, got %v / %v", hls["framerate"], hls["coder"])
+	}
+
+	if v, present := hls["hls_flags"]; !present || v != nil {
+		t.Fatalf("hls_flags: want explicit null, got %v (present: %t)", v, present)
 	}
 }
 

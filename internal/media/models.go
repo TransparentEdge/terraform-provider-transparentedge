@@ -47,13 +47,12 @@ type Overlay struct {
 
 // HLS is the "hls" custom profile.
 type HLS struct {
-	Position     types.String `tfsdk:"position"`
 	HLSTime      types.Int64  `tfsdk:"hls_time"`
 	HLSListSize  types.Int64  `tfsdk:"hls_list_size"`
 	MasterPlName types.String `tfsdk:"master_pl_name"`
 	HLSFlags     types.String `tfsdk:"hls_flags"`
 	PixFmt       types.String `tfsdk:"pix_fmt"`
-	Framerate    types.String `tfsdk:"framerate"`
+	Framerate    types.Int64  `tfsdk:"framerate"`
 	H264Preset   types.String `tfsdk:"h264_preset"`
 	H264Profile  types.String `tfsdk:"h264_profile"`
 	H264Level    types.String `tfsdk:"h264_level"`
@@ -61,7 +60,7 @@ type HLS struct {
 	Bufsize      types.String `tfsdk:"bufsize"`
 	BStrategy    types.Int64  `tfsdk:"b_strategy"`
 	Refs         types.Int64  `tfsdk:"refs"`
-	Coder        types.String `tfsdk:"coder"`
+	Coder        types.Int64  `tfsdk:"coder"`
 	ScThreshold  types.Int64  `tfsdk:"sc_threshold"`
 }
 

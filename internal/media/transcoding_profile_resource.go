@@ -148,6 +148,8 @@ The update operation always replaces the full list of custom profiles: removing 
 			},
 			"audio_codec": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString("libfdk_aac"),
 				Description:         "Output audio codec. One of: ac3, mp3, mp2, libfdk_aac, copy.",
 				MarkdownDescription: "Output audio codec. One of: `ac3`, `mp3`, `mp2`, `libfdk_aac`, `copy`.",
 				Validators: []validator.String{
@@ -230,6 +232,8 @@ func overlaySchemaAttributes() map[string]schema.Attribute {
 		},
 		"horizontal": schema.StringAttribute{
 			Optional:            true,
+			Computed:            true,
+			Default:             stringdefault.StaticString("right"),
 			Description:         "Horizontal alignment of the overlay image. One of: left, center, right.",
 			MarkdownDescription: "Horizontal alignment of the overlay image. One of: `left`, `center`, `right`.",
 			Validators: []validator.String{
@@ -238,6 +242,8 @@ func overlaySchemaAttributes() map[string]schema.Attribute {
 		},
 		"vertical": schema.StringAttribute{
 			Optional:            true,
+			Computed:            true,
+			Default:             stringdefault.StaticString("top"),
 			Description:         "Vertical alignment of the overlay image. One of: top, center, bottom.",
 			MarkdownDescription: "Vertical alignment of the overlay image. One of: `top`, `center`, `bottom`.",
 			Validators: []validator.String{
@@ -270,14 +276,6 @@ func overlaySchemaAttributes() map[string]schema.Attribute {
 // hlsSchemaAttributes returns the attributes of the hls custom profile.
 func hlsSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"position": schema.StringAttribute{
-			Required:            true,
-			Description:         "Whether the HLS filter is applied before or after the rest of the video filters. One of: before, after.",
-			MarkdownDescription: "Whether the HLS filter is applied before or after the rest of the video filters. One of: `before`, `after`.",
-			Validators: []validator.String{
-				stringvalidator.OneOf("before", "after"),
-			},
-		},
 		"hls_time": schema.Int64Attribute{
 			Optional:            true,
 			Computed:            true,
@@ -312,10 +310,12 @@ func hlsSchemaAttributes() map[string]schema.Attribute {
 		},
 		"pix_fmt": schema.StringAttribute{
 			Optional:            true,
-			Description:         "Value passed to ffmpeg's -pix_fmt, for example yuv420p.",
-			MarkdownDescription: "Value passed to ffmpeg's `-pix_fmt`, for example `yuv420p`.",
+			Computed:            true,
+			Default:             stringdefault.StaticString("yuv420p"),
+			Description:         "Value passed to ffmpeg's -pix_fmt.",
+			MarkdownDescription: "Value passed to ffmpeg's `-pix_fmt`.",
 		},
-		"framerate": schema.StringAttribute{
+		"framerate": schema.Int64Attribute{
 			Optional:            true,
 			Description:         "Output framerate.",
 			MarkdownDescription: "Output framerate.",
@@ -364,10 +364,10 @@ func hlsSchemaAttributes() map[string]schema.Attribute {
 			Description:         "Number of reference frames.",
 			MarkdownDescription: "Number of reference frames.",
 		},
-		"coder": schema.StringAttribute{
+		"coder": schema.Int64Attribute{
 			Optional:            true,
-			Description:         "Value passed to ffmpeg's -coder.",
-			MarkdownDescription: "Value passed to ffmpeg's `-coder`.",
+			Description:         "Value passed to ffmpeg's -coder: 0 (CAVLC) or 1 (CABAC).",
+			MarkdownDescription: "Value passed to ffmpeg's `-coder`: `0` (CAVLC) or `1` (CABAC).",
 		},
 		"sc_threshold": schema.Int64Attribute{
 			Optional:            true,

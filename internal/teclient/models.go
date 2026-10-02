@@ -276,10 +276,10 @@ type OverlayProfileAPIModel struct {
 // CustomProfileType returns the profile_type this payload is for.
 func (p OverlayProfileAPIModel) CustomProfileType() string { return p.ProfileType }
 
-// HLSProfileAPIModel is the "hls" element of the custom_profiles payload.
+// HLSProfileAPIModel is the "hls" element of the custom_profiles payload. Unlike overlay it
+// has no position: the API does not store it for hls (it is neither returned nor required).
 type HLSProfileAPIModel struct {
 	ProfileType string `json:"profile_type"`
-	Position    string `json:"position"`
 
 	// as pointers since they can be null
 	HLSTime      *int    `json:"hls_time"`
@@ -287,7 +287,7 @@ type HLSProfileAPIModel struct {
 	MasterPlName *string `json:"master_pl_name"`
 	HLSFlags     *string `json:"hls_flags"`
 	PixFmt       *string `json:"pix_fmt"`
-	Framerate    *string `json:"framerate"`
+	Framerate    *int    `json:"framerate"`
 	H264Preset   *string `json:"h264_preset"`
 	H264Profile  *string `json:"h264_profile"`
 	H264Level    *string `json:"h264_level"`
@@ -295,7 +295,7 @@ type HLSProfileAPIModel struct {
 	Bufsize      *string `json:"bufsize"`
 	BStrategy    *int    `json:"b_strategy"`
 	Refs         *int    `json:"refs"`
-	Coder        *string `json:"coder"`
+	Coder        *int    `json:"coder"`
 	ScThreshold  *int    `json:"sc_threshold"`
 }
 
@@ -327,7 +327,7 @@ type CustomProfileAPIModel struct {
 	MasterPlName *string `json:"master_pl_name,omitempty"`
 	HLSFlags     *string `json:"hls_flags,omitempty"`
 	PixFmt       *string `json:"pix_fmt,omitempty"`
-	Framerate    *string `json:"framerate,omitempty"`
+	Framerate    *int    `json:"framerate,omitempty"`
 	H264Preset   *string `json:"h264_preset,omitempty"`
 	H264Profile  *string `json:"h264_profile,omitempty"`
 	H264Level    *string `json:"h264_level,omitempty"`
@@ -335,7 +335,7 @@ type CustomProfileAPIModel struct {
 	Bufsize      *string `json:"bufsize,omitempty"`
 	BStrategy    *int    `json:"b_strategy,omitempty"`
 	Refs         *int    `json:"refs,omitempty"`
-	Coder        *string `json:"coder,omitempty"`
+	Coder        *int    `json:"coder,omitempty"`
 	ScThreshold  *int    `json:"sc_threshold,omitempty"`
 }
 

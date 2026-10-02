@@ -47,13 +47,12 @@ func toAPIModel(p TranscodingProfile) teclient.NewTranscodingProfileAPIModel {
 	if p.HLS != nil {
 		api.CustomProfiles = append(api.CustomProfiles, teclient.HLSProfileAPIModel{
 			ProfileType:  "hls",
-			Position:     p.HLS.Position.ValueString(),
 			HLSTime:      int64ToIntPtr(p.HLS.HLSTime),
 			HLSListSize:  int64ToIntPtr(p.HLS.HLSListSize),
 			MasterPlName: stringToPtr(p.HLS.MasterPlName),
 			HLSFlags:     stringToPtr(p.HLS.HLSFlags),
 			PixFmt:       stringToPtr(p.HLS.PixFmt),
-			Framerate:    stringToPtr(p.HLS.Framerate),
+			Framerate:    int64ToIntPtr(p.HLS.Framerate),
 			H264Preset:   stringToPtr(p.HLS.H264Preset),
 			H264Profile:  stringToPtr(p.HLS.H264Profile),
 			H264Level:    stringToPtr(p.HLS.H264Level),
@@ -61,7 +60,7 @@ func toAPIModel(p TranscodingProfile) teclient.NewTranscodingProfileAPIModel {
 			Bufsize:      stringToPtr(p.HLS.Bufsize),
 			BStrategy:    int64ToIntPtr(p.HLS.BStrategy),
 			Refs:         int64ToIntPtr(p.HLS.Refs),
-			Coder:        stringToPtr(p.HLS.Coder),
+			Coder:        int64ToIntPtr(p.HLS.Coder),
 			ScThreshold:  int64ToIntPtr(p.HLS.ScThreshold),
 		})
 	}
@@ -116,13 +115,12 @@ func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIM
 			}
 		case "hls":
 			dst.HLS = &HLS{
-				Position:     types.StringValue(cp.Position),
 				HLSTime:      intPtrToInt64(cp.HLSTime),
 				HLSListSize:  intPtrToInt64(cp.HLSListSize),
 				MasterPlName: strPtrToString(cp.MasterPlName),
 				HLSFlags:     strPtrToString(cp.HLSFlags),
 				PixFmt:       strPtrToString(cp.PixFmt),
-				Framerate:    strPtrToString(cp.Framerate),
+				Framerate:    intPtrToInt64(cp.Framerate),
 				H264Preset:   strPtrToString(cp.H264Preset),
 				H264Profile:  strPtrToString(cp.H264Profile),
 				H264Level:    strPtrToString(cp.H264Level),
@@ -130,7 +128,7 @@ func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIM
 				Bufsize:      strPtrToString(cp.Bufsize),
 				BStrategy:    intPtrToInt64(cp.BStrategy),
 				Refs:         intPtrToInt64(cp.Refs),
-				Coder:        strPtrToString(cp.Coder),
+				Coder:        intPtrToInt64(cp.Coder),
 				ScThreshold:  intPtrToInt64(cp.ScThreshold),
 			}
 		default:

@@ -64,16 +64,12 @@ resource "transparentedge_transcoding_profile" "hd_with_logo" {
 <a id="nestedatt--hls"></a>
 ### Nested Schema for `hls`
 
-Required:
-
-- `position` (String) Whether the HLS filter is applied before or after the rest of the video filters. One of: `before`, `after`.
-
 Optional:
 
 - `b_strategy` (Number) Value passed to ffmpeg's `-b_strategy`.
 - `bufsize` (String) Value passed to ffmpeg's `-bufsize`, for example `4M`.
-- `coder` (String) Value passed to ffmpeg's `-coder`.
-- `framerate` (String) Output framerate.
+- `coder` (Number) Value passed to ffmpeg's `-coder`: `0` (CAVLC) or `1` (CABAC).
+- `framerate` (Number) Output framerate.
 - `h264_level` (String) x264 level, for example `4.1`.
 - `h264_preset` (String) x264 encoding preset.
 - `h264_profile` (String) x264 profile. One of: `baseline`, `main`, `high`.
@@ -82,7 +78,7 @@ Optional:
 - `hls_time` (Number) Target segment duration, in seconds.
 - `master_pl_name` (String) File name of the master playlist.
 - `maxrate` (String) Value passed to ffmpeg's `-maxrate`, for example `2M`.
-- `pix_fmt` (String) Value passed to ffmpeg's `-pix_fmt`, for example `yuv420p`.
+- `pix_fmt` (String) Value passed to ffmpeg's `-pix_fmt`.
 - `refs` (Number) Number of reference frames.
 - `sc_threshold` (Number) Scene change detection threshold.
 
@@ -128,4 +124,4 @@ The Transcoding API enforces a few rules that this resource surfaces as plan-tim
 
 - **Removing `overlay` (or `hls`) from your configuration deletes it from the API.** The update operation is a full replace: this resource always sends the complete list of custom profiles on every `apply`, so a type that is no longer present in your configuration is deleted, not left untouched.
 - **Manual changes from the dashboard are reverted on the next `apply`.** If someone adds a custom profile (for example, a new logo) from the dashboard to a profile managed by Terraform, the next `apply` removes it, since it is not declared in the configuration.
-- **Attributes with a default value are reset to that default when they are not set.** `video_bitrate` (`1000`), `audio_bitrate` (`96`), `restrict_bitrate` (`false`), the `overlay` attributes `scale_width`/`scale_height` (`128`), `opacity` (`0.8`) and `offset_x`/`offset_y` (`44`), and the `hls` attributes `hls_time` (`5`), `hls_list_size` (`0`) and `master_pl_name` (`master.m3u8`) do not keep the value stored in the API: if the attribute is missing from the configuration (or a module passes `null`), the next `apply` sets it to its default. When importing an existing profile, declare every one of these values explicitly, or the first `apply` will change them.
+- **Attributes with a default value are reset to that default when they are not set.** `video_bitrate` (`1000`), `audio_bitrate` (`96`), `audio_codec` (`libfdk_aac`), `restrict_bitrate` (`false`), the `overlay` attributes `scale_width`/`scale_height` (`128`), `opacity` (`0.8`), `horizontal` (`right`), `vertical` (`top`) and `offset_x`/`offset_y` (`44`), and the `hls` attributes `hls_time` (`5`), `hls_list_size` (`0`), `master_pl_name` (`master.m3u8`) and `pix_fmt` (`yuv420p`) do not keep the value stored in the API: if the attribute is missing from the configuration (or a module passes `null`), the next `apply` sets it to its default. When importing an existing profile, declare every one of these values explicitly, or the first `apply` will change them.
