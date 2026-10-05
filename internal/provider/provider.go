@@ -17,6 +17,7 @@ import (
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/autoprovisioning"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/companies"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/helpers"
+	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/media"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/staging"
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
@@ -245,6 +246,8 @@ func (*TransparentEdgeProvider) DataSources(_ context.Context) []func() datasour
 		staging.NewStagingBackendsDataSource,
 		staging.NewStagingVclconfDataSource,
 		companies.NewIPRangesDataSource,
+		media.NewTranscodingProfilesDataSource,
+		media.NewTranscodingAllowedValuesDataSource,
 	}
 }
 
@@ -260,6 +263,7 @@ func (*TransparentEdgeProvider) Resources(_ context.Context) []func() resource.R
 		autoprovisioning.NewCertReqHTTPResource,
 		staging.NewStagingBackendResource,
 		staging.NewStagingVclconfResource,
+		media.NewTranscodingProfileResource,
 	}
 }
 
