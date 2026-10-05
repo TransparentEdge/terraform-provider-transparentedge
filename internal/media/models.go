@@ -3,11 +3,9 @@ package media
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
-// TranscodingProfileSummary holds the fields of the TranscodingProfile serializer, the one
-// the list endpoint returns. It is the element of the transcoding_profiles data source and
-// is embedded in TranscodingProfile (the framework promotes the tfsdk tags of an embedded
-// struct), so that both share a single mapping.
-type TranscodingProfileSummary struct {
+// TranscodingProfile is the transcoding_profile resource model and the element of the
+// transcoding_profiles data source.
+type TranscodingProfile struct {
 	ID              types.Int64  `tfsdk:"id"`
 	Company         types.Int64  `tfsdk:"company"`
 	Name            types.String `tfsdk:"name"`
@@ -19,14 +17,7 @@ type TranscodingProfileSummary struct {
 	VideoAspect     types.String `tfsdk:"video_aspect"`
 	AudioBitrate    types.Int64  `tfsdk:"audio_bitrate"`
 	AudioCodec      types.String `tfsdk:"audio_codec"`
-	Segmentation    types.String `tfsdk:"segmentation"`
 	RestrictBitrate types.Bool   `tfsdk:"restrict_bitrate"`
-}
-
-// TranscodingProfile is the transcoding_profile resource model: the flat fields of the
-// listing plus the custom profiles, which only the detail serializer returns.
-type TranscodingProfile struct {
-	TranscodingProfileSummary
 
 	Overlay *Overlay `tfsdk:"overlay"`
 	HLS     *HLS     `tfsdk:"hls"`
@@ -66,7 +57,7 @@ type HLS struct {
 
 // TranscodingProfiles is the transcoding_profiles data source model.
 type TranscodingProfiles struct {
-	Profiles []TranscodingProfileSummary `tfsdk:"profiles"`
+	Profiles []TranscodingProfile `tfsdk:"profiles"`
 }
 
 // TranscodingAllowedValues is the transcoding_allowed_values data source model.

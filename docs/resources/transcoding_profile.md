@@ -40,18 +40,17 @@ resource "transparentedge_transcoding_profile" "hd_with_logo" {
 ### Required
 
 - `name` (String) Name of the transcoding profile.
-- `video_codec` (String) Output video codec. One of: `h264`, `webm`, `libx264`, `mpeg2video`, `copy`.
-- `video_format` (String) Output video container format. One of: `mp4`, `mpegts`, `rawvideo`.
+- `video_codec` (String) Output video codec, for example `h264` or `libx264`. Must be one of the `video_codecs` of the `transparentedge_transcoding_allowed_values` data source.
+- `video_format` (String) Output video container format, for example `mp4` or `mpegts`. Must be one of the `video_formats` of the `transparentedge_transcoding_allowed_values` data source.
 
 ### Optional
 
 - `audio_bitrate` (Number) Output audio bitrate, in kbps.
-- `audio_codec` (String) Output audio codec. One of: `ac3`, `mp3`, `mp2`, `libfdk_aac`, `copy`.
-- `hls` (Attributes) HLS custom profile. Cannot be combined with `segmentation`. (see [below for nested schema](#nestedatt--hls))
+- `audio_codec` (String) Output audio codec, for example `libfdk_aac` or `mp3`. Must be one of the `audio_codecs` of the `transparentedge_transcoding_allowed_values` data source.
+- `hls` (Attributes) HLS custom profile. (see [below for nested schema](#nestedatt--hls))
 - `overlay` (Attributes) Overlay (logo/watermark) custom profile. Cannot be combined with `video_width` or `video_height`. (see [below for nested schema](#nestedatt--overlay))
 - `restrict_bitrate` (Boolean) Restrict the output bitrate to the configured `video_bitrate`/`audio_bitrate`.
-- `segmentation` (String) Segmentation configuration. Cannot be combined with `hls`.
-- `video_aspect` (String) Output video aspect ratio. One of: `16:9`, `9:16`, `4:3`.
+- `video_aspect` (String) Output video aspect ratio, for example `16:9` or `4:3`. Must be one of the `video_aspect` of the `transparentedge_transcoding_allowed_values` data source.
 - `video_bitrate` (Number) Output video bitrate, in kbps.
 - `video_height` (Number) Output video height, in pixels. Cannot be combined with `overlay`.
 - `video_width` (Number) Output video width, in pixels. Cannot be combined with `overlay`.
@@ -116,8 +115,8 @@ terraform import transparentedge_transcoding_profile.hd_with_logo 1234
 
 The Transcoding API enforces a few rules that this resource surfaces as plan-time errors instead of runtime failures:
 
-- Only one custom profile of each type (`overlay`, `hls`) is allowed per transcoding profile — enforced by the schema, which exposes `overlay` and `hls` as single objects rather than a list.
-- `hls` cannot be combined with `segmentation`.
+- `video_format`, `video_codec`, `audio_codec` and `video_aspect` are validated at plan time against the API: they must be one of the values returned by the `transparentedge_transcoding_allowed_values` data source, which is the authoritative list.
+- Only one custom profile of each type (`overlay`, `hls`) is allowed per transcoding profile, so `overlay` and `hls` are single objects rather than a list.
 - `overlay` cannot be combined with `video_width` or `video_height` (the API switches between `-filter_complex` and `-vf` depending on which is set).
 
 ## Warnings for module consumers

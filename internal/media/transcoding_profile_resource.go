@@ -3,7 +3,10 @@ package media
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -30,6 +33,7 @@ var (
 	_ resource.ResourceWithConfigure        = &transcodingProfileResource{}
 	_ resource.ResourceWithImportState      = &transcodingProfileResource{}
 	_ resource.ResourceWithConfigValidators = &transcodingProfileResource{}
+	_ resource.ResourceWithModifyPlan       = &transcodingProfileResource{}
 )
 
 // NewTranscodingProfileResource is a helper function to simplify the provider implementation.
@@ -55,8 +59,8 @@ func (*transcodingProfileResource) Schema(_ context.Context, _ resource.SchemaRe
 
 The API enforces a few rules that this resource surfaces at plan time:
 
+* ` + "`video_format`, `video_codec`, `audio_codec` and `video_aspect`" + ` must be one of the values listed by the ` + "`transparentedge_transcoding_allowed_values`" + ` data source.
 * Only one custom profile of each type (` + "`overlay`, `hls`" + `) is allowed per transcoding profile.
-* ` + "`hls`" + ` cannot be combined with ` + "`segmentation`" + `.
 * ` + "`overlay`" + ` cannot be combined with ` + "`video_width`" + ` or ` + "`video_height`" + `.
 
 The update operation always replaces the full list of custom profiles: removing ` + "`overlay`" + ` or ` + "`hls`" + ` from the configuration deletes it from the API, and any custom profile added from the dashboard to a profile managed by this resource is removed on the next ` + "`apply`" + `.`,
@@ -88,19 +92,13 @@ The update operation always replaces the full list of custom profiles: removing 
 			},
 			"video_format": schema.StringAttribute{
 				Required:            true,
-				Description:         "Output video container format. One of: mp4, mpegts, rawvideo.",
-				MarkdownDescription: "Output video container format. One of: `mp4`, `mpegts`, `rawvideo`.",
-				Validators: []validator.String{
-					stringvalidator.OneOf("mp4", "mpegts", "rawvideo"),
-				},
+				Description:         "Output video container format, for example mp4 or mpegts. Must be one of the video_formats of the transparentedge_transcoding_allowed_values data source.",
+				MarkdownDescription: "Output video container format, for example `mp4` or `mpegts`. Must be one of the `video_formats` of the `transparentedge_transcoding_allowed_values` data source.",
 			},
 			"video_codec": schema.StringAttribute{
 				Required:            true,
-				Description:         "Output video codec. One of: h264, webm, libx264, mpeg2video, copy.",
-				MarkdownDescription: "Output video codec. One of: `h264`, `webm`, `libx264`, `mpeg2video`, `copy`.",
-				Validators: []validator.String{
-					stringvalidator.OneOf("h264", "webm", "libx264", "mpeg2video", "copy"),
-				},
+				Description:         "Output video codec, for example h264 or libx264. Must be one of the video_codecs of the transparentedge_transcoding_allowed_values data source.",
+				MarkdownDescription: "Output video codec, for example `h264` or `libx264`. Must be one of the `video_codecs` of the `transparentedge_transcoding_allowed_values` data source.",
 			},
 			"video_width": schema.Int64Attribute{
 				Optional:            true,
@@ -130,11 +128,8 @@ The update operation always replaces the full list of custom profiles: removing 
 			},
 			"video_aspect": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Output video aspect ratio. One of: 16:9, 9:16, 4:3.",
-				MarkdownDescription: "Output video aspect ratio. One of: `16:9`, `9:16`, `4:3`.",
-				Validators: []validator.String{
-					stringvalidator.OneOf("16:9", "9:16", "4:3"),
-				},
+				Description:         "Output video aspect ratio, for example 16:9 or 4:3. Must be one of the video_aspect of the transparentedge_transcoding_allowed_values data source.",
+				MarkdownDescription: "Output video aspect ratio, for example `16:9` or `4:3`. Must be one of the `video_aspect` of the `transparentedge_transcoding_allowed_values` data source.",
 			},
 			"audio_bitrate": schema.Int64Attribute{
 				Optional:            true,
@@ -150,16 +145,8 @@ The update operation always replaces the full list of custom profiles: removing 
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("libfdk_aac"),
-				Description:         "Output audio codec. One of: ac3, mp3, mp2, libfdk_aac, copy.",
-				MarkdownDescription: "Output audio codec. One of: `ac3`, `mp3`, `mp2`, `libfdk_aac`, `copy`.",
-				Validators: []validator.String{
-					stringvalidator.OneOf("ac3", "mp3", "mp2", "libfdk_aac", "copy"),
-				},
-			},
-			"segmentation": schema.StringAttribute{
-				Optional:            true,
-				Description:         "Segmentation configuration. Cannot be combined with hls.",
-				MarkdownDescription: "Segmentation configuration. Cannot be combined with `hls`.",
+				Description:         "Output audio codec, for example libfdk_aac or mp3. Must be one of the audio_codecs of the transparentedge_transcoding_allowed_values data source.",
+				MarkdownDescription: "Output audio codec, for example `libfdk_aac` or `mp3`. Must be one of the `audio_codecs` of the `transparentedge_transcoding_allowed_values` data source.",
 			},
 			"restrict_bitrate": schema.BoolAttribute{
 				Optional:            true,
@@ -176,8 +163,8 @@ The update operation always replaces the full list of custom profiles: removing 
 			},
 			"hls": schema.SingleNestedAttribute{
 				Optional:            true,
-				Description:         "HLS custom profile. Cannot be combined with segmentation.",
-				MarkdownDescription: "HLS custom profile. Cannot be combined with `segmentation`.",
+				Description:         "HLS custom profile.",
+				MarkdownDescription: "HLS custom profile.",
 				Attributes:          hlsSchemaAttributes(),
 			},
 		},
@@ -191,6 +178,9 @@ func overlaySchemaAttributes() map[string]schema.Attribute {
 			Required:            true,
 			Description:         "URL of the image used as overlay.",
 			MarkdownDescription: "URL of the image used as overlay.",
+			Validators: []validator.String{
+				urlValidator{},
+			},
 		},
 		"position": schema.StringAttribute{
 			Required:            true,
@@ -378,14 +368,74 @@ func hlsSchemaAttributes() map[string]schema.Attribute {
 }
 
 // ConfigValidators enforces the API rules that would otherwise fail at apply time with a 400:
-// hls cannot be combined with segmentation, and overlay cannot be combined with
-// video_width/video_height ("-filter_complex" vs "-vf"). The "only one custom profile of
+// overlay cannot be combined with video_width/video_height ("-filter_complex" vs "-vf"). The "only one custom profile of
 // each type" rule is enforced by the schema itself (overlay/hls are single objects).
 func (*transcodingProfileResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		resourcevalidator.Conflicting(path.MatchRoot("overlay"), path.MatchRoot("video_width")),
 		resourcevalidator.Conflicting(path.MatchRoot("overlay"), path.MatchRoot("video_height")),
-		resourcevalidator.Conflicting(path.MatchRoot("hls"), path.MatchRoot("segmentation")),
+	}
+}
+
+// ModifyPlan checks the enum attributes against the API's allowed values, so that an
+// unsupported value fails at plan time instead of with a 400 at apply time. Only the
+// attributes that change are checked, which skips the request on no-op plans.
+func (r *transcodingProfileResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var plan, state TranscodingProfile
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+
+	if !req.State.Raw.IsNull() {
+		resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	changed := map[string]string{}
+
+	for attr, v := range map[string]struct{ planned, prior types.String }{
+		"video_format": {plan.VideoFormat, state.VideoFormat},
+		"video_codec":  {plan.VideoCodec, state.VideoCodec},
+		"audio_codec":  {plan.AudioCodec, state.AudioCodec},
+		"video_aspect": {plan.VideoAspect, state.VideoAspect},
+	} {
+		if !v.planned.IsNull() && !v.planned.IsUnknown() && !v.planned.Equal(v.prior) {
+			changed[attr] = v.planned.ValueString()
+		}
+	}
+
+	if len(changed) == 0 {
+		return
+	}
+
+	values, err := r.client.GetTranscodingAllowedValues()
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to read Transcoding Allowed Values", err.Error())
+
+		return
+	}
+
+	allowed := map[string][]string{
+		"video_format": values.VideoFormats,
+		"video_codec":  values.VideoCodecs,
+		"audio_codec":  values.AudioCodecs,
+		"video_aspect": values.AspectRatio,
+	}
+
+	for attr, v := range changed {
+		if !slices.Contains(allowed[attr], v) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(attr),
+				"Invalid value",
+				fmt.Sprintf("%q is not allowed by the API, allowed values: %s", v, strings.Join(allowed[attr], ", ")),
+			)
+		}
 	}
 }
 
@@ -402,26 +452,6 @@ func (r *transcodingProfileResource) Create(ctx context.Context, req resource.Cr
 
 	created, err := r.client.CreateTranscodingProfile(toAPIModel(plan))
 	if err != nil {
-		// The profile was created but could not be read back: save the planned configuration
-		// with the identifiers the create response returned, so that the next plan refreshes
-		// it instead of creating a duplicate. The planned values are what the API was asked
-		// for and it accepted, so they are the best approximation available here.
-		if errors.Is(err, teclient.ErrTranscodingProfileNotRead) && created != nil {
-			resp.Diagnostics.AddWarning(
-				"Transcoding profile created but not read back",
-				"The transcoding profile was created with id "+strconv.Itoa(created.ID)+", but reading it back from the API failed:\n"+
-					err.Error()+"\n\n"+
-					"The state has been saved with the planned configuration. Run 'terraform plan' to refresh it against the API.",
-			)
-
-			plan.ID = types.Int64Value(int64(created.ID))
-			plan.Company = types.Int64Value(int64(created.Company))
-
-			resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-
-			return
-		}
-
 		resp.Diagnostics.AddError(
 			"Error creating the transcoding profile",
 			err.Error(),

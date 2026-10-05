@@ -39,6 +39,6 @@ Read-Only:
 - `domains` (String) SAN (_Subject Alternative Name_) domains included in the certificate, including the Common Name.
 - `expiration` (String) Date when the certificate will expire.
 - `id` (Number) ID of the certificate.
-- `privatekey` (String) Private key of the certificate in PEM format, it cannot be password protected.
+- `privatekey` (String, Sensitive) Private key of the certificate in PEM format, it cannot be password protected.
 - `publickey` (String) Public part of the certificate in PEM format, it's recommended to include the full chain.
 - `standalone` (Boolean) A standalone certificate will not be merged automatically on the SAN of other existing certificates for the same Company on creation or renewals.

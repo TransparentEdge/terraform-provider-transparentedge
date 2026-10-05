@@ -23,21 +23,18 @@ func TestResourceModelRoundTrip(t *testing.T) {
 	state := tfsdk.State{Schema: schemaResp.Schema}
 
 	in := TranscodingProfile{
-		TranscodingProfileSummary: TranscodingProfileSummary{
-			ID:              types.Int64Value(7),
-			Company:         types.Int64Value(1),
-			Name:            types.StringValue("hd"),
-			VideoFormat:     types.StringValue("mp4"),
-			VideoCodec:      types.StringValue("h264"),
-			VideoWidth:      types.Int64Null(),
-			VideoHeight:     types.Int64Null(),
-			VideoBitrate:    types.Int64Value(1000),
-			VideoAspect:     types.StringValue("16:9"),
-			AudioBitrate:    types.Int64Value(96),
-			AudioCodec:      types.StringNull(),
-			Segmentation:    types.StringNull(),
-			RestrictBitrate: types.BoolValue(false),
-		},
+		ID:              types.Int64Value(7),
+		Company:         types.Int64Value(1),
+		Name:            types.StringValue("hd"),
+		VideoFormat:     types.StringValue("mp4"),
+		VideoCodec:      types.StringValue("h264"),
+		VideoWidth:      types.Int64Null(),
+		VideoHeight:     types.Int64Null(),
+		VideoBitrate:    types.Int64Value(1000),
+		VideoAspect:     types.StringValue("16:9"),
+		AudioBitrate:    types.Int64Value(96),
+		AudioCodec:      types.StringNull(),
+		RestrictBitrate: types.BoolValue(false),
 		Overlay: &Overlay{
 			URL:         types.StringValue("https://example.com/logo.png"),
 			Position:    types.StringValue("after"),
@@ -61,7 +58,7 @@ func TestResourceModelRoundTrip(t *testing.T) {
 	}
 
 	if out.ID != in.ID || out.Name != in.Name || out.VideoAspect != in.VideoAspect {
-		t.Fatalf("promoted fields lost: %+v", out.TranscodingProfileSummary)
+		t.Fatalf("fields lost: %+v", out)
 	}
 
 	if out.Overlay == nil || out.Overlay.OffsetX != types.Int64Value(44) {
@@ -80,7 +77,7 @@ func TestDataSourceModelRoundTrip(t *testing.T) {
 
 	state := tfsdk.State{Schema: schemaResp.Schema}
 
-	in := TranscodingProfiles{Profiles: []TranscodingProfileSummary{{
+	in := TranscodingProfiles{Profiles: []TranscodingProfile{{
 		ID:              types.Int64Value(7),
 		Company:         types.Int64Value(1),
 		Name:            types.StringValue("hd"),
@@ -92,8 +89,24 @@ func TestDataSourceModelRoundTrip(t *testing.T) {
 		VideoAspect:     types.StringNull(),
 		AudioBitrate:    types.Int64Value(96),
 		AudioCodec:      types.StringNull(),
-		Segmentation:    types.StringNull(),
 		RestrictBitrate: types.BoolValue(false),
+		HLS: &HLS{
+			HLSTime:      types.Int64Value(5),
+			HLSListSize:  types.Int64Value(0),
+			MasterPlName: types.StringValue("master.m3u8"),
+			HLSFlags:     types.StringNull(),
+			PixFmt:       types.StringValue("yuv420p"),
+			Framerate:    types.Int64Null(),
+			H264Preset:   types.StringNull(),
+			H264Profile:  types.StringNull(),
+			H264Level:    types.StringNull(),
+			Maxrate:      types.StringNull(),
+			Bufsize:      types.StringNull(),
+			BStrategy:    types.Int64Null(),
+			Refs:         types.Int64Null(),
+			Coder:        types.Int64Null(),
+			ScThreshold:  types.Int64Null(),
+		},
 	}}}
 
 	if diags := state.Set(ctx, &in); diags.HasError() {
@@ -106,7 +119,11 @@ func TestDataSourceModelRoundTrip(t *testing.T) {
 	}
 
 	if len(out.Profiles) != 1 || out.Profiles[0].Name != types.StringValue("hd") {
-		t.Fatalf("summary lost: %+v", out.Profiles)
+		t.Fatalf("profile lost: %+v", out.Profiles)
+	}
+
+	if out.Profiles[0].Overlay != nil || out.Profiles[0].HLS == nil || out.Profiles[0].HLS.HLSTime != types.Int64Value(5) {
+		t.Fatalf("custom profiles lost: %+v", out.Profiles[0])
 	}
 }
 
@@ -114,19 +131,16 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 	t.Parallel()
 
 	plan := TranscodingProfile{
-		TranscodingProfileSummary: TranscodingProfileSummary{
-			Name:            types.StringValue("hd"),
-			VideoFormat:     types.StringValue("mp4"),
-			VideoCodec:      types.StringValue("h264"),
-			VideoWidth:      types.Int64Null(),
-			VideoHeight:     types.Int64Null(),
-			VideoBitrate:    types.Int64Value(1000),
-			VideoAspect:     types.StringNull(),
-			AudioBitrate:    types.Int64Value(96),
-			AudioCodec:      types.StringValue("libfdk_aac"),
-			Segmentation:    types.StringNull(),
-			RestrictBitrate: types.BoolValue(false),
-		},
+		Name:            types.StringValue("hd"),
+		VideoFormat:     types.StringValue("mp4"),
+		VideoCodec:      types.StringValue("h264"),
+		VideoWidth:      types.Int64Null(),
+		VideoHeight:     types.Int64Null(),
+		VideoBitrate:    types.Int64Value(1000),
+		VideoAspect:     types.StringNull(),
+		AudioBitrate:    types.Int64Value(96),
+		AudioCodec:      types.StringValue("libfdk_aac"),
+		RestrictBitrate: types.BoolValue(false),
 		Overlay: &Overlay{
 			URL:         types.StringValue("https://example.com/logo.png"),
 			Position:    types.StringValue("after"),
@@ -155,7 +169,7 @@ func TestPayloadSendsExplicitNulls(t *testing.T) {
 	// A cleared field has to reach the API as an explicit null, or its previous value
 	// survives the update. audio_codec is not in the list: the API rejects a null there, so
 	// the schema gives it a default instead.
-	for _, key := range []string{"video_aspect", "segmentation", "video_width", "video_height"} {
+	for _, key := range []string{"video_aspect", "video_width", "video_height"} {
 		if v, ok := payload[key]; !ok || v != nil {
 			t.Fatalf("%s: want explicit null, got %v (present: %t)", key, v, ok)
 		}
@@ -185,13 +199,10 @@ func TestHLSPayload(t *testing.T) {
 	t.Parallel()
 
 	plan := TranscodingProfile{
-		TranscodingProfileSummary: TranscodingProfileSummary{
-			Name:         types.StringValue("hls"),
-			VideoFormat:  types.StringValue("mpegts"),
-			VideoCodec:   types.StringValue("h264"),
-			AudioCodec:   types.StringValue("libfdk_aac"),
-			Segmentation: types.StringNull(),
-		},
+		Name:        types.StringValue("hls"),
+		VideoFormat: types.StringValue("mpegts"),
+		VideoCodec:  types.StringValue("h264"),
+		AudioCodec:  types.StringValue("libfdk_aac"),
 		HLS: &HLS{
 			HLSTime:      types.Int64Value(5),
 			HLSListSize:  types.Int64Value(0),
@@ -243,32 +254,5 @@ func TestHLSPayload(t *testing.T) {
 
 	if v, present := hls["hls_flags"]; !present || v != nil {
 		t.Fatalf("hls_flags: want explicit null, got %v (present: %t)", v, present)
-	}
-}
-
-func TestSegmentationNormalization(t *testing.T) {
-	t.Parallel()
-
-	blank := " "
-	value := "x"
-
-	if got := normalizeSegmentation(&blank, types.StringNull()); !got.IsNull() {
-		t.Fatalf("whitespace with no prior value should be null, got %v", got)
-	}
-
-	if got := normalizeSegmentation(&blank, types.StringValue(" ")); got != types.StringValue(" ") {
-		t.Fatalf("whitespace asked for by the config should be kept, got %v", got)
-	}
-
-	if got := normalizeSegmentation(&blank, types.StringValue("x")); !got.IsNull() {
-		t.Fatalf("whitespace clearing a real prior value should be null, got %v", got)
-	}
-
-	if got := normalizeSegmentation(&value, types.StringNull()); got != types.StringValue("x") {
-		t.Fatalf("real value should be kept, got %v", got)
-	}
-
-	if got := normalizeSegmentation(nil, types.StringValue(" ")); !got.IsNull() {
-		t.Fatalf("nil should be null, got %v", got)
 	}
 }

@@ -2,9 +2,11 @@ package media
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	"github.com/TransparentEdge/terraform-provider-transparentedge/internal/teclient"
 )
@@ -33,11 +35,8 @@ func (*transcodingProfilesDataSource) Metadata(_ context.Context, req datasource
 // Schema defines the schema for the data source.
 func (*transcodingProfilesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Transcoding profile listing. Use it to discover the id of existing profiles (for example to generate import blocks). " +
-			"The overlay and hls custom profiles are not part of the listing: read them from the transparentedge_transcoding_profile resource, after importing it.",
-		MarkdownDescription: "Transcoding profile listing. Use it to discover the `id` of existing profiles (for example to generate `import {}` blocks).\n\n" +
-			"The `overlay` and `hls` custom profiles are **not** part of the listing: the list endpoint does not return them, so they are read from the " +
-			"`transparentedge_transcoding_profile` resource instead, after importing it.",
+		Description:         "Transcoding profile listing. Use it to discover the id of existing profiles (for example to generate import blocks).",
+		MarkdownDescription: "Transcoding profile listing. Use it to discover the `id` of existing profiles (for example to generate `import {}` blocks).",
 
 		Attributes: map[string]schema.Attribute{
 			"profiles": schema.ListNestedAttribute{
@@ -101,15 +100,22 @@ func (*transcodingProfilesDataSource) Schema(_ context.Context, _ datasource.Sch
 							Description:         "Output audio codec.",
 							MarkdownDescription: "Output audio codec.",
 						},
-						"segmentation": schema.StringAttribute{
-							Computed:            true,
-							Description:         "Segmentation configuration.",
-							MarkdownDescription: "Segmentation configuration.",
-						},
 						"restrict_bitrate": schema.BoolAttribute{
 							Computed:            true,
 							Description:         "Restrict the output bitrate to the configured video_bitrate/audio_bitrate.",
 							MarkdownDescription: "Restrict the output bitrate to the configured `video_bitrate`/`audio_bitrate`.",
+						},
+						"overlay": schema.SingleNestedAttribute{
+							Computed:            true,
+							Description:         "Overlay (logo/watermark) custom profile, null when not configured.",
+							MarkdownDescription: "Overlay (logo/watermark) custom profile, `null` when not configured.",
+							Attributes:          computedAttributes(overlaySchemaAttributes()),
+						},
+						"hls": schema.SingleNestedAttribute{
+							Computed:            true,
+							Description:         "HLS custom profile, null when not configured.",
+							MarkdownDescription: "HLS custom profile, `null` when not configured.",
+							Attributes:          computedAttributes(hlsSchemaAttributes()),
 						},
 					},
 				},
@@ -134,12 +140,12 @@ func (d *transcodingProfilesDataSource) Read(ctx context.Context, _ datasource.R
 
 	// Start from an empty list so that a company without profiles yields [] instead of
 	// null, which would break "for p in ...profiles" expressions.
-	state.Profiles = []TranscodingProfileSummary{}
+	state.Profiles = []TranscodingProfile{}
 
 	for i := range profiles {
-		var item TranscodingProfileSummary
+		var item TranscodingProfile
 
-		applyFlatAPIModel(&item, &profiles[i])
+		resp.Diagnostics.Append(applyAPIModel(&item, &profiles[i])...)
 
 		state.Profiles = append(state.Profiles, item)
 	}
@@ -161,4 +167,25 @@ func (d *transcodingProfilesDataSource) Configure(_ context.Context, req datasou
 	}
 
 	d.client = client
+}
+
+// computedAttributes turns the resource's custom profile attributes into computed data source
+// attributes, so that both schemas share the same names and descriptions.
+func computedAttributes(attrs map[string]rschema.Attribute) map[string]schema.Attribute {
+	out := make(map[string]schema.Attribute, len(attrs))
+
+	for name, attr := range attrs {
+		switch attr.(type) {
+		case rschema.StringAttribute:
+			out[name] = schema.StringAttribute{Computed: true, Description: attr.GetDescription(), MarkdownDescription: attr.GetMarkdownDescription()}
+		case rschema.Int64Attribute:
+			out[name] = schema.Int64Attribute{Computed: true, Description: attr.GetDescription(), MarkdownDescription: attr.GetMarkdownDescription()}
+		case rschema.Float64Attribute:
+			out[name] = schema.Float64Attribute{Computed: true, Description: attr.GetDescription(), MarkdownDescription: attr.GetMarkdownDescription()}
+		default:
+			panic(fmt.Sprintf("computedAttributes: unsupported attribute type %T for %q", attr, name))
+		}
+	}
+
+	return out
 }

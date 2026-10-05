@@ -2,7 +2,6 @@ package media
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,9 +23,8 @@ func toAPIModel(p TranscodingProfile) teclient.NewTranscodingProfileAPIModel {
 		VideoAspect:     stringToPtr(p.VideoAspect),
 		AudioBitrate:    int(p.AudioBitrate.ValueInt64()),
 		AudioCodec:      stringToPtr(p.AudioCodec),
-		Segmentation:    stringToPtr(p.Segmentation),
 		RestrictBitrate: p.RestrictBitrate.ValueBool(),
-		CustomProfiles:  make([]teclient.CustomProfileRequest, 0),
+		CustomProfiles:  make([]any, 0),
 	}
 
 	if p.Overlay != nil {
@@ -68,9 +66,12 @@ func toAPIModel(p TranscodingProfile) teclient.NewTranscodingProfileAPIModel {
 	return api
 }
 
-// applyFlatAPIModel maps the fields of the TranscodingProfile serializer, the ones both the
-// list and the detail endpoints return.
-func applyFlatAPIModel(dst *TranscodingProfileSummary, api *teclient.TranscodingProfileAPIModel) {
+// applyAPIModel maps the API response into the model, splitting custom_profiles by
+// profile_type into Overlay/HLS. A custom profile of an unknown type is warned about, since
+// it is not represented in the schema and the resource's next PUT would delete it.
+func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	dst.ID = types.Int64Value(int64(api.ID))
 	dst.Company = types.Int64Value(int64(api.Company))
 	dst.Name = types.StringValue(api.Name)
@@ -82,19 +83,7 @@ func applyFlatAPIModel(dst *TranscodingProfileSummary, api *teclient.Transcoding
 	dst.VideoAspect = strPtrToString(api.VideoAspect)
 	dst.AudioBitrate = types.Int64Value(int64(api.AudioBitrate))
 	dst.AudioCodec = strPtrToString(api.AudioCodec)
-	dst.Segmentation = normalizeSegmentation(api.Segmentation, dst.Segmentation)
 	dst.RestrictBitrate = types.BoolValue(api.RestrictBitrate)
-}
-
-// applyAPIModel maps the detail API response into the resource model, splitting
-// custom_profiles by profile_type into Overlay/HLS. A custom profile of an unknown type is
-// warned about, since the next PUT would silently delete it (it is not represented in the
-// schema). The warning is worded for the resource on purpose: this is the only caller that
-// writes custom_profiles back.
-func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIModel) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	applyFlatAPIModel(&dst.TranscodingProfileSummary, api)
 
 	dst.Overlay = nil
 	dst.HLS = nil
@@ -135,8 +124,9 @@ func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIM
 			diags.AddWarning(
 				"Unmanaged custom profile found",
 				fmt.Sprintf(
-					"Transcoding profile %d has a custom profile of type %q that this provider does not know how to represent. "+
-						"The next apply will delete it, since the API replaces the full custom_profiles list on every update.",
+					"Transcoding profile %d has a custom profile of type %q that this provider does not support. "+
+						"The API deletes custom profile types missing from an update, so the next update of this profile "+
+						"through the transparentedge_transcoding_profile resource will delete it.",
 					api.ID, cp.ProfileType,
 				),
 			)
@@ -144,31 +134,6 @@ func applyAPIModel(dst *TranscodingProfile, api *teclient.TranscodingProfileAPIM
 	}
 
 	return diags
-}
-
-// normalizeSegmentation avoids a perpetual diff: the API can return " " for an unset
-// segmentation instead of null. A whitespace value that the configuration asked for is kept
-// as it is (the API enum accepts " "), otherwise writing it would make the state differ from
-// the plan; prior is the value already in the plan or state, if any.
-func normalizeSegmentation(s *string, prior types.String) types.String {
-	if s == nil {
-		return types.StringNull()
-	}
-
-	if strings.TrimSpace(*s) == "" && !isWhitespaceString(prior) {
-		return types.StringNull()
-	}
-
-	return types.StringValue(*s)
-}
-
-// isWhitespaceString reports whether v holds a known, non-null, whitespace-only string.
-func isWhitespaceString(v types.String) bool {
-	if v.IsNull() || v.IsUnknown() {
-		return false
-	}
-
-	return strings.TrimSpace(v.ValueString()) == ""
 }
 
 func int64ToIntPtr(v types.Int64) *int {

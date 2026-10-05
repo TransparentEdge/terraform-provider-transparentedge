@@ -26,8 +26,8 @@ Transcoding profiles are imported by their numeric ID. Use the `transparentedge_
 
 The Transcoding API enforces a few rules that this resource surfaces as plan-time errors instead of runtime failures:
 
-- Only one custom profile of each type (`overlay`, `hls`) is allowed per transcoding profile — enforced by the schema, which exposes `overlay` and `hls` as single objects rather than a list.
-- `hls` cannot be combined with `segmentation`.
+- `video_format`, `video_codec`, `audio_codec` and `video_aspect` are validated at plan time against the API: they must be one of the values returned by the `transparentedge_transcoding_allowed_values` data source, which is the authoritative list.
+- Only one custom profile of each type (`overlay`, `hls`) is allowed per transcoding profile, so `overlay` and `hls` are single objects rather than a list.
 - `overlay` cannot be combined with `video_width` or `video_height` (the API switches between `-filter_complex` and `-vf` depending on which is set).
 
 ## Warnings for module consumers

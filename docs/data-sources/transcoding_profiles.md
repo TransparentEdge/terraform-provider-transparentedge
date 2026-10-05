@@ -4,14 +4,11 @@ page_title: "transparentedge_transcoding_profiles Data Source - TransparentEdge"
 subcategory: ""
 description: |-
   Transcoding profile listing. Use it to discover the id of existing profiles (for example to generate import {} blocks).
-  The overlay and hls custom profiles are not part of the listing: the list endpoint does not return them, so they are read from the transparentedge_transcoding_profile resource instead, after importing it.
 ---
 
 # transparentedge_transcoding_profiles (Data Source)
 
 Transcoding profile listing. Use it to discover the `id` of existing profiles (for example to generate `import {}` blocks).
-
-The `overlay` and `hls` custom profiles are **not** part of the listing: the list endpoint does not return them, so they are read from the `transparentedge_transcoding_profile` resource instead, after importing it.
 
 ## Example Usage
 
@@ -38,13 +35,51 @@ Read-Only:
 - `audio_bitrate` (Number) Output audio bitrate, in kbps.
 - `audio_codec` (String) Output audio codec.
 - `company` (Number) Company ID that owns this transcoding profile.
+- `hls` (Attributes) HLS custom profile, `null` when not configured. (see [below for nested schema](#nestedatt--profiles--hls))
 - `id` (Number) ID of the transcoding profile.
 - `name` (String) Name of the transcoding profile.
+- `overlay` (Attributes) Overlay (logo/watermark) custom profile, `null` when not configured. (see [below for nested schema](#nestedatt--profiles--overlay))
 - `restrict_bitrate` (Boolean) Restrict the output bitrate to the configured `video_bitrate`/`audio_bitrate`.
-- `segmentation` (String) Segmentation configuration.
 - `video_aspect` (String) Output video aspect ratio.
 - `video_bitrate` (Number) Output video bitrate, in kbps.
 - `video_codec` (String) Output video codec.
 - `video_format` (String) Output video container format.
 - `video_height` (Number) Output video height, in pixels.
 - `video_width` (Number) Output video width, in pixels.
+
+<a id="nestedatt--profiles--hls"></a>
+### Nested Schema for `profiles.hls`
+
+Read-Only:
+
+- `b_strategy` (Number) Value passed to ffmpeg's `-b_strategy`.
+- `bufsize` (String) Value passed to ffmpeg's `-bufsize`, for example `4M`.
+- `coder` (Number) Value passed to ffmpeg's `-coder`: `0` (CAVLC) or `1` (CABAC).
+- `framerate` (Number) Output framerate.
+- `h264_level` (String) x264 level, for example `4.1`.
+- `h264_preset` (String) x264 encoding preset.
+- `h264_profile` (String) x264 profile. One of: `baseline`, `main`, `high`.
+- `hls_flags` (String) Value passed to ffmpeg's `-hls_flags`.
+- `hls_list_size` (Number) Maximum number of segments kept in the playlist. `0` keeps all segments.
+- `hls_time` (Number) Target segment duration, in seconds.
+- `master_pl_name` (String) File name of the master playlist.
+- `maxrate` (String) Value passed to ffmpeg's `-maxrate`, for example `2M`.
+- `pix_fmt` (String) Value passed to ffmpeg's `-pix_fmt`.
+- `refs` (Number) Number of reference frames.
+- `sc_threshold` (Number) Scene change detection threshold.
+
+
+<a id="nestedatt--profiles--overlay"></a>
+### Nested Schema for `profiles.overlay`
+
+Read-Only:
+
+- `horizontal` (String) Horizontal alignment of the overlay image. One of: `left`, `center`, `right`.
+- `offset_x` (Number) Horizontal offset, in pixels, applied to the overlay image position.
+- `offset_y` (Number) Vertical offset, in pixels, applied to the overlay image position.
+- `opacity` (Number) Opacity of the overlay image, from `0` (transparent) to `1` (opaque).
+- `position` (String) Whether the overlay filter is applied before or after the rest of the video filters. One of: `before`, `after`.
+- `scale_height` (Number) Height, in pixels, the overlay image is scaled to.
+- `scale_width` (Number) Width, in pixels, the overlay image is scaled to.
+- `url` (String) URL of the image used as overlay.
+- `vertical` (String) Vertical alignment of the overlay image. One of: `top`, `center`, `bottom`.

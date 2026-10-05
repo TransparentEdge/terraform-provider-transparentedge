@@ -1,6 +1,9 @@
 package teclient
 
-import "net/http"
+import (
+	"net/http"
+	"sync"
+)
 
 // APIEnvironment.
 type APIEnvironment int
@@ -37,6 +40,10 @@ type Client struct {
 	VerifySSL       bool
 	UserAgent       string
 	ProviderVersion string
+
+	// cache of GetTranscodingAllowedValues, see its comment
+	allowedValuesMu sync.Mutex
+	allowedValues   *TranscodingAllowedValuesAPIModel
 }
 
 // SiteAPIModel.
@@ -201,8 +208,9 @@ type CertReqHTTP struct {
 	Log           *string `json:"error_text"`
 }
 
-// TranscodingProfileAPIModel is the full transcoding profile as returned by GET/PUT
-// (TranscodingProfileDetail in the API spec, includes custom_profiles).
+// TranscodingProfileAPIModel is the transcoding profile as returned by every endpoint,
+// custom_profiles included (the spec documents the POST response without them, but the
+// API returns them).
 type TranscodingProfileAPIModel struct {
 	ID              int    `json:"id"`
 	Company         int    `json:"company"`
@@ -213,21 +221,17 @@ type TranscodingProfileAPIModel struct {
 	AudioBitrate    int    `json:"audio_bitrate"`
 	RestrictBitrate bool   `json:"restrict_bitrate"`
 	// as pointers since they can be null
-	VideoWidth   *int    `json:"video_width"`
-	VideoHeight  *int    `json:"video_height"`
-	VideoAspect  *string `json:"video_aspect"`
-	AudioCodec   *string `json:"audio_codec"`
-	Segmentation *string `json:"segmentation"`
+	VideoWidth  *int    `json:"video_width"`
+	VideoHeight *int    `json:"video_height"`
+	VideoAspect *string `json:"video_aspect"`
+	AudioCodec  *string `json:"audio_codec"`
 
 	CustomProfiles []CustomProfileAPIModel `json:"custom_profiles"`
 }
 
 // NewTranscodingProfileAPIModel is the create/update payload for a transcoding profile.
-// No field carries omitempty: the API distinguishes an absent field from an explicit null,
-// and its update only assigns the fields present in the payload, so an omitted field keeps
-// its previous value and could never be cleared from the configuration. CustomProfiles is
-// always sent for the same reason: the API replaces the full list (types present are
-// upserted, types absent are deleted).
+// CustomProfiles is always sent: when omitted the API leaves the custom profiles untouched,
+// when present it replaces the full list (types present are upserted, absent are deleted).
 type NewTranscodingProfileAPIModel struct {
 	Name            string `json:"name"`
 	VideoFormat     string `json:"video_format"`
@@ -237,27 +241,18 @@ type NewTranscodingProfileAPIModel struct {
 	RestrictBitrate bool   `json:"restrict_bitrate"`
 
 	// as pointers since they can be null
-	VideoWidth   *int    `json:"video_width"`
-	VideoHeight  *int    `json:"video_height"`
-	VideoAspect  *string `json:"video_aspect"`
-	AudioCodec   *string `json:"audio_codec"`
-	Segmentation *string `json:"segmentation"`
+	VideoWidth  *int    `json:"video_width"`
+	VideoHeight *int    `json:"video_height"`
+	VideoAspect *string `json:"video_aspect"`
+	AudioCodec  *string `json:"audio_codec"`
 
-	CustomProfiles []CustomProfileRequest `json:"custom_profiles"`
+	// OverlayProfileAPIModel or HLSProfileAPIModel
+	CustomProfiles []any `json:"custom_profiles"`
 }
 
-// CustomProfileRequest is one element of the custom_profiles payload. It is implemented by
-// OverlayProfileAPIModel and HLSProfileAPIModel: the request is typed per profile_type so
-// that each one sends only its own fields (an overlay payload carrying null hls fields, or
-// the other way around, is not something the API is expected to accept).
-type CustomProfileRequest interface {
-	// CustomProfileType returns the profile_type this payload is for.
-	CustomProfileType() string
-}
-
-// OverlayProfileAPIModel is the "overlay" element of the custom_profiles payload. Its
-// optional fields are sent without omitempty for the same reason as the profile ones: a
-// field absent from the upserted object keeps its previous value.
+// OverlayProfileAPIModel is the "overlay" element of the custom_profiles payload. Optional
+// fields are sent without omitempty: the upsert keeps the previous value of an absent
+// field, so an explicit null is the only way to clear it.
 type OverlayProfileAPIModel struct {
 	ProfileType string `json:"profile_type"`
 	Position    string `json:"position"`
@@ -272,9 +267,6 @@ type OverlayProfileAPIModel struct {
 	OffsetX     *int     `json:"offset_x"`
 	OffsetY     *int     `json:"offset_y"`
 }
-
-// CustomProfileType returns the profile_type this payload is for.
-func (p OverlayProfileAPIModel) CustomProfileType() string { return p.ProfileType }
 
 // HLSProfileAPIModel is the "hls" element of the custom_profiles payload. Unlike overlay it
 // has no position: the API does not store it for hls (it is neither returned nor required).
@@ -299,44 +291,41 @@ type HLSProfileAPIModel struct {
 	ScThreshold  *int    `json:"sc_threshold"`
 }
 
-// CustomProfileType returns the profile_type this payload is for.
-func (p HLSProfileAPIModel) CustomProfileType() string { return p.ProfileType }
-
 // CustomProfileAPIModel decodes a custom profile returned by the API: it is the union of the
 // overlay and hls fields, and only one of the two sets is populated, depending on
-// ProfileType. It is response-only, see CustomProfileRequest for the payload. The
-// "transcoding_profile" field returned by the API is intentionally not modeled:
+// ProfileType. It is response-only, see OverlayProfileAPIModel and HLSProfileAPIModel for
+// the payload. The "transcoding_profile" field returned by the API is intentionally not modeled:
 // these routes are not decoded with DisallowUnknownFields.
 type CustomProfileAPIModel struct {
 	ProfileType string `json:"profile_type"`
 	Position    string `json:"position"`
 
 	// overlay fields, as pointers since they can be null
-	URL         *string  `json:"url,omitempty"`
-	ScaleWidth  *int     `json:"scale_width,omitempty"`
-	ScaleHeight *int     `json:"scale_height,omitempty"`
-	Opacity     *float64 `json:"opacity,omitempty"`
-	Horizontal  *string  `json:"horizontal,omitempty"`
-	Vertical    *string  `json:"vertical,omitempty"`
-	OffsetX     *int     `json:"offset_x,omitempty"`
-	OffsetY     *int     `json:"offset_y,omitempty"`
+	URL         *string  `json:"url"`
+	ScaleWidth  *int     `json:"scale_width"`
+	ScaleHeight *int     `json:"scale_height"`
+	Opacity     *float64 `json:"opacity"`
+	Horizontal  *string  `json:"horizontal"`
+	Vertical    *string  `json:"vertical"`
+	OffsetX     *int     `json:"offset_x"`
+	OffsetY     *int     `json:"offset_y"`
 
 	// hls fields, as pointers since they can be null
-	HLSTime      *int    `json:"hls_time,omitempty"`
-	HLSListSize  *int    `json:"hls_list_size,omitempty"`
-	MasterPlName *string `json:"master_pl_name,omitempty"`
-	HLSFlags     *string `json:"hls_flags,omitempty"`
-	PixFmt       *string `json:"pix_fmt,omitempty"`
-	Framerate    *int    `json:"framerate,omitempty"`
-	H264Preset   *string `json:"h264_preset,omitempty"`
-	H264Profile  *string `json:"h264_profile,omitempty"`
-	H264Level    *string `json:"h264_level,omitempty"`
-	Maxrate      *string `json:"maxrate,omitempty"`
-	Bufsize      *string `json:"bufsize,omitempty"`
-	BStrategy    *int    `json:"b_strategy,omitempty"`
-	Refs         *int    `json:"refs,omitempty"`
-	Coder        *int    `json:"coder,omitempty"`
-	ScThreshold  *int    `json:"sc_threshold,omitempty"`
+	HLSTime      *int    `json:"hls_time"`
+	HLSListSize  *int    `json:"hls_list_size"`
+	MasterPlName *string `json:"master_pl_name"`
+	HLSFlags     *string `json:"hls_flags"`
+	PixFmt       *string `json:"pix_fmt"`
+	Framerate    *int    `json:"framerate"`
+	H264Preset   *string `json:"h264_preset"`
+	H264Profile  *string `json:"h264_profile"`
+	H264Level    *string `json:"h264_level"`
+	Maxrate      *string `json:"maxrate"`
+	Bufsize      *string `json:"bufsize"`
+	BStrategy    *int    `json:"b_strategy"`
+	Refs         *int    `json:"refs"`
+	Coder        *int    `json:"coder"`
+	ScThreshold  *int    `json:"sc_threshold"`
 }
 
 // TranscodingAllowedValuesAPIModel lists the values accepted by the transcoding profile enums.

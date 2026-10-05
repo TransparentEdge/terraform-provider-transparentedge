@@ -13,7 +13,7 @@ import (
 
 // Provider documentation generation.
 //go:generate terraform fmt -recursive ./examples/
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name transparentedge --rendered-provider-name TransparentEdge
+//go:generate env TF_CLI_CONFIG_FILE=/dev/null go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name transparentedge --rendered-provider-name TransparentEdge
 
 var (
 	// variables are set by goreleaser.

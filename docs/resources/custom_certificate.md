@@ -45,7 +45,7 @@ EOF
 
 ### Required
 
-- `privatekey` (String) Private part of the certificate in PEM format, the certificate can't be protected with a password.
+- `privatekey` (String, Sensitive) Private part of the certificate in PEM format, the certificate can't be protected with a password.
 - `publickey` (String) Public part of the certificate in PEM format, it's recommended to include the full chain.
 
 ### Read-Only
